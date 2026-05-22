@@ -22,7 +22,7 @@ async function main() {
         console.log('🔄 Hacker Newsから最新記事を取得中...');
         const feed = await parser.parseURL(HACKER_NEWS_RSS);
         
-        const topItems = feed.items.slice(0, 2);
+        const topItems = feed.items.slice(0, 10);
         const summarizedArticles = [];
 
         console.log(`🤖 LM Studioと連携して要約を開始します... (合計: ${topItems.length}件)`);
@@ -146,9 +146,9 @@ function renderArticleCards(articles) {
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         <span>PICK UP RECOMMEND</span>
                     </div>
-                    <a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" target="_blank" rel="nofollow" class="hover:underline text-slate-900 font-medium block">
-                        これからの時代に必須のAIスキル・プログラミング効率化を最速で習得する ↗
-                    </a>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" rel="nofollow">コスパ最強ゲーミングPCなら【MDL.make】</a>
+
+<img border="0" width="1" height="1" src="https://www14.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" alt="">
                 </div>
 
                 <div class="flex items-center justify-between text-xs text-slate-400">
@@ -220,9 +220,9 @@ function generateTopPageHTML(articles, displayDate, archiveFiles) {
         <div class="bg-white border border-slate-200/80 p-6 rounded-2xl text-center mb-12 shadow-sm flex flex-col items-center justify-center">
             <span class="inline-block text-[10px] font-bold tracking-wider text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded mb-4">SPONSOR</span>
             <div class="inline-block overflow-hidden rounded-lg shadow-sm hover:shadow transition-shadow">
-                <a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
-                <img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
-                <img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" rel="nofollow">コスパ最強ゲーミングPCなら【MDL.make】</a>
+
+<img border="0" width="1" height="1" src="https://www14.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" alt="">
             </div>
         </div>
 
