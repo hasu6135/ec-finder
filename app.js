@@ -36,7 +36,7 @@ async function main() {
 
             try {
 //=====================================================================================================
-const response = await openai.chat.completions.create({
+                    const response = await openai.chat.completions.create({
                     model: 'loading-model',
                     messages: [
                         { 
@@ -72,13 +72,15 @@ const response = await openai.chat.completions.create({
                 // AIの出力テキスト（装飾済みのHTMLベースの文章）を取得
                 let summary = response.choices[0].message.content;
 
-                // 【安全装置】もしAIがMarkdown記号を混ぜてしまった場合の自動除去
+                // 【超強力・安全装置】AIが出力した無駄なMarkdown記号やコードブロック用の枠を完全に消去
                 summary = summary
-                    .replace(/##+/g, '')
-                    .replace(/\*\*/g, '')
-                    .replace(/---+/g, '')
-                    .replace(/#/g, '')
-                    .trim();
+                    .replace(/```html/g, '') // 「```html」を完全に消去
+                    .replace(/```/g, '')     // 「```」を完全に消去
+                    .replace(/##+/g, '')     // 「##」を消去
+                    .replace(/\*\*/g, '')    // 「**」を消去
+                    .replace(/---+/g, '')    // 「---」を消去
+                    .replace(/#/g, '')       // 単一の「#」を消去
+                    .trim();                 // 前後の余計な空白・改行を削除
 
                 // 改行をブラウザで認識できるように<br>に変換（ただし、すでに構造化されているタグの周りの無駄な改行を考慮）
                 const formattedSummary = summary.replace(/\n/g, '<br>');
