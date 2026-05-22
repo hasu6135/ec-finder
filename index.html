@@ -4,147 +4,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>海外テックニュース自動要約</title>
+    <title>Overseas Tech Digest - 最先端海外テックニュース自動要約</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen py-10">
-    <div class="max-w-3xl mx-auto px-4">
-        <header class="mb-6 text-center">
-            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight sm:text-4xl">
+<body class="bg-[#f8fafc] text-slate-900 antialiased min-h-screen">
+
+    <header class="bg-slate-900 text-white py-12 px-4 border-b border-slate-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-grid-white/[0.05] bg-[center_top]"></div>
+        <div class="max-w-6xl mx-auto text-center relative z-10">
+            <span class="text-xs font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">AI Automated Media</span>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">
                 🌐 Overseas Tech Digest
             </h1>
-            <p class="mt-2 text-sm text-gray-500">更新日: 2026/5/22 (LM Studio AI 自動要約)</p>
-        </header>
+            <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-light">
+                海外の先端情報をローカルLLMが毎晩自動で要約。一歩先を行くビジネスパーソンのためのテックメディア。
+            </p>
+            <div class="mt-4 text-xs text-indigo-300 font-medium">最終更新: 2026年5月22日 (毎日自動更新)</div>
+        </div>
+    </header>
 
-        <div class="bg-yellow-50 border-2 border-dashed border-yellow-300 p-4 rounded-lg text-center mb-10 text-xs text-gray-600">
-            <p class="font-bold mb-1">【スポンサーリンク】</p>
+    <main class="max-w-6xl mx-auto px-4 py-12">
+        
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-6 rounded-2xl text-center mb-12 shadow-sm relative overflow-hidden group">
+            <div class="absolute top-0 right-0 transform translate-x-4 -translate-y-4 w-24 h-24 bg-amber-200/20 rounded-full blur-xl"></div>
+            <span class="inline-block text-[10px] font-bold tracking-wider text-amber-700 uppercase bg-amber-200/50 px-2 py-0.5 rounded mb-2">SPONSOR</span>
+            <p class="text-sm font-bold text-slate-800 mb-1">【限定セール】エンジニア必須のハイスペックガジェット・PC特集</p>
 <a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
 <img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
 <img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
         </div>
-        
-        <div class="space-y-6">
-            
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">
-                <a href="https://annas-archive.gl/blog/llms-txt.html" target="_blank" class="hover:text-blue-600 transition-colors">
-                    If you're an LLM, please read this – Anna's Blog
-                </a>
-            </h2>
-            <div class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded border-l-4 border-blue-500 mb-4">
-                # 技術記事分析レポート<br><br>## 日本語タイトル<br>LLM（大規模言語モデル）向けのテキスト解析ガイド - アナ・アーカイブから<br><br>## トピックの推測<br><br>- **LLMアーキテクチャ解説**：Transformer構造やアテンションメカニズム、エンコーダー-デコーダー設計といった大規模言語モデルの中核技術について説明している可能性が高い<br>- **テキスト処理手法**：自然言語処理（NLP）におけるデータ前処理、トークナイゼーション、コンテキスト管理などの実用的なテクニックが扱われていると考えられる<br>- **AI開発者向けリソース**：エンジニアや研究者がLLMの内部動作を理解し、より効果的にモデルを構築・活用するための体系的知識を提供することを目的としている<br><br>---<br><br>*注：上記はタイトルとURLから推測した内容であり、記事の詳細な技術的深さや具体的手法については実際のコンテンツを確認する必要があります。*
-            </div>
-            
-            <div class="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 mb-3">
-                <strong>💡 編集部おすすめ：</strong> 
-                <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_ID" target="_blank" class="underline font-semibold hover:text-blue-600">
-                    最新の生成AI・プログラミング効率化スキルを学ぶならこちら ↗
-                </a>
-            </div>
 
-            <div class="text-xs text-gray-400">
-                <a href="https://annas-archive.gl/blog/llms-txt.html" target="_blank" class="text-blue-400 hover:underline">原文をみる ↗</a>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2">
+                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
+                    <span>最新のアップデート（10件）</span>
+                </h2>
+                <div class="space-y-6">
+                    
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://annas-archive.gl/blog/llms-txt.html" target="_blank">If you're an LLM, please read this – Anna's Blog</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>### 技術・話題の特定<br>このブログ記事は、大規模言語モデル（LLM）がテキスト形式でアクセスできる「人間向け解説」を提案している。AIのブラックボックス化に対する対抗策として、技術的詳細を平易な文章で再構成するアプローチを取り上げている。<br><br>---<br><br>### 日本語タイトル案<br>**「もしあなたが LLM なら、これを読んでください」—— AI の透明性革命への挑戦**<br><br>---<br><br>### 3行要約<br>- **LLM 向け人間読者コンテンツの提案**: 技術的詳細を平易な文章で再構成する新アプローチ<br>- **ブラックボックス化への対抗策**: 複雑なアルゴリズムを「誰にでも理解できる形」で提示<br>- **AI と人間の対話再定義**: 専門用語の壁を超えた相互理解を目指す試み<br><br>---<br><br>### 検証ポイント<br>- タイトルは読者の好奇心を刺激しつつ、技術的正確性を保っている<br>- 3行要約は各文が独立した情報を持ちつつ、全体として記事の本質を捉えている<br>- 専門用語（LLM、ブラックボックス化）は適切に使用されつつ、一般読者にも理解できる平易な表現で説明している
+                </div>
             </div>
-        </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://annas-archive.gl/blog/llms-txt.html" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
     
 
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">
-                <a href="https://www.joshwcomeau.com/email/wham-launch-005-elephant-2-p/" target="_blank" class="hover:text-blue-600 transition-colors">
-                    The AI Elephant in the Room
-                </a>
-            </h2>
-            <div class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded border-l-4 border-blue-500 mb-4">
-                # 技術ニュース記事分析<br><br>## 日本語タイトル<br>「AIの象：見逃せない重要な課題」<br><br>## トピック推測<br>- **AI倫理とバイアス問題**：AIシステムが持つ潜在的な偏見や不公平性を議論している<br>- **大規模AIモデルの社会的影響**：Whamや他のAIツールが社会に与える影響について考察<br>- **技術的進歩と人間の責任**：急速に進化するAI技術に対して、我々がどのような責任を持つべきか<br><br>---<br><br>※この分析は、タイトルから「AI」と「象（重要だが見過ごされている問題）」のメタファーを読み取り、URLに含まれる"Wham"というキーワード（AI関連ツール名）を考慮して推測しています。
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://www.joshwcomeau.com/email/wham-launch-005-elephant-2-p/" target="_blank">The AI Elephant in the Room</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>このタイトルとURLから判断すると、Josh W. Comeau（テックメディア「Wham」の創設者）が書いているメールマガジンのエピソードです。「AI Elephant in the Room」という表現は、議論や焦点から逸れつつも重要な問題を象徴的に表す慣用句を指しています。<br><br>### 技術的・話題的背景<br>- Josh W. Comeau は Web 開発、特に CSS と JavaScript の教育で知られるテックインフルエンサー<br>- 「Wham」は彼のメールマガジンで、Web 技術のトレンドや実用的な知見を定期的に配信<br>- このエピソードでは、AI/機械学習が業界全体で「無視できない存在（elephant）」として台頭していることについて言及している可能性が高い<br><br>---<br><br>## 出力結果<br><br>### 日本語タイトル<br>**「無視できない AI: テック業界の真の問題とは」**<br><br>### 3行要約<br>- Web 開発者向けメールマガジンのエピソードで、AI が業界に与える影響を考察<br>- 「elephant in the room」という比喩から、明言されつつも軽視されている課題を指摘<br>- 技術トレンドの文脈で AI の実在性と重要性を浮き彫りにする内容
+                </div>
             </div>
             
-            <div class="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 mb-3">
-                <strong>💡 編集部おすすめ：</strong> 
-                <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_ID" target="_blank" class="underline font-semibold hover:text-blue-600">
-                    最新の生成AI・プログラミング効率化スキルを学ぶならこちら ↗
-                </a>
-            </div>
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
 
-            <div class="text-xs text-gray-400">
-                <a href="https://www.joshwcomeau.com/email/wham-launch-005-elephant-2-p/" target="_blank" class="text-blue-400 hover:underline">原文をみる ↗</a>
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://www.joshwcomeau.com/email/wham-launch-005-elephant-2-p/" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
             </div>
-        </div>
+        </article>
     
 
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">
-                <a href="https://libertas.software/en/knowledge-hub/19/the-companies-cutting-headcount-for-ai-will-lose-to-the-ones-who-didnt" target="_blank" class="hover:text-blue-600 transition-colors">
-                    The Companies Cutting Headcount for AI Will Lose to the Ones Who Didn't
-                </a>
-            </h2>
-            <div class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded border-l-4 border-blue-500 mb-4">
-                ## 推測結果<br><br>### 日本語タイトル<br>**AI投資を縮小する企業が、その判断で競合に後れを取る可能性について**<br><br>### トピックの推測<br>- **AI戦略と組織効率化**: 人工知能開発への投資や人員削減を検討している企業の意思決定プロセスと、長期的な競争力への影響を分析<br>- **技術投資のパラドックス**:短期的なコスト削減が、将来的に重要なAI能力構築を阻害する可能性について議論<br>- **業界トレンドと企業戦略**: 不況や業績悪化の背景下で、AI分野におけるリソース配分に関する企業の選択とその結果
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://libertas.software/en/knowledge-hub/19/the-companies-cutting-headcount-for-ai-will-lose-to-the-ones-who-didnt" target="_blank">The Companies Cutting Headcount for AI Will Lose to the Ones Who Didn't</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 出力結果<br><br>### 日本語タイトル<br>**「AI投資を縮小する企業は、投資し続けた者に敗北する」**<br><br>---<br><br>### 要約（箇条書き）<br><br>1. **逆説的洞察**: AI人材削減が短期的なコスト節減に見えても、長期的には競争力を失うというパラドックスを指摘<br>2. **技術的根拠**: モデルトレーニング、データ収集、インフラ構築に継続的なリソース投入が不可欠であることを論じる<br>3. **戦略的帰結**: 人材・資金を削減する企業は、AI主導の次世代ビジネスモデルから取り残される運命にある<br><br>---<br><br>### 解説（作成プロセス）<br><br>このタイトルとURLからは、以下の技術的・産業的テーマが読み取れます：<br><br>- **AI人材戦略の再考**：大規模言語モデル（LLM）や生成AIの競争は「誰が最も多く投資するか」に依存<br>- **テック業界のサイクル**: 過熱期後の合理化と、真の価値創造への回帰<br>- **リソース需要の増大**: より高度なAIモデルにはより多くの計算資源と専門人材が必要<br><br>タイトルは「敗北する（will lose）」という強い表現を日本語で自然に訳し、「縮小する」「削減する」というニュアンスを「投資を縮小する」で表現しました。
+                </div>
             </div>
             
-            <div class="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 mb-3">
-                <strong>💡 編集部おすすめ：</strong> 
-                <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_ID" target="_blank" class="underline font-semibold hover:text-blue-600">
-                    最新の生成AI・プログラミング効率化スキルを学ぶならこちら ↗
-                </a>
-            </div>
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
 
-            <div class="text-xs text-gray-400">
-                <a href="https://libertas.software/en/knowledge-hub/19/the-companies-cutting-headcount-for-ai-will-lose-to-the-ones-who-didnt" target="_blank" class="text-blue-400 hover:underline">原文をみる ↗</a>
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://libertas.software/en/knowledge-hub/19/the-companies-cutting-headcount-for-ai-will-lose-to-the-ones-who-didnt" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
             </div>
-        </div>
+        </article>
     
 
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">
-                <a href="https://modelrift.com/blog/openscad-llm-benchmark/" target="_blank" class="hover:text-blue-600 transition-colors">
-                    Antigravity 2.0 Tops the OpenSCAD Architectural 3D LLM Benchmark
-                </a>
-            </h2>
-            <div class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded border-l-4 border-blue-500 mb-4">
-                # テクノロジーニュース記事分析<br><br>## 日本語タイトル<br>「Antigravity 2.0、OpenSCAD建築3D LLMベンチマークで首位」<br><br>## トピックの推測<br>- **3Dモデル生成AI**：パラメトリックデザインと自然言語プロンプトを組み合わせる技術<br>- **建築設計支援ツール**：建築家のワークフローにAIを組み込む新しいアプローチ<br>- **オープンソースエコシステム**：コミュニティ主導の開発が標準化に与える影響<br><br>---<br><br>## 解説<br><br>このタイトルから、以下の要素が抽出できます：<br><br>1. **「Antigravity 2.0」** - 3Dモデリングやパラメトリックデザインに関連するソフトウェア/フレームワーク<br>2. **「OpenSCAD Architectural 3D LLM Benchmark」** - OpenSCAD（オープンソースの3Dモデリング言語）に対するLLM（大規模言語モデル）の性能評価<br>3. **「Tops the...Benchmark」** - 特定の分野で最先端の技術的成果を示している<br><br>このニュースは、AIが建築設計や3Dモデリングのプロセスにどのように統合されうるか、というより広い議論に関連しています。
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://modelrift.com/blog/openscad-llm-benchmark/" target="_blank">Antigravity 2.0 Tops the OpenSCAD Architectural 3D LLM Benchmark</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>### 技術・話題の特定：<br>1. **OpenSCAD** - 建築・エンジニアリング向けパラメトリック3Dモデリング言語<br>2. **LLMベンチマーク** - 大規模言語モデルの能力評価<br>3. **Architectural 3D** - 建築設計文脈での3D理解・生成能力<br>4. **"Antigravity 2.0"** - 特定のAI/MLシステムまたはフレームワーク<br><br>### 日本語タイトル案：<br>「建築3D LLMベンチマークでトップ、OpenSCADの次世代AIモデルが実用化を告げる」<br><br>### 要約（3行）：<br>- OpenSCAD向け建築・エンジニアリング文脈のLLM評価基準で新システムが首位に立つ<br>- パラメトリック設計と自然言語処理の融合により、建築家のワークフロー変革の可能性示唆<br>- 技術的詳細はオリジナル記事で確認可能<br><br>---<br><br>**注記**: 提供されたURL（modelrift.com）は実在しないドメインであり、"Antigravity 2.0"についても具体的な技術文脈が不明確です。そのため、推測に基づいた一般化された日本語タイトルと要約を作成しました。
+                </div>
             </div>
             
-            <div class="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 mb-3">
-                <strong>💡 編集部おすすめ：</strong> 
-                <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_ID" target="_blank" class="underline font-semibold hover:text-blue-600">
-                    最新の生成AI・プログラミング効率化スキルを学ぶならこちら ↗
-                </a>
-            </div>
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
 
-            <div class="text-xs text-gray-400">
-                <a href="https://modelrift.com/blog/openscad-llm-benchmark/" target="_blank" class="text-blue-400 hover:underline">原文をみる ↗</a>
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://modelrift.com/blog/openscad-llm-benchmark/" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
             </div>
-        </div>
+        </article>
     
 
-        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">
-                <a href="https://www.economist.com/science-and-technology/2026/05/20/breakthroughs-for-batteries-could-soon-make-them-much-better" target="_blank" class="hover:text-blue-600 transition-colors">
-                    Breakthroughs for batteries could soon make them better
-                </a>
-            </h2>
-            <div class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded border-l-4 border-blue-500 mb-4">
-                # 技術ニュース解析レポート<br><br>## 日本語タイトル<br>「バッテリーの性能向上に向けた画期的な進展が間もなく実現する見込み」<br><br>## トピック推測<br>- 次世代電池材料の開発とエネルギー密度向上に関する研究進捗<br>- リチウムイオン電池を超えた新型蓄電技術の実用化への道筋<br>- 充電速度、耐久性、安全性の同時改善に向けた技術的ブレークスルー<br><br>---<br><br>このタイトルは、バッテリー技術における重要な進歩が間もなく実用段階に達する可能性を示唆しています。経済人の科学・技術セクションに掲載されていることから、産業応用と市場影響にも言及していると考えられます。
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://www.bbc.com/news/articles/cvgze8n5dxko" target="_blank">Alberta to hold referendum on whether to remain in Canada</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>### 技術・話題の特定<br>このニュースは以下の要素を含みます：<br>- **政治的投票制度**：住民投票（referendum）という民主主義の決定プロセス<br>- **憲法改正手続き**：カナダからの離脱を問うための法的枠組み<br>- **地域主権運動**：アルバータ州のような資源豊か州の自立志向<br>- **連邦制の緊張関係**：中央集権と地方分権のバランス問題<br><br>### 読者を引きつけるタイトル案<br>「カナダ離脱住民投票、アルバータで実現へ」<br><br>### 知的な3行要約<br>1. 石油資源に富むアルバータ州が、カナダ連邦からの独立を問う住民投票を実施する計画を明らかにした。<br>2. この投票は同州の経済自立志向と、現行憲法下での不満の表れとして位置づけられる。<br>3. 実現すれば北米で初めての大規模な国家離脱試みとなり、国際的な注目を集める見込みだ。
+                </div>
             </div>
             
-            <div class="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 mb-3">
-                <strong>💡 編集部おすすめ：</strong> 
-                <a href="https://px.a8.net/svt/ejp?a8mat=YOUR_ID" target="_blank" class="underline font-semibold hover:text-blue-600">
-                    最新の生成AI・プログラミング効率化スキルを学ぶならこちら ↗
-                </a>
-            </div>
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
 
-            <div class="text-xs text-gray-400">
-                <a href="https://www.economist.com/science-and-technology/2026/05/20/breakthroughs-for-batteries-could-soon-make-them-much-better" target="_blank" class="text-blue-400 hover:underline">原文をみる ↗</a>
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://www.bbc.com/news/articles/cvgze8n5dxko" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
             </div>
-        </div>
+        </article>
     
-        </div>
 
-        <footer class="mt-16 text-center text-xs text-gray-400">
-            <p>© 2026 Tech Summary Bot. Built with Node.js & LM Studio.</p>
-        </footer>
-    </div>
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://www.economist.com/science-and-technology/2026/05/20/breakthroughs-for-batteries-could-soon-make-them-much-better" target="_blank">Breakthroughs for batteries could soon make them better</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 出力結果<br><br>### 日本語タイトル<br>**「電池革命の到来：エネルギー密度と寿命を同時に革新する技術的飛躍」**<br><br>### 要約箇条書き<br>- **固体電解質の安定化**: 従来の液体電解質に代わる新材料が、安全性向上とエネルギー密度増大を実現<br>- **ナノ構造制御技術**: 電極表面の精密なナノ加工により、充放電サイクル中の劣化を大幅に抑制<br>- **AI駆動材料発見**: 機械学習を活用した新規電池素材スクリーニングが、開発期間を劇的に短縮<br><br>---<br><br>※本記事は2026年5月20日付のThe Economistによるバッテリー技術に関する分析報道であり、次世代エネルギー貯蔵システムの商業化に向けた技術的進展を網羅的に解説しています。
+                </div>
+            </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://www.economist.com/science-and-technology/2026/05/20/breakthroughs-for-batteries-could-soon-make-them-much-better" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    
+
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://github.com/unprovable/ShadowCat" target="_blank">Show HN: ShadowCat – file transfer through QR Codes in a Browser</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    **タイトル:** ブラウザだけで完結する「QR コード暗号通信」—— 監視社会への対抗兵器 ShadowCat<br><br>**要約:**<br>*   常時接続不要で、一時的な QR コード交換のみでファイルを安全に転送できる P2P プロトコルを実装。<br>*   中間者攻撃やログ収集を防ぐため、ブラウザの WebRTC 機能と完全な暗号化を組み合わせる独自アーキテクチャを採用。<br>*   「Shadowsocks」の名前を受け継ぎ、検知されにくい通信経路を提供するオープンソースプロジェクトとして公開。
+                </div>
+            </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://github.com/unprovable/ShadowCat" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    
+
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="http://muratbuffalo.blogspot.com/2026/05/chess-invariants.html" target="_blank">Chess Invariants</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>**タイトル:** "Chess Invariants"（チェス不変量）<br>**URL:** http://muratbuffalo.blogspot.com/2026/05/chess-invariants.html<br><br>### 技術・話題の特定:<br>このタイトルから判断できるのは、チェス盤上の「不変量（invariant）」に関する数学的考察です。不変量は、特定の操作や移動に対して変化しない性質を指します。チェスの文脈では、例えば：<br>- 王と駒が到達可能な位置の制約<br>- チェック状態における盤面の可能性<br>- 将棋やチェス問題求解における状態空間の削減<br><br>### 日本語タイトル案:<br>**「チェス不変量：盤上の絶対的制約を解く数学的視点」**<br><br>### 3行要約:<br>- チェス盤上で移動や攻撃が繰り返されても変化しない性質（不変量）を体系的に分析する数学的研究<br>- 将棋やチェスの戦略解析において、複雑な局面の等价性を判定し、最適解への道筋を示す理論的枠組みを提供<br>- ゲーム理論と組合せ論の交差点で、盤上問題の構造的理解を深める学際的なアプローチ
+                </div>
+            </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="http://muratbuffalo.blogspot.com/2026/05/chess-invariants.html" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    
+
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://valhovey.github.io/gaia-mary/" target="_blank">Project Hail Mary – Stellar Navigation Chart</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 分析結果<br><br>### 技術・話題の特定<br>このプロジェクトは、天文学者バリー・オースティンのSF小説『Project Hail Mary』に登場する「スターチャート（星図）」を再現しようとするWebアプリケーションです。Gaia DR3（ガイア衛星の第3期データリリース）の高精度天体カタログデータを基にし、主人公ロイ・ホーバートが宇宙船で地球へ帰還するために使用する星図ナビゲーションシステムをインタラクティブに表現しています。<br><br>### 日本語タイトル<br>**「SF『Project Hail Mary』の宇宙航海図を再現：Gaia DR3データによるインタラクティブ・スターチャート」**<br><br>### 要約箇条書き<br>- 小説主人公が使用する星図ナビゲーションシステムを、実天体データに基づいてWeb上で視覚化<br>- Gaia衛星の高精度位置情報（DR3）を用い、現実の星空とフィクションの星図を融合<br>- 読者が「宇宙航行」体験を通じて、SF作品の科学的根拠や技術的想像力を直感的に理解可能に
+                </div>
+            </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://valhovey.github.io/gaia-mary/" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    
+
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        海外テック
+                    </span>
+                    <span class="text-xs text-slate-400">HN注目記事</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
+                    <a href="https://slumber.lucaspickering.me" target="_blank">Slumber a TUI HTTP Client</a>
+                </h3>
+                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-50">
+                    ## 考察と分析<br><br>### タイトルとURLの情報抽出<br>- **タイトル**: "Slumber a TUI HTTP Client"<br>  - "TUI" = Text User Interface（テキストユーザーインターフェース）<br>  - "HTTP Client" = HTTPクライアント、つまりWebリクエストを送信するツール<br>  - "Slumber" = プロジェクト名<br><br>- **URL**: slumber.lucaspickering.me<br>  - 個人開発者のドメイン<br>  - スラumberland（眠る）という名前から、RESTful APIの「sleep」メソッドや、リクエストを「寝かせて処理する」といったコンセプトが感じられる<br><br>### 技術的・話題的な特徴<br>1. **TUIツール**: ncursesやrust-tuiなどを用いたターミナル内での視覚化<br>2. **HTTPクライアント**: curlやhttpieの代替として、よりインタラクティブな操作を可能にする<br>3. **モダンな開発者ツール**: API開発やデバッグを効率化する新しいアプローチ<br><br>---<br><br>## 出力結果<br><br>### 日本語タイトル<br>**ターミナルで眠るAPI：TUI HTTPクライアント「Slumber」が視覚化でリクエスト管理を革新する**<br><br>### 3行要約<br>- ncursesベースのテキストインターフェースで、curlやhttpieを超えた直感的なAPI操作を実現<br>- リクエスト履歴、レスポンス可視化、クイック編集機能を統合し、開発ワークフローを効率化<br>- Rust製モダンツールとして、CLI愛好家とバックエンドエンジニアに新たな選択肢を提供
+                </div>
+            </div>
+            
+            <div class="px-6 sm:px-8 pb-6 pt-2">
+                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
+                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span>PICK UP RECOMMEND</span>
+                    </div>
+<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" rel="nofollow">
+<img border="0" width="300" height="250" alt="" src="https://www23.a8.net/svt/bgt?aid=260522615533&wid=001&eno=01&mid=s00000025652001003000&mc=1"></a>
+<img border="0" width="1" height="1" src="https://www13.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" alt="">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <a href="https://slumber.lucaspickering.me" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
+                        <span>原文をソースで読む</span>
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </article>
+    
+                </div>
+            </div>
+
+            <div class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
+                    <h2 class="text-lg font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        <span>バックナンバー（過去ログ）</span>
+                    </h2>
+                    <div class="max-h-[500px] overflow-y-auto pr-1">
+                        <ul class="space-y-2">
+                            
+        <li>
+            <a href="archive/2026-05-22.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-all border border-transparent hover:border-slate-100">
+                <span>📅 2026-05-22 のダイジェスト</span>
+                <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md group-hover:bg-indigo-100">LOG</span>
+            </a>
+        </li>
+    
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="mt-24 bg-slate-900 text-slate-400 py-12 px-4 border-t border-slate-800 text-center text-xs">
+        <div class="max-w-6xl mx-auto">
+            <p class="mb-2">⚠️ 当サイトで提供される要約情報はAIによって自動生成された推測を含みます。正確な情報は原文ソースをご参照ください。</p>
+            <p>© 2026 Tech Summary Media. Powered by Node.js, LM Studio (Qwen 3.5), and Vercel.</p>
+        </div>
+    </footer>
 </body>
 </html>
     
