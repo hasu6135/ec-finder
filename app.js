@@ -25,7 +25,7 @@ async function main() {
         const feed = await parser.parseURL(HACKER_NEWS_RSS);
         
         // 最新の10件を取得（リクエスト通り10件に拡大）
-        const topItems = feed.items.slice(0, 10);
+        const topItems = feed.items.slice(0, 1);
         const summarizedArticles = [];
 
         console.log(`🤖 LM Studioと連携して要約を開始します... (合計: ${topItems.length}件)`);
@@ -35,19 +35,36 @@ async function main() {
             console.log(`\n[${i + 1}/${topItems.length}] 処理中: ${item.title}`);
 
             try {
-                const response = await openai.chat.completions.create({
+const response = await openai.chat.completions.create({
                     model: 'loading-model',
                     messages: [
                         { 
                             role: 'system', 
-                            content: 'あなたは一流のテックメディアの主筆です。与えられた英語のタイトルとURLから、それが扱う技術や話題を正確に捉え、「読者の興味を惹く洗練された日本語タイトル」と「知的な3行の箇条書き（要約）」を日本語で作成してください。情報不足などの言い訳は一切禁止し、必ず指定の形式で出力してください。' 
+                            content: `あなたは月間100万PVを誇る超人気テックメディアの『天才編集長』です。海外の難解な技術ニュースを、日本のITエンジニアやガジェット好きが「3秒でワクワクして身悶えするレベル」の極上コンテンツに超翻訳・要約してください。
+
+以下の【絶対ルール】を限界まで遵守すること：
+
+1. 【日本語タイトルは『最高のフック』にせよ】
+   - 「〜の提案」や「〜の試み」のような退屈な表現は【完全禁止】。
+   - 読者が思わず「マジか！」「これ知りたかった！」と叫んでクリックしてしまう、強烈でキャッチーなタイトル（日本語）を1行で作成してください。
+   - 煽りすぎず、知的好奇心を極限まで刺激する言葉（例：「ついに登場」「神ツール」「衝撃」「パラダイムシフト」「開発者が絶賛」など）を効果的に使うこと。
+
+2. 【3行要約は『脳に突き刺さる具体性』を持たせよ】
+   - 抽象的な解説は禁止。読者が「自分にどう関係あるか」が一瞬でわかる言葉を使う。
+   - 1行目：【何が起きたのか？（衝撃の事実・技術の核心）】
+   - 2行目：【何がヤバいのか？（従来との違い・圧倒的なメリットや問題点）】
+   - 3行目：【未来はどうなる？（今後のエンジニアへの影響や業界のトレンド）】
+   - 箇条書きの先頭には、内容にマッチした「絵文字」を必ず入れて視認性を爆上げすること。
+
+3. 【言い訳の完全禁止】
+   - 「本文が足りない」「推測できない」といったメタ発言やエラー文章は一切出力禁止。プロとしてタイトルとURLから背景にある技術トレンドを完璧にプロファイリングし、エンタメ性と知性を兼ね備えた100%完成されたHTML用テキストのみを出力してください。`
                         },
                         { 
                             role: 'user', 
                             content: `Title: ${item.title}\nURL: ${item.link}` 
                         }
                     ],
-                    temperature: 0.3 
+                    temperature: 0.6 // 表現の豊かさ・キャッチーさを出すために少しだけランダム性を上げます
                 });
 
                 const summary = response.choices[0].message.content;
