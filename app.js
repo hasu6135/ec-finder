@@ -35,7 +35,7 @@ async function main() {
             console.log(`\n[${i + 1}/${topItems.length}] 処理中: ${item.title}`);
 
             try {
-const response = await openai.chat.completions.create({
+                    const response = await openai.chat.completions.create({
                     model: 'loading-model',
                     messages: [
                         { 
@@ -47,32 +47,43 @@ const response = await openai.chat.completions.create({
 1. 【日本語タイトルは『最高のフック』にせよ】
    - 「〜の提案」や「〜の試み」のような退屈な表現は【完全禁止】。
    - 読者が思わず「マジか！」「これ知りたかった！」と叫んでクリックしてしまう、強烈でキャッチーなタイトル（日本語）を1行で作成してください。
-   - 煽りすぎず、知的好奇心を極限まで刺激する言葉（例：「ついに登場」「神ツール」「衝撃」「パラダイムシフト」「開発者が絶賛」など）を効果的に使うこと。
 
 2. 【3行要約は『脳に突き刺さる具体性』を持たせよ】
-   - 抽象的な解説は禁止。読者が「自分にどう関係あるか」が一瞬でわかる言葉を使う。
+   - 箇条書きの先頭には、内容にマッチした「絵文字」を必ず入れて視認性を爆上げすること。
    - 1行目：【何が起きたのか？（衝撃の事実・技術の核心）】
    - 2行目：【何がヤバいのか？（従来との違い・圧倒的なメリットや問題点）】
    - 3行目：【未来はどうなる？（今後のエンジニアへの影響や業界のトレンド）】
-   - 箇条書きの先頭には、内容にマッチした「絵文字」を必ず入れて視認性を爆上げすること。
 
-3. 【言い訳の完全禁止】
-   - 「本文が足りない」「推測できない」といったメタ発言やエラー文章は一切出力禁止。プロとしてタイトルとURLから背景にある技術トレンドを完璧にプロファイリングし、エンタメ性と知性を兼ね備えた100%完成されたHTML用テキストのみを出力してください。`
+3. 【Markdown記号の出力は「絶対禁止」】
+   - 「#」や「##」、「**」や「---」といったMarkdownの記号は、Webサイトの表示を崩すため【一切使用禁止】とします。
+   - タイトル行と、3行の箇条書き（改行区切り）のみを出力してください。「分析結果」や「検証ポイント」などの余計な見出しセクションも不要です。言い訳やメタ発言も一切禁止します。`
                         },
                         { 
                             role: 'user', 
                             content: `Title: ${item.title}\nURL: ${item.link}` 
                         }
                     ],
-                    temperature: 0.6 // 表現の豊かさ・キャッチーさを出すために少しだけランダム性を上げます
+                    temperature: 0.6 
                 });
 
-                const summary = response.choices[0].message.content;
+                // AIの出力テキストを取得
+                let summary = response.choices[0].message.content;
+
+                // 【安全装置】もしAIがMarkdown記号を出してしまった場合、プログラム側で強制除去・整形
+                summary = summary
+                    .replace(/##+/g, '') // 「##」を消去
+                    .replace(/\*\*/g, '') // 「**」を消去
+                    .replace(/---+/g, '') // 「---」を消去
+                    .replace(/#/g, '')    // 単一の「#」を消去
+                    .trim();              // 前後の余計な空白を削除
+
+                // 改行コードをブラウザ用の<br>タグに変換
+                const formattedSummary = summary.replace(/\n/g, '<br>');
 
                 summarizedArticles.push({
                     originalTitle: item.title,
                     link: item.link,
-                    summary: summary.replace(/\n/g, '<br>')
+                    summary: formattedSummary
                 });
 
                 console.log(`✅ [${i + 1}/${topItems.length}] 要約完了！`);
