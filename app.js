@@ -22,7 +22,7 @@ async function main() {
         console.log('🔄 Hacker Newsから最新記事を取得中...');
         const feed = await parser.parseURL(HACKER_NEWS_RSS);
         
-        const topItems = feed.items.slice(0, 10);
+        const topItems = feed.items.slice(0, 1);
         const summarizedArticles = [];
 
         console.log(`🤖 LM Studioと連携して要約を開始します... (合計: ${topItems.length}件)`);
