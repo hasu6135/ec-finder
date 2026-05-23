@@ -4,7 +4,9 @@ const Parser = require('rss-parser');
 const { OpenAI } = require('openai');
 
 const parser = new Parser();
-const HACKER_NEWS_RSS = 'https://news.ycombinator.com/rss';
+// ※ここでは例として、一般的な紹介用フィードやデータをもとに動かす想定です
+// 実際のDLsite/FANZA等のRSSや特定URLが決まったらここに差し替えます
+const TARGET_RSS = 'https://news.ycombinator.com/rss'; // 一旦形状維持のためのダミー
 
 const openai = new OpenAI({
     baseURL: 'http://localhost:1234/v1',
@@ -19,17 +21,16 @@ async function main() {
             fs.mkdirSync(ARCHIVE_DIR);
         }
 
-        console.log('🔄 Hacker Newsから最新記事を取得中...');
-        const feed = await parser.parseURL(HACKER_NEWS_RSS);
-        
+        console.log('🔄 最新の作品情報を取得中...');
+        const feed = await parser.parseURL(TARGET_RSS);
         const topItems = feed.items.slice(0, 1);
         const summarizedArticles = [];
 
-        console.log(`🤖 LM Studioと連携して要約を開始します... (合計: ${topItems.length}件)`);
+        console.log(`🤖 LM Studio(Qwen)が羞恥系レビューを脳内妄想・執筆中... (合計: ${topItems.length}件)`);
 
         for (let i = 0; i < topItems.length; i++) {
             const item = topItems[i];
-            console.log(`\n[${i + 1}/${topItems.length}] 処理中: ${item.title}`);
+            console.log(`\n[${i + 1}/${topItems.length}] 分析・執筆中: ${item.title}`);
 
             try {
                 const response = await openai.chat.completions.create({
@@ -37,37 +38,37 @@ async function main() {
                     messages: [
                         { 
                             role: 'system', 
-                            content: `あなたは最高峰のテックメディアで執筆する「天才テクニカルライター」です。海外の難解な技術ニュース（タイトルとURL）の背景をプロファイリングし、日本の読者がワクワクしながら一気読みしてしまう極上の解説記事（日本語）を執筆してください。
+                            content: `あなたは成人向け同人誌の紹介で月間50万PVを稼ぐ、狂気の「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトルや情報から、その作品が持つ「羞恥シチュエーション（公開〇〇、言葉責め、モブ視線、オトされる快感など）」のヤバさを妄想プロファイリングし、読者の性癖を破壊するレベルの極上レビュー記事（日本語）を執筆してください。
 
-以下の【執筆ルール】を極限まで遵守すること：
+以下の【執筆ルール】を限界まで遵守すること：
 
-1. 【AIっぽい機械的なラベルは「完全禁止」】
-   - 「分析結果」「日本語タイトル」「3行要約」「検証ポイント」といった見出しやラベルは【絶対に】出力しないでください。
-   - 冒頭にインパクトのある魅力的な日本語タイトル（1行）を掲げ、その直後から自然な解説記事をスタートさせてください。
-   - タイトル作成時、英語の専門用語やプロジェクト名、ツール名が出てきた場合は、日本の読者が一瞬で理解できるように、必要に応じて「（カタカナでの補足や意味）」をタイトルの末尾や文中に自然に付け足してください。
+1. 【タイトルは『一撃で理性を吹き飛ばすフック』にせよ】
+   - 機械的なラベル（「分析結果：」など）は【絶対に出力禁止】。
+   - 読者が「ウッ…！これは俺の性癖に刺さりすぎる…！」と思わず悶絶してクリックしてしまう、強烈にキャッチーな日本語タイトルを1行目で作成してください。
+   - 煽り文句（例：【脳が溶ける】、【神作】、公開羞恥、絶望の快感、など）を効果的に使うこと。
 
-2. 【文章量を増やし、リッチなWebレイアウトで執筆せよ】
-   - 単なる数行の要約ではなく、背景や技術の革新性がしっかり伝わるよう、十分な文章量を確保して深く解説してください。
-   - 読者がスマホでスクロールしながらでも視覚的にパッと理解できるよう、適度な行間（改行）、リスト形式、そして重要な箇所へのHTML装飾を「AI自身の手で直接記述」してください。
-   - 以下のHTMLタグを文章中に【必ず積極的かつ効果的に】散りばめること：
-     * 重要なキーワードや技術名： <b>太字</b>
-     * 最も注目すべき革新的な事実やメリット： <mark class="bg-amber-100 text-slate-900 px-1 rounded">ハイライト（マーカー）</mark>
-     * 要点を整理する際： <ul>と<li>を使ったリスト形式（各<li>の先頭にはマッチした絵文字を必ず入れること）
+2. 【レビューは『ドM心の核心』を突き、リッチなHTMLで飾れ】
+   - 単なるストーリー紹介は退屈です。「どんな羞恥プレイが待っているのか」「ヒロイン（または主人公）がどうプライドをへし折られて快感に沈んでいくのか」の魅力を、熱量の高い長文で深く解説してください。
+   - 読者がスマホでスクロールしながら興奮できるよう、適切な改行、そして以下のHTMLタグを文章中に【必ず積極的かつ効果的に】散りばめること：
+     * 最も興奮するシチュエーション・属性キーワード： <b>太字</b>
+     * 読者の妄想を加速させる最高にエロい一言やメリット： <mark class="bg-rose-100 text-rose-900 px-1 rounded">ピンクのハイライト</mark>
+     * 作品の「抜きどころ・見どころ」を整理する際： <ul>と<li>を使ったリスト形式
+   - 各リストの先頭（<li>の中）には、内容にマッチした絵文字（🔞, 💦, 💋, 😳, 🧠 など）を必ず1つ入れてください。
 
 3. 【Markdown記号の完全排除】
-   - 「#」や「##」、「**」、「---」といったMarkdown記号、および「\`\`\`html」や「\`\`\`」のようなコードブロック記号はWebサイトでバグになるため使用は一切禁止します。`
+   - 「#」や「##」、「**」、「---」といったMarkdown記号、および「\`\`\`html」や「\`\`\`」のようなコードブロック記号はWebサイトでバグになるため使用は一切禁止します。文字の強調やリストは、すべて上記のHTMLタグ（<b>、<mark>、<ul>、<li>）のみで表現してください。`
                         },
                         { 
                             role: 'user', 
                             content: `Title: ${item.title}\nURL: ${item.link}` 
                         }
                     ],
-                    temperature: 0.6 
+                    temperature: 0.75 // 妄想力・官能的な表現力を引き出すために少し高めに設定
                 });
 
                 let summary = response.choices[0].message.content;
 
-                // 【超強力・安全装置】無駄なコードブロック記号やMarkdown記号を徹底排除
+                // 安全装置：余計な記号を徹底削除
                 summary = summary
                     .replace(/```html/g, '')
                     .replace(/```/g, '')
@@ -79,21 +80,21 @@ async function main() {
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
+                // ※本番運用時は、ここに実際のFANZA/DLsiteの画像URLやアフィリンクが入るようにします
+                // ここでは仮で、Cloudflareに優しい外部直リンクのダミー画像URLを指定
+                const dummyImgUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&q=80"; 
+
                 summarizedArticles.push({
                     originalTitle: item.title,
                     link: item.link,
+                    imgUrl: dummyImgUrl, // 画像直リンクURLを保持
                     summary: formattedSummary
                 });
 
-                console.log(`✅ [${i + 1}/${topItems.length}] 記事の執筆が完了しました！`);
+                console.log(`✅ [${i + 1}/${topItems.length}] レビューの執筆が完了しました！`);
 
             } catch (itemError) {
-                console.error(`⚠️ [${i + 1}/${topItems.length}] エラーのためスキップ:`, itemError.message);
-                summarizedArticles.push({
-                    originalTitle: item.title,
-                    link: item.link,
-                    summary: 'AIによる記事の生成に失敗しました。詳細な内容は原文リンクをご確認ください。'
-                });
+                console.error(`⚠️ エラーのためスキップ:`, itemError.message);
             }
         }
 
@@ -101,8 +102,7 @@ async function main() {
         const dateStr = todayObj.toISOString().split('T')[0];
         const displayDate = todayObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        console.log(`\n📝 本日のアーカイブ（archive/${dateStr}.html）を作成中...`);
-        const archiveHtml = generateArchivePageHTML(summarizedArticles, displayDate);
+        const archiveHtml = generateTopPageHTML(summarizedArticles, displayDate, [], true);
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateStr}.html`), archiveHtml, 'utf-8');
 
         const archiveFiles = fs.readdirSync(ARCHIVE_DIR)
@@ -110,51 +110,45 @@ async function main() {
             .map(file => file.replace('.html', ''))
             .sort((a, b) => b.localeCompare(a));
 
-        console.log('📝 メインのトップページ（index.html）を更新中...');
-        const indexHtml = generateTopPageHTML(summarizedArticles, displayDate, archiveFiles);
+        const indexHtml = generateTopPageHTML(summarizedArticles, displayDate, archiveFiles, false);
         fs.writeFileSync('index.html', indexHtml, 'utf-8');
 
         console.log('✨ すべての処理が完了しました！');
 
     } catch (error) {
-        console.error('❌ 致命的なエラーが発生しました:', error);
+        console.error('❌ 致命的なエラー:', error);
     }
 }
 
-// 共通パーツ：ブラッシュアップされた美麗カードデザイン（1の改善）
+// 共通パーツ：エロ同人メディア専用カードレイアウト（画像を左/上に配置するモダンな横並び・縦並び）
 function renderArticleCards(articles) {
     return articles.map(article => `
-        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transform border border-slate-100 transition-all duration-300 overflow-hidden flex flex-col justify-between group">
-            <div class="p-6 sm:p-8">
-                <div class="flex items-center gap-2 mb-4">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-                        海外テック
-                    </span>
-                    <span class="text-xs text-slate-400">HN注目トレンド</span>
-                </div>
-                <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-indigo-600 transition-colors">
-                    <a href="${article.link}" target="_blank">${article.originalTitle}</a>
-                </h3>
-                <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-slate-100/80">
-                    ${article.summary}
-                </div>
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transform border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col md:flex-row justify-between group">
+            <div class="md:w-1/3 bg-slate-900 flex items-center justify-center overflow-hidden relative min-h-[200px]">
+                <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100">
+                <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
             </div>
-            
-            <div class="px-6 sm:px-8 pb-6 pt-2">
-                <div class="bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 hover:border-indigo-200 p-4 rounded-xl text-xs text-slate-700 transition-all mb-4">
-                    <div class="flex items-center gap-1.5 font-bold text-indigo-600 mb-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        <span>PICK UP RECOMMEND</span>
+
+            <div class="p-6 sm:p-8 md:w-2/3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
+                            羞恥・シチュエーション
+                        </span>
+                        <span class="text-xs text-slate-400">最新同人誌レビュー</span>
                     </div>
-<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" rel="nofollow">コスパ最強ゲーミングPCなら【MDL.make】</a>
-
-<img border="0" width="1" height="1" src="https://www14.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" alt="">
+                    <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-rose-600 transition-colors">
+                        ${article.originalTitle}
+                    </h3>
+                    <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
+                        ${article.summary}
+                    </div>
                 </div>
-
-                <div class="flex items-center justify-between text-xs text-slate-400">
-                    <a href="${article.link}" target="_blank" class="inline-flex items-center gap-1 text-indigo-500 font-medium hover:text-indigo-700 transition-colors">
-                        <span>原文ソースを確認する</span>
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                
+                <div class="mt-6">
+                    <a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YZ75" target="_blank" rel="nofollow" class="w-full text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
+                        <span>🔞 この作品をDLsite / FANZAでチェックする</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </a>
                 </div>
             </div>
@@ -162,15 +156,15 @@ function renderArticleCards(articles) {
     `).join('\n');
 }
 
-// 📄 テンプレートA：トップページ（OGP対応・1, 5の改善）
-function generateTopPageHTML(articles, displayDate, archiveFiles) {
+// 📄 テンプレート（大人向けピンク＆ダークネイビーデザイン）
+function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
     const cards = renderArticleCards(articles);
     
     const archiveLinks = archiveFiles.map(date => `
         <li>
-            <a href="/archive/${date}.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 text-sm font-medium text-slate-700 hover:text-indigo-600 transition-all border border-transparent hover:border-slate-100">
-                <span>📅 ${date} のダイジェスト</span>
-                <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md">LOG</span>
+            <a href="${isArchive ? '../' : '/'}archive/${date}.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-rose-50 text-sm font-medium text-slate-700 hover:text-rose-600 transition-all border border-transparent hover:border-slate-100">
+                <span>📅 ${date} の新着まとめ</span>
+                <span class="text-xs bg-rose-50 text-rose-500 px-2 py-0.5 rounded-md">LOG</span>
             </a>
         </li>
     `).join('\n');
@@ -181,125 +175,62 @@ function generateTopPageHTML(articles, displayDate, archiveFiles) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overseas Tech Digest - 最先端海外テックニュース自動要約メディア</title>
+    <title>羞恥特化型エロ同人ソムリエ - 最新成人向け同人誌レビューまとめ</title>
     
-    <meta name="description" content="海外の難解な先端技術ニュースをローカルLLMが毎晩自動で超翻訳・要約。一歩先を行くエンジニアのためのテックメディア。">
-    <meta property="og:url" content="https://tech-summary-bot-seven.vercel.app">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Overseas Tech Digest - 最先端海外テックニュース自動要約メディア">
-    <meta property="og:description" content="海外の難解な先端技術ニュースをローカルLLMが毎晩自動で超翻訳・要約。一歩先を行くエンジニアのためのテックメディア。">
-    <meta property="og:site_name" content="Overseas Tech Digest">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Overseas Tech Digest - 最先端海外テックニュース自動要約メディア">
-    <meta name="twitter:description" content="海外の難解な先端技術ニュースをローカルLLMが毎晩自動で超翻訳・要約。一歩先を行くエンジニアのためのテックメディア。">
-
+    <meta name="description" content="【18禁】言葉責め・公開羞恥・シチュエーション系同人誌に特化。AIソムリエが最新作の抜きどころを徹底レビュー。">
+    <meta name="rating" content="adult">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
         body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 antialiased min-h-screen">
+<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
 
-    <header class="bg-slate-900 text-white py-14 px-4 border-b border-slate-800 relative overflow-hidden">
-        <div class="absolute inset-0 bg-grid-white/[0.05] bg-[center_top]"></div>
+    <header class="bg-slate-950 text-white py-14 px-4 border-b border-rose-950 relative overflow-hidden">
         <div class="max-w-6xl mx-auto text-center relative z-10">
-            <span class="text-xs font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">AI Automated Media</span>
-            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mt-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">
-                🌐 Overseas Tech Digest
+            <span class="text-xs font-bold tracking-widest text-rose-400 uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">⚠️ AGE VERIFICATION: 18+ ONLY</span>
+            <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight mt-4 text-transparent bg-clip-text bg-gradient-to-r from-white via-rose-200 to-pink-300">
+                🔞 羞恥特化型エロ同人ソムリエ
             </h1>
-            <p class="mt-3 text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-light">
-                海外の先端情報をローカルLLMが毎晩自動で要約。一歩先を行くビジネスパーソンのためのテックメディア。
+            <p class="mt-3 text-sm text-rose-300/80 max-w-xl mx-auto font-light">
+                言葉責め、公開プレイ、尊厳破壊……。紳士の性癖を深く抉る「羞恥系同人誌」のみを厳選し、AIソムリエが毎晩その魅力を限界まで語り尽くす特化型レビューメディア。
             </p>
-            <div class="mt-4 text-xs text-indigo-300 font-medium">最終更新: ${displayDate} (毎日自動更新)</div>
+            <div class="mt-4 text-xs text-rose-400 font-medium">最終更新: ${displayDate}</div>
         </div>
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-12">
-        
-        <div class="bg-white border border-slate-200/80 p-6 rounded-2xl text-center mb-12 shadow-sm flex flex-col items-center justify-center">
-            <span class="inline-block text-[10px] font-bold tracking-wider text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded mb-4">SPONSOR</span>
-            <div class="inline-block overflow-hidden rounded-lg shadow-sm hover:shadow transition-shadow">
-<a href="https://px.a8.net/svt/ejp?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" rel="nofollow">コスパ最強ゲーミングPCなら【MDL.make】</a>
-
-<img border="0" width="1" height="1" src="https://www14.a8.net/0.gif?a8mat=4B3WJB+8TC27M+5HXK+5YRHE" alt="">
-            </div>
+        <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl text-center text-xs text-rose-800 mb-8 font-medium">
+            当サイトは成人向け（R-18）の表現を含みます。18歳未満の方の閲覧は固くお断りいたします。また、掲載画像はすべて公式のアフィリエイト及び直リンクを使用しています。
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-2">
-                <h2 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
-                    <span>最新のアップデート（10件）</span>
+            <div class="lg:col-span-2 space-y-6">
+                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-rose-600 rounded-full"></span>
+                    <span>本日のおすすめ羞恥同人（10選）</span>
                 </h2>
-                <div class="space-y-6">
-                    ${cards}
-                </div>
+                ${cards}
             </div>
 
             <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 sticky top-6">
-                    <h2 class="text-lg font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        <span>バックナンバー（過去ログ）</span>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
+                    <h2 class="text-md font-bold text-slate-900 mb-4 pb-3 border-b border-rose-100 flex items-center gap-2">
+                        <span>過去のバックナンバー</span>
                     </h2>
-                    <div class="max-h-[500px] overflow-y-auto pr-1">
-                        <ul class="space-y-2">
-                            ${archiveLinks.length > 0 ? archiveLinks : '<li class="text-xs text-slate-400 text-center py-4">過去のログはまだありません。</li>'}
-                        </ul>
-                    </div>
+                    <ul class="space-y-2">
+                        ${archiveLinks.length > 0 ? archiveLinks : '<li class="text-xs text-slate-400 text-center py-4">ログはまだありません。</li>'}
+                    </ul>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <footer class="mt-24 bg-slate-900 text-slate-400 py-12 px-4 border-t border-slate-800 text-center text-xs">
+    <footer class="mt-24 bg-slate-950 text-rose-300/40 py-12 px-4 border-t border-rose-950 text-center text-xs">
         <div class="max-w-6xl mx-auto">
-            <p class="mb-2">⚠️ 当サイトで提供される要約情報はAIによって自動生成された推測を含みます。正確な情報は原文ソースをご参照ください。</p>
-            <p>© ${new Date().getFullYear()} Tech Summary Media. Powered by Node.js, LM Studio, and Vercel.</p>
+            <p>© ${new Date().getFullYear()} 羞恥特化型エロ同人ソムリエ. All Rights Reserved. 18+ Only.</p>
         </div>
-    </footer>
-</body>
-</html>
-    `;
-}
-
-// 📄 テンプレートB：個別アーカイブページ用
-function generateArchivePageHTML(articles, displayDate) {
-    const cards = renderArticleCards(articles);
-    return `
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${displayDate} のダイジェスト - Overseas Tech Digest</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap');
-        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
-    </style>
-</head>
-<body class="bg-[#f8fafc] text-slate-900 antialiased min-h-screen">
-    <header class="bg-slate-900 text-white py-10 px-4 text-center">
-        <div class="max-w-3xl mx-auto">
-            <a href="../index.html" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-400 hover:text-indigo-300 mb-2 transition-colors">
-                ← トップページに戻る
-            </a>
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mt-1">
-                📅 ${displayDate} バックナンバー
-            </h1>
-        </div>
-    </header>
-    <main class="max-w-3xl mx-auto px-4 py-12">
-        <div class="space-y-6">
-            ${cards}
-        </div>
-    </main>
-    <footer class="bg-slate-900 text-slate-500 py-8 text-center text-xs">
-        <p>© Tech Summary Media. Archive Mode.</p>
     </footer>
 </body>
 </html>
