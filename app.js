@@ -11,7 +11,7 @@ const { JSDOM } = require('jsdom');
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 2; // 最初はテスト用に1件
+const FETCH_COUNT = 10; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
@@ -221,9 +221,11 @@ async function fetchDmmProducts() {
  * ===================================================
  */
 function parseMarkdownTableToHtml(text) {
-    // 1. まず、AIが生成しがちな「空の改行タグの羅列」を事前に抹殺する
-    const cleanedText = text.replace(/(<br\s*\/?>\s*){3,}/gi, '\n\n');
-    
+    // 1. 強力な正規表現で、連続する<br>や不要な空行を徹底的に消去・圧縮する
+    let cleanedText = text
+        .replace(/(<br\s*\/?>\s*){2,}/gi, '<br>') // <br>の連続を1つに圧縮
+        .replace(/\n{3,}/g, '\n\n');              // 改行3つ以上の連続を2つに制限
+
     const lines = cleanedText.split('\n');
     let inTable = false;
     let htmlOutput = [];
@@ -231,18 +233,17 @@ function parseMarkdownTableToHtml(text) {
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         
-        // 💡重要：テーブルの一部ではない、単なる空行（<br>変換の元）は極力無視する
-        if (line === '' || line === '<br>') continue;
+        // 空行（余白の原因）は極力スキップするが、テーブル内は維持
+        if (!inTable && line === '') continue;
 
+        // マークダウンのテーブル記号
         if (line.startsWith('|') && line.endsWith('|')) {
             const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
-            
-            // 区切り行（|---|---|）は無視
-            if (line.includes('---') || line.includes('===')) continue;
+            if (line.includes('---')) continue; // 区切り行は無視
 
             if (!inTable) {
                 inTable = true;
-                htmlOutput.push('<div class="overflow-x-auto my-4 shadow-sm border border-rose-100 rounded-xl">');
+                htmlOutput.push('<div class="overflow-x-auto my-2 shadow-sm border border-rose-100 rounded-xl">');
                 htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
                 htmlOutput.push('<thead class="bg-rose-50 text-rose-900 font-bold"><tr>');
                 cells.forEach(cell => htmlOutput.push(`<th class="px-4 py-3">${cell}</th>`));
@@ -258,8 +259,10 @@ function parseMarkdownTableToHtml(text) {
                 inTable = false;
                 htmlOutput.push('</tbody></table></div>');
             }
-            // 💡重要：テーブル以外の文章の改行処理
-            htmlOutput.push(line + '<br>');
+            // 💡重要：テーブル以外の文章は、単なる改行ではなく<p>で囲むと最も美しい
+            if (line.length > 0) {
+                htmlOutput.push(`<p class="mb-4">${line}</p>`);
+            }
         }
     }
     if (inTable) {
