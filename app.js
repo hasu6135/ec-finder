@@ -1,9 +1,9 @@
-const puppeteer = require('puppeteer'); // 👈 1行目にこれを追加！
+const puppeteer = require('puppeteer'); 
 const fs = require('fs');
 const path = require('path');
 const { OpenAI } = require('openai');
 const axios = require('axios'); 
-const { JSDOM } = require('jsdom'); // 💡 詳細ページ解析用のライブラリを追加
+const { JSDOM } = require('jsdom'); 
 
 /**
  * ===================================================
@@ -15,7 +15,7 @@ const FETCH_COUNT = 1; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
-const DMM_AFFILIATE_ID = '132815-001'; // 👈 自動で末尾-990に変換する処理を入れました
+const DMM_AFFILIATE_ID = '132815-001'; 
 
 const openai = new OpenAI({
     baseURL: 'http://localhost:1234/v1',
@@ -84,21 +84,16 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         let productDescription = '';
         let realTachiyomiUrl = '';
 
-        // ===================================================
-        // 📝 1. 作品紹介（あらすじ）のハッキング抽出
-        // ===================================================
+        // 作品紹介（あらすじ）のハッキング抽出
         const descElem = doc.querySelector('[data-testid="description-text"]') || doc.querySelector('.sc-ef68d909-1');
         if (descElem) {
-            // <br>タグを改行文字に変換しつつテキストを取得
             productDescription = descElem.innerHTML
-                .replace(/<br\s*\/?>/gi, '\n') // 改行タグを本物の改行に
-                .replace(/<[^>]+>/g, '')       // その他のHTMLタグを消去
+                .replace(/<br\s*\/?>/gi, '\n') 
+                .replace(/<[^>]+>/g, '')       
                 .trim();
         }
 
-        // ===================================================
-        // 💬 2. レビュー抽出（ロジックA & B）
-        // ===================================================
+        // レビュー抽出
         const nicknames = doc.querySelectorAll('[data-testid="nickname"]');
         nicknames.forEach(nick => {
             const reviewBox = nick.closest('div');
@@ -121,9 +116,7 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
-        // ===================================================
-        // 👀 3. 試し読みURL
-        // ===================================================
+        // 試し読みURL
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
@@ -134,7 +127,6 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         await browser.close();
 
-        // レビューのネタバレ・ノイズフィルター
         const filteredReviews = userReviews.filter(r => {
             if (r.includes('作品の内容に関する記述が含まれています')) return false;
             if (r.includes('ネタバレ')) return false;
@@ -144,9 +136,6 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             return true;
         });
 
-        // ===================================================
-        // 📊 4. 進行状況をコンソールに美しく可視化
-        // ===================================================
         console.log(` └ 💬 有効な参考レビュー: ${filteredReviews.length}件`);
         if (filteredReviews.length > 0) {
             console.log(` 📥 --- [厳選されたレビューの中身] ---`);
@@ -161,13 +150,10 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             console.log(` 📥 --- [あらすじ冒頭スナップ] ---`);
             console.log(`   ${productDescription.substring(0, 120).replace(/\n/g, ' ')}...`);
             console.log(` ---------------------------------`);
-        } else {
-            console.log(` └ ⚠️ 作品紹介の取得に失敗しました。`);
         }
 
         const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
         
-        // AIライターに渡すデータをここで合体させます
         return {
             userReviews: reviewSummary || '（ネタバレなしレビューなし）',
             productDescription: productDescription || '（作品紹介なし）',
@@ -183,8 +169,7 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 }
 
 /**
- * ===================================================
- * 📦 DMM Web Service API からデータを取得する関数（リンクバグ完全修正版）
+ * 📦 DMM Web Service API からデータを取得する関数
  * ===================================================
  */
 async function fetchDmmProducts() {
@@ -211,13 +196,13 @@ async function fetchDmmProducts() {
             return [];
         }
 
-	return response.data.result.items.map(item => {
+        return response.data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
 
             return {
                 title: item.title,
-                url: perfectAffiliateUrl, // 🛒 今すぐ読む（完璧に動くアフィリンク）
+                url: perfectAffiliateUrl, 
                 imageUrl: item.imageURL?.large || item.imageURL?.list,
                 description: item.description || ''
             };
@@ -227,6 +212,56 @@ async function fetchDmmProducts() {
         console.error('⚠️ DMM API取得エラー:', error.message);
         return [];
     }
+}
+
+/**
+ * ===================================================
+ * 💡【重要変更】AIが作ったマークダウン形式のテーブル（表）を、
+ * 美しいHTMLのテーブルへ全自動で100%完全変換する超軽量関数
+ * ===================================================
+ */
+function parseMarkdownTableToHtml(text) {
+    const lines = text.split('\n');
+    let inTable = false;
+    let htmlOutput = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // パイプ「|」で始まる行を表として認識
+        if (line.startsWith('|') && line.endsWith('|')) {
+            const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+            
+            // 区切り行（|---|---|）は無視する
+            if (line.includes('---') || line.includes('===')) {
+                continue;
+            }
+
+            if (!inTable) {
+                inTable = true;
+                htmlOutput.push('<div class="overflow-x-auto my-6 shadow-sm border border-rose-100 rounded-xl">');
+                htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
+                htmlOutput.push('<thead class="bg-rose-50 text-rose-900 font-bold"><tr>');
+                cells.forEach(cell => htmlOutput.push(`<th class="px-4 py-3">${cell}</th>`));
+                htmlOutput.push('</tr></thead>');
+                htmlOutput.push('<tbody class="divide-y divide-rose-50 bg-white text-slate-700">');
+            } else {
+                htmlOutput.push('<tr class="hover:bg-slate-50/50 transition-colors">');
+                cells.forEach(cell => htmlOutput.push(`<td class="px-4 py-3 font-medium">${cell}</td>`));
+                htmlOutput.push('</tr>');
+            }
+        } else {
+            if (inTable) {
+                inTable = false;
+                htmlOutput.push('</tbody></table></div>');
+            }
+            htmlOutput.push(line);
+        }
+    }
+    if (inTable) {
+        htmlOutput.push('</tbody></table></div>');
+    }
+    return htmlOutput.join('\n');
 }
 
 /**
@@ -247,25 +282,21 @@ async function main() {
         }
 
         const summarizedArticles = [];
-        console.log(`🤖 LM Studio(Qwen)による、生レビューを反映した超濃厚レビュー執筆を開始...`);
+        console.log(`🤖 LM Studioによる、生レビューを反映した超濃厚レビュー執筆を開始...`);
 
         for (let i = 0; i < products.length; i++) {
             const product = products[i];
             console.log(`\n[${i + 1}/${products.length}] ターゲット作品: ${product.title}`);
 
-            // 💡 拡張ステップ：詳細ページへ行ってレビューとサンプル画像を引っこ抜く
             const detailData = await scrapeDmmProductDetail(product.url);
 
             try {
- 				// ===================================================
-                // 🔥 エロ同人ソムリエ AIライター 生成セクション（最終完全版）
-                // ===================================================
                 const response = await openai.chat.completions.create({
-                    model: 'loading-model', // ⚠️お使いの環境のモデル名（gpt-4oなど）に適宜合わせてください
+                    model: 'loading-model', 
                     messages: [
                         { 
                             role: 'system', 
-                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトル、公式の詳細なあらすじ、そして【実際に購入したユーザーの生レビュー（口コミ）】を徹底的に分析し、その作品が持つ「羞恥シチュエーション（公開羞恥、言葉責め、モブ視線、尊厳破壊など）」のどこが読者に刺さっているのかを反映した、狂気的なほど熱量の高い紹介記事（日本語）を執筆してください。
+                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトル、公式の詳細なあらすじ、 tender して【実際に購入したユーザーの生レビュー（口コミ）】を徹底的に分析し、その作品が持つ「羞恥シチュエーション（公開羞恥、言葉責め、モブ視線、尊厳破壊など）」のどこが読者に刺さっているのかを反映した、狂気的なほど熱量の高い紹介記事（日本語）を執筆してください。
 
 以下の【執筆ルール】を限界まで遵守すること：
 1. 【タイトルは『一撃で理性を吹き飛ばすフック』にせよ】
@@ -294,15 +325,15 @@ async function main() {
                 summary = summary
                     .replace(/```html/g, '').replace(/```/g, '').replace(/##+/g, '').replace(/\*\*/g, '').replace(/---+/g, '').replace(/#/g, '').trim();
 
-                const formattedSummary = summary.replace(/\n/g, '<br>');
+                // 💡【重要修正】先にテーブル（表）の自動HTMLパースを行い、その後で通常の改行を<br>に変換する
+                const tableParsedSummary = parseMarkdownTableToHtml(summary);
+                const formattedSummary = tableParsedSummary.replace(/\n/g, '<br>');
 
-				// 💡 ページから引っこ抜いた「100%動く試し読みURL」を、ユーザー様提示の完璧なアフィリエイトの型にハメ込みます
                 let perfectSampleReadLink = '';
                 if (detailData.tachiyomiUrl) {
                     const encodedSampleUrl = encodeURIComponent(detailData.tachiyomiUrl);
                     perfectSampleReadLink = `https://al.fanza.co.jp/?lurl=${encodedSampleUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
                 } else {
-                    // 万が一取れなかった場合のバックアップ（通常の商品ページへ飛ばす）
                     perfectSampleReadLink = product.url;
                 }
 
@@ -312,7 +343,7 @@ async function main() {
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
                     sampleImages: detailData.sampleImages,
-                    sampleReadLink: perfectSampleReadLink // 💡 完璧なアフィ報酬付き試し読みリンク
+                    sampleReadLink: perfectSampleReadLink 
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
@@ -341,10 +372,9 @@ async function main() {
     }
 }
 
-// 共通パーツ：カードレイアウトの中に「全サンプル画像」のグリッド表示を追加
+// 共通パーツ：カードレイアウト
 function renderArticleCards(articles) {
     return articles.map(article => {
-        // 📸 サンプル画像のHTMLを組み立てる（Cloudflareの転送量を消費しない直リンク仕様）
         let samplesHtml = '';
         if (article.sampleImages && article.sampleImages.length > 0) {
             const imgTags = article.sampleImages.map(imgUrl => `
@@ -368,13 +398,11 @@ function renderArticleCards(articles) {
         return `
         <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col p-6 sm:p-8 group">
             <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
-                <!-- 左：メイン表紙画像 -->
-                <div class="md:w-1/3 bg-slate-900 flex items-center justify-center overflow-hidden relative min-h-[260px] rounded-xl shadow-inner">
-                    <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-opacity">
+                <div class="md:w-1/3 bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner">
+                    <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
                     <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
                 </div>
 
-                <!-- 右：生レビューを参考にしてAIが書いた濃厚テキスト -->
                 <div class="md:w-2/3 flex flex-col justify-between">
                     <div>
                         <div class="flex items-center gap-2 mb-3">
@@ -391,7 +419,7 @@ function renderArticleCards(articles) {
                         </div>
                     </div>
                     
-<div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
                         <a href="${article.link}" target="_blank" rel="nofollow" class="flex-1 text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
                             <span>🔞 FANZAブックスで今すぐ読む ↗</span>
                         </a>
@@ -403,14 +431,13 @@ function renderArticleCards(articles) {
                 </div>
             </div>
 
-            <!-- 💡 下部：サンプル画像一覧をここに美しく配置 -->
             ${samplesHtml}
         </article>
         `;
     }).join('\n');
 }
 
-// 📄 テンプレート（変更なし）
+// 📄 テンプレート
 function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
     const cards = renderArticleCards(articles);
     const archiveLinks = archiveFiles.map(date => `
@@ -453,7 +480,7 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
 
     <main class="max-w-6xl mx-auto px-4 py-12">
         <div class="bg-rose-50 border border-rose-200 p-4 rounded-xl text-center text-xs text-rose-800 mb-8 font-medium">
-            当サイトは成人向け（R-18）の表現を含みます。18歳未満の方の閲覧は固くお断りいたします。
+            當サイトは成人向け（R-18）の表現を含みます。18歳未満の方の閲覧は固くお断りいたします。
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
