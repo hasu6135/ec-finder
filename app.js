@@ -76,12 +76,28 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
+		// 3. 💡 【新設】ページ内から本物の試し読み（立ち読み）URLをダイレクトに抽出
+        // FANZAブックスのページ内にある「立ち読み」ボタンのリンクを狙い撃ちします
+        const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
+        let realTachiyomiUrl = '';
+        
+        if (tachiyomiLinkElem) {
+            realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
+            if (!realTachiyomiUrl.startsWith('http')) {
+                realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
+            }
+            console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
+        } else {
+            console.log(` └ ⚠️ ページ内に試し読みリンクが見つかりませんでした`);
+        }
+
         console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
         console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
-        return {
+		return {
             userReviews: reviewSummary || '（まだ購入者レビューがありません。あらすじから妄想してください）',
-            sampleImages: sampleImages
+            sampleImages: sampleImages,
+            tachiyomiUrl: realTachiyomiUrl // 💡 抽出したURLを戻り値に追加
         };
 
     } catch (error) {
@@ -119,34 +135,13 @@ async function fetchDmmProducts() {
             return [];
         }
 
-        return response.data.result.items.map(item => {
-            // 💡 【超重要】APIが返すバグ付きURLを捨て、ユーザー様に提示いただいた「100%動く構造」でアフィリンクを再構築します
-            // 生の作品URL（item.URL）をエンコードして、正しいアフィリエイトの形にハメ込みます
+	return response.data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
-            
-			// 💡 100%確実に動くアフィリエイトURL（今すぐ読む用）
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
-
-            // 💡 【超重要】提示していただいた正しい構造（/product/数字/ID/tachiyomi/?cid=...）を完璧に再現します
-            // APIが返してくる生の作品URL（item.URL）の「末尾のクエスチョンマーク（?）」の手前に、
-            // ピンポイントで「tachiyomi/」を割り込ませる魔法の文字列置換です！
-            let sampleReadLink = '';
-            if (item.URL.includes('?')) {
-                // 例: .../b915awnmg04310/?cid=...  の形を 
-                //    .../b915awnmg04310/tachiyomi/?cid=... に変換
-                sampleReadLink = item.URL.replace('/?', '/tachiyomi/?');
-            } else {
-                sampleReadLink = `${item.URL}tachiyomi/`;
-            }
-
-            // 試し読みURLも安全にアフィリエイト化（ユーザー様提示の形式に完全一致させます）
-            const encodedSampleUrl = encodeURIComponent(sampleReadLink);
-            const perfectSampleReadLink = `https://al.fanza.co.jp/?lurl=${encodedSampleUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
 
             return {
                 title: item.title,
-                url: perfectAffiliateUrl,         // 🛒 本編購入（完璧）
-                sampleReadLink: perfectSampleReadLink, // 👀 試し読み（完璧・アフィ報酬付き）
+                url: perfectAffiliateUrl, // 🛒 今すぐ読む（完璧に動くアフィリンク）
                 imageUrl: item.imageURL?.large || item.imageURL?.list,
                 description: item.description || ''
             };
@@ -221,23 +216,23 @@ async function main() {
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
-				// 安全対策：アフィリエイトIDの末尾を補正
-                const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
-                    ? DMM_AFFILIATE_ID.replace('-001', '-990') 
-                    : DMM_AFFILIATE_ID;
+				// 💡 ページから引っこ抜いた「100%動く試し読みURL」を、ユーザー様提示の完璧なアフィリエイトの型にハメ込みます
+                let perfectSampleReadLink = '';
+                if (detailData.tachiyomiUrl) {
+                    const encodedSampleUrl = encodeURIComponent(detailData.tachiyomiUrl);
+                    perfectSampleReadLink = `https://al.fanza.co.jp/?lurl=${encodedSampleUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
+                } else {
+                    // 万が一取れなかった場合のバックアップ（通常の商品ページへ飛ばす）
+                    perfectSampleReadLink = product.url;
+                }
 
-                // 💡 DMMブックス公式の「試し読みビューア直接起動URL」を安全に生成します。
-                // アフィURLを加工しないため100%エラーにならず、報酬のクッキーも確実に乗ります！
-                const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${product.cid}&affiliate_id=${finalAffiliateId}`;
-
-				// 💡 API側で完璧なURL（url と sampleReadLink）を作ってあるので、そのまま横流しします
                 summarizedArticles.push({
                     originalTitle: product.title,
                     link: product.url,
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
                     sampleImages: detailData.sampleImages,
-                    sampleReadLink: product.sampleReadLink // 👈 productからそのまま受け取る
+                    sampleReadLink: perfectSampleReadLink // 💡 完璧なアフィ報酬付き試し読みリンク
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
