@@ -23,7 +23,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（FANZAドメイン完全修正版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（真・完全版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -37,12 +37,13 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             rawUrl = decodeURIComponent(rawUrl); 
         }
 
-        // 💡 【年齢認証突破＆ドメイン修正】
-        // 一般向け(book.dmm.co.jp)を、実在するFANZA成人向け専用ドメイン(published.fanza.co.jp)に置換！
-        if (rawUrl.includes('book.dmm.co.jp')) {
-            rawUrl = rawUrl.replace('book.dmm.co.jp', 'published.fanza.co.jp');
+        // 💡 ドメイン置換は不要！FANZAブックスの成人向け作品も「book.dmm.co.jp」が正しいドメインです。
+        // （幻のドメインに書き換わってしまっている場合は元に戻します）
+        if (rawUrl.includes('published.fanza.co.jp') || rawUrl.includes('book.fanza.co.jp')) {
+            rawUrl = rawUrl.replace('published.fanza.co.jp', 'book.dmm.co.jp').replace('book.fanza.co.jp', 'book.dmm.co.jp');
         }
-        console.log(`🔍 生の作品ページを詳細分析中（FANZAモード）: ${rawUrl}`);
+
+        console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
         
         let userReviews = [];
 
@@ -55,14 +56,15 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         if (productId) {
             try {
-                console.log(` 📡 FANZAブックスレビュー通信網へダイレクト接続 (確定ID: ${productId})`);
+                console.log(` 📡 ブックスレビュー通信網へダイレクト接続 (確定ID: ${productId})`);
                 
-                // 💡 FANZAブックス公式が提供している100%実在する本物のレビューAPIエンドポイントです
-                const reviewApiUrl = `https://published.fanza.co.jp/api/v1/review/list?cid=${productId}&limit=5&page=1`;
+                // 💡 【ここが最大の修正点】APIを叩く時も「Cookie: age_check_done=1」が必須でした！
+                // これがないと、R18作品のレビューはDMMサーバー側でブロックされて「0件」になってしまいます。
+                const reviewApiUrl = `https://book.dmm.co.jp/api/v1/review/list?cid=${productId}&limit=10&page=1`;
                 const apiRes = await axios.get(reviewApiUrl, {
                     headers: { 
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                        'Cookie': 'age_check_done=1' // 年齢認証済みのクッキー
+                        'Cookie': 'age_check_done=1' // 🔞 この一文がレビュー覚醒の鍵です
                     }
                 });
 
@@ -74,11 +76,11 @@ async function scrapeDmmProductDetail(affiliateUrl) {
                     });
                 }
             } catch (apiErr) {
-                console.log(' └ ⚠️ FANZAレビュー通信網からの取得に失敗しました。');
+                console.log(' └ ⚠️ レビュー通信網からの取得に失敗しました。');
             }
         }
 
-        // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出
+        // 2. HTML本体の取得（サンプル画像＆試し読みURL、およびレビューの保険用）
         const response = await axios.get(rawUrl, {
             headers: { 
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -88,14 +90,29 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         const dom = new JSDOM(response.data);
         const doc = dom.window.document;
 
-        // FANZAブックス(成人向け)の画像タグ構造を徹底的に網羅
-        const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img, #sample-image img, .p-product__sample img, [class*="sample"] img, img[src*="published.fanza.co.jp"]');
+        // 💡 【保険】APIでレビューが取れなかった場合、HTMLからも全方位でレビューの痕跡を抽出
+        if (userReviews.length === 0) {
+            const reviewElements = doc.querySelectorAll('[class*="review"], [id*="review"], .commentBox, .rev-comment, .u-text-break');
+            reviewElements.forEach(el => {
+                const text = el.textContent.trim();
+                // 15文字以上で、HTMLタグなどのノイズが含まれていない日本語テキストを抽出
+                if (text.length > 15 && text.length < 500 && !text.includes('<') && !text.includes('無断転載') && !text.includes('レビューはありません')) {
+                    const cleanText = text.replace(/\s+/g, ' ');
+                    if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
+                }
+            });
+        }
+
+        // 💡 【画像抽出超強化】クラス名に頼らず、すべての画像URLの「文字列パターン」からサンプル画像を強制抽出
+        const allImgs = doc.querySelectorAll('img');
         let sampleImages = [];
-        sampleImgElements.forEach(img => {
+        allImgs.forEach(img => {
             let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-src-large');
-            if (src) {
-                // サムネイル用(pt.jpg)を、サイト掲載用の綺麗な大画像(pl.jpg)に自動変換
+            if (src && (src.includes('pr.jpg') || src.includes('pt.jpg') || src.includes('pl.jpg') || src.includes('ps.jpg') || src.includes('sample'))) {
+                // サムネイル用(pt.jpg/ps.jpg/pr.jpg)を、サイト掲載用の綺麗な大画像(pl.jpg)に自動変換
                 if (src.includes('pt.jpg')) src = src.replace('pt.jpg', 'pl.jpg'); 
+                if (src.includes('ps.jpg')) src = src.replace('ps.jpg', 'pl.jpg'); 
+                if (src.includes('pr.jpg')) src = src.replace('pr.jpg', 'pl.jpg'); 
                 if (src.includes('js-')) src = src.replace('js-', ''); 
                 if (!src.startsWith('http')) src = 'https:' + src;
                 if (!sampleImages.includes(src)) sampleImages.push(src);
@@ -108,13 +125,16 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
             if (!realTachiyomiUrl.startsWith('http')) {
-                realTachiyomiUrl = 'https://published.fanza.co.jp' + realTachiyomiUrl;
+                realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
             }
             console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
         }
 
-        const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
-        console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
+        // 重複を除去してシャッフル（または上から3件）
+        const uniqueReviews = [...new Set(userReviews)];
+        const reviewSummary = uniqueReviews.slice(0, 3).join('\n---\n');
+        
+        console.log(` └ 💬 参考レビューを取得: ${uniqueReviews.length}件`);
         console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
         return {
