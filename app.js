@@ -51,7 +51,7 @@ async function fetchDmmProducts() {
                 api_id: DMM_API_ID,
                 affiliate_id: DMM_AFFILIATE_ID,
                 site: 'FANZA',           
-                floor: 'digital_doujin',          // 一旦「電子コミック」に固定
+                floor: [{"id": "81","name": "同人","code": "digital_doujin"}],
                 keyword: encodedKeyword, // エンコード済みのキーワード
                 hits: FETCH_COUNT,       
                 sort: 'date'             
