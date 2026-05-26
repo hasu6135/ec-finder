@@ -92,25 +92,21 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
 /**
  * ===================================================
- * 📦 DMM Web Service API からデータを取得する関数
+ * 📦 DMM Web Service API からデータを取得する関数（リンクバグ完全修正版）
  * ===================================================
  */
 async function fetchDmmProducts() {
     try {
-        // 安全対策：アフィリエイトIDの末尾が「-001」などの場合、自動でAPI専用の「-990」に補正
         const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
             ? DMM_AFFILIATE_ID.replace('-001', '-990') 
             : DMM_AFFILIATE_ID;
 
-//参考：https://note.com/challengepclife/n/nef91d6b4e78b
         console.log('📡 DMM APIへリクエストを送信中（人気順）...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
                 affiliate_id: finalAffiliateId,
                 site: 'FANZA',  
-                //service: 'doujin',
-                //floor: 'digital_doujin',
                 service: 'ebook',
                 floor: 'comic',
                 keyword: '羞恥', 
@@ -123,13 +119,26 @@ async function fetchDmmProducts() {
             return [];
         }
 
-        return response.data.result.items.map(item => ({
-            title: item.title,
-            url: item.affiliateURL, 
-            imageUrl: item.imageURL?.large || item.imageURL?.list,
-            description: item.description || '',
-            cid: item.cid // 💡 商品ID（cid）をここで一緒に回収しておきます！
-        }));
+        return response.data.result.items.map(item => {
+            // 💡 【超重要】APIが返すバグ付きURLを捨て、ユーザー様に提示いただいた「100%動く構造」でアフィリンクを再構築します
+            // 生の作品URL（item.URL）をエンコードして、正しいアフィリエイトの形にハメ込みます
+            const encodedRawUrl = encodeURIComponent(item.URL);
+            
+            // ① 本編購入用のリンク（末尾は確実に動作する -001 をベースにします）
+            const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
+
+            // ② 試し読み用のリンク（先ほどお伝えした公式のビューア直行URL。商品ID（cid）を自動挿入）
+            const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${item.cid}&affiliate_id=${finalAffiliateId}`;
+
+            return {
+                title: item.title,
+                url: perfectAffiliateUrl, // 👈 修正した完璧なリンク
+                sampleReadLink: sampleReadLink, // 👈 完璧な試し読みリンク
+                imageUrl: item.imageURL?.large || item.imageURL?.list,
+                description: item.description || '',
+                cid: item.cid
+            };
+        });
 
     } catch (error) {
         console.error('⚠️ DMM API取得エラー:', error.message);
@@ -209,13 +218,14 @@ async function main() {
                 // アフィURLを加工しないため100%エラーにならず、報酬のクッキーも確実に乗ります！
                 const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${product.cid}&affiliate_id=${finalAffiliateId}`;
 
+				// 💡 API側で完璧なURL（url と sampleReadLink）を作ってあるので、そのまま横流しします
                 summarizedArticles.push({
                     originalTitle: product.title,
                     link: product.url,
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
                     sampleImages: detailData.sampleImages,
-                    sampleReadLink: sampleReadLink 
+                    sampleReadLink: product.sampleReadLink // 👈 productからそのまま受け取る
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
