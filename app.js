@@ -127,7 +127,8 @@ async function fetchDmmProducts() {
             title: item.title,
             url: item.affiliateURL, 
             imageUrl: item.imageURL?.large || item.imageURL?.list,
-            description: item.description || ''
+            description: item.description || '',
+            cid: item.cid // 💡 商品ID（cid）をここで一緒に回収しておきます！
         }));
 
     } catch (error) {
@@ -199,9 +200,14 @@ async function main() {
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
-                // 💡 アフィリエイトURLのパラメータを壊さないよう、末尾にハッシュ（#preview）を付与します。
-                // これによりDMM側でリンク無効エラーにならず、ブックスのページで試し読みが自動起動します。
-                const sampleReadLink = `${product.url}#preview`;
+				// 安全対策：アフィリエイトIDの末尾を補正
+                const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
+                    ? DMM_AFFILIATE_ID.replace('-001', '-990') 
+                    : DMM_AFFILIATE_ID;
+
+                // 💡 DMMブックス公式の「試し読みビューア直接起動URL」を安全に生成します。
+                // アフィURLを加工しないため100%エラーにならず、報酬のクッキーも確実に乗ります！
+                const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${product.cid}&affiliate_id=${finalAffiliateId}`;
 
                 summarizedArticles.push({
                     originalTitle: product.title,
@@ -209,7 +215,7 @@ async function main() {
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
                     sampleImages: detailData.sampleImages,
-                    sampleReadLink: sampleReadLink // 💡 ここに試し読み用のリンクを追加！
+                    sampleReadLink: sampleReadLink 
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
