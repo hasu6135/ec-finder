@@ -23,123 +23,123 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（真・完全版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（完全決着版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
     try {
         const urlObj = new URL(affiliateUrl);
-        let rawUrl = urlObj.searchParams.get('lurl'); 
-
-        if (!rawUrl) {
-            rawUrl = affiliateUrl;
-        } else {
-            rawUrl = decodeURIComponent(rawUrl); 
-        }
-
-        // 💡 ドメイン置換は不要！FANZAブックスの成人向け作品も「book.dmm.co.jp」が正しいドメインです。
-        // （幻のドメインに書き換わってしまっている場合は元に戻します）
-        if (rawUrl.includes('published.fanza.co.jp') || rawUrl.includes('book.fanza.co.jp')) {
-            rawUrl = rawUrl.replace('published.fanza.co.jp', 'book.dmm.co.jp').replace('book.fanza.co.jp', 'book.dmm.co.jp');
-        }
-
-        console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
+        let rawUrl = urlObj.searchParams.get('lurl') || affiliateUrl;
+        rawUrl = decodeURIComponent(rawUrl);
         
+        console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
         let userReviews = [];
+        let sampleImages = [];
+        let realTachiyomiUrl = '';
 
-        // URLの中から商品ID（cid）を正規表現で100%確実に抜き出す
         let productId = null;
         const cidMatch = rawUrl.match(/\/([b][a-z0-9]{5,})\/?/i) || rawUrl.match(/(b[a-z0-9]{10,})/i);
-        if (cidMatch) {
-            productId = cidMatch[1].replace(/\//g, '');
-        }
+        if (cidMatch) productId = cidMatch[1].replace(/\//g, '');
 
         if (productId) {
+            // 💡 究極の裏技：抽出したIDを使って「DMMアフィリエイトAPI」を裏で叩き、
+            // HTMLのスクレイピングを無視して公式データベースから直接高画質画像を引っこ抜きます！
             try {
-                console.log(` 📡 ブックスレビュー通信網へダイレクト接続 (確定ID: ${productId})`);
+                console.log(` 📡 DMM公式データ網からサンプル画像を直接抽出中 (ID: ${productId})`);
+                const finalAffId = DMM_AFFILIATE_ID.endsWith('-001') ? DMM_AFFILIATE_ID.replace('-001', '-990') : DMM_AFFILIATE_ID;
                 
-                // 💡 【ここが最大の修正点】APIを叩く時も「Cookie: age_check_done=1」が必須でした！
-                // これがないと、R18作品のレビューはDMMサーバー側でブロックされて「0件」になってしまいます。
-                const reviewApiUrl = `https://book.dmm.co.jp/api/v1/review/list?cid=${productId}&limit=10&page=1`;
-                const apiRes = await axios.get(reviewApiUrl, {
-                    headers: { 
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                        'Cookie': 'age_check_done=1' // 🔞 この一文がレビュー覚醒の鍵です
-                    }
-                });
-
-                if (apiRes.data && apiRes.data.data && apiRes.data.data.reviews) {
-                    apiRes.data.data.reviews.forEach(rev => {
-                        if (rev.body && rev.body.length > 10) {
-                            userReviews.push(rev.body.trim().replace(/\s+/g, ' '));
+                // 1商品だけを狙い撃ちするAPIリクエスト
+                const itemApiUrl = `https://api.dmm.com/affiliate/v3/ItemList?api_id=${DMM_API_ID}&affiliate_id=${finalAffId}&site=FANZA&cid=${productId}`;
+                const itemRes = await axios.get(itemApiUrl);
+                
+                if (itemRes.data && itemRes.data.result && itemRes.data.result.items) {
+                    const itemData = itemRes.data.result.items[0];
+                    if (itemData && itemData.sampleImageURL) {
+                        // 高画質(sample_l)か、通常(sample_s)を綺麗に変換して取得
+                        if (itemData.sampleImageURL.sample_l && itemData.sampleImageURL.sample_l.image) {
+                            sampleImages.push(...itemData.sampleImageURL.sample_l.image);
+                        } else if (itemData.sampleImageURL.sample_s && itemData.sampleImageURL.sample_s.image) {
+                            itemData.sampleImageURL.sample_s.image.forEach(img => {
+                                sampleImages.push(img.replace('pt.jpg', 'pl.jpg').replace('ps.jpg', 'pl.jpg'));
+                            });
                         }
-                    });
+                    }
                 }
-            } catch (apiErr) {
-                console.log(' └ ⚠️ レビュー通信網からの取得に失敗しました。');
+            } catch (e) {
+                console.log(' └ ⚠️ APIからの画像取得エラー (スキップします)');
             }
         }
 
-        // 2. HTML本体の取得（サンプル画像＆試し読みURL、およびレビューの保険用）
-        const response = await axios.get(rawUrl, {
-            headers: { 
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Cookie': 'age_check_done=1; g_device=pc; r18=1' // 🔞年齢確認完全突破クッキー
-            }
-        });
-        const dom = new JSDOM(response.data);
-        const doc = dom.window.document;
+        // --- 2. HTML本体の取得（試し読みURL ＆ レビュー抽出） ---
+        try {
+            const response = await axios.get(rawUrl, {
+                headers: { 
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                    'Cookie': 'age_check_done=1; g_device=pc; r18=1' // 🔞年齢確認完全突破クッキー
+                }
+            });
+            
+            const rawHtml = response.data;
+            const dom = new JSDOM(rawHtml);
+            const doc = dom.window.document;
 
-        // 💡 【保険】APIでレビューが取れなかった場合、HTMLからも全方位でレビューの痕跡を抽出
-        if (userReviews.length === 0) {
-            const reviewElements = doc.querySelectorAll('[class*="review"], [id*="review"], .commentBox, .rev-comment, .u-text-break');
+            // 💡 【レビュー抽出：究極ハッキング版】
+            // 画面上のHTMLタグだけでなく、裏側に埋め込まれた状態データ(JSON)も全てパースしてレビューを探し出す
+            
+            // パターンA: 画面上のタグから取得
+            const reviewElements = doc.querySelectorAll('[class*="review" i], [id*="review" i], .commentBox, .rev-comment, .u-text-break');
             reviewElements.forEach(el => {
                 const text = el.textContent.trim();
-                // 15文字以上で、HTMLタグなどのノイズが含まれていない日本語テキストを抽出
-                if (text.length > 15 && text.length < 500 && !text.includes('<') && !text.includes('無断転載') && !text.includes('レビューはありません')) {
+                if (text.length > 15 && text.length < 500 && !text.includes('<') && !text.includes('無断転載')) {
                     const cleanText = text.replace(/\s+/g, ' ');
                     if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
                 }
             });
+
+            // パターンB: 生のHTMLソースコードから正規表現で強制抽出
+            const regexes = [
+                /"reviewBody"\s*:\s*"([^"]+)"/g,
+                /"comment"\s*:\s*"([^"]+)"/g,
+                /"body"\s*:\s*"([^"]+)"/g
+            ];
+            regexes.forEach(regex => {
+                let match;
+                while ((match = regex.exec(rawHtml)) !== null) {
+                    try {
+                        const decoded = JSON.parse(`"${match[1]}"`); // \u3042 等を日本語に復元
+                        const cleanText = decoded.replace(/\s+/g, ' ').trim();
+                        if (cleanText.length > 15 && cleanText.length < 500 && !cleanText.includes('<') && !cleanText.includes('http')) {
+                            if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
+                        }
+                    } catch(e) {}
+                }
+            });
+
+            // 試し読みURL抽出（これはすでに大成功しています！）
+            const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
+            if (tachiyomiLinkElem) {
+                realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
+                if (!realTachiyomiUrl.startsWith('http')) {
+                    realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
+                }
+                console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
+            }
+
+        } catch (htmlErr) {
+            console.log(` └ ⚠️ HTML解析エラー: ${htmlErr.message}`);
         }
 
-        // 💡 【画像抽出超強化】クラス名に頼らず、すべての画像URLの「文字列パターン」からサンプル画像を強制抽出
-        const allImgs = doc.querySelectorAll('img');
-        let sampleImages = [];
-        allImgs.forEach(img => {
-            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-src-large');
-            if (src && (src.includes('pr.jpg') || src.includes('pt.jpg') || src.includes('pl.jpg') || src.includes('ps.jpg') || src.includes('sample'))) {
-                // サムネイル用(pt.jpg/ps.jpg/pr.jpg)を、サイト掲載用の綺麗な大画像(pl.jpg)に自動変換
-                if (src.includes('pt.jpg')) src = src.replace('pt.jpg', 'pl.jpg'); 
-                if (src.includes('ps.jpg')) src = src.replace('ps.jpg', 'pl.jpg'); 
-                if (src.includes('pr.jpg')) src = src.replace('pr.jpg', 'pl.jpg'); 
-                if (src.includes('js-')) src = src.replace('js-', ''); 
-                if (!src.startsWith('http')) src = 'https:' + src;
-                if (!sampleImages.includes(src)) sampleImages.push(src);
-            }
-        });
-
-        // 3. ページ内から本物の試し読み（立ち読み）URLをダイレクトに抽出
-        const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
-        let realTachiyomiUrl = '';
-        if (tachiyomiLinkElem) {
-            realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
-            if (!realTachiyomiUrl.startsWith('http')) {
-                realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
-            }
-            console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
-        }
-
-        // 重複を除去してシャッフル（または上から3件）
+        // 最終整理
         const uniqueReviews = [...new Set(userReviews)];
         const reviewSummary = uniqueReviews.slice(0, 3).join('\n---\n');
+        const uniqueSampleImages = [...new Set(sampleImages)];
         
         console.log(` └ 💬 参考レビューを取得: ${uniqueReviews.length}件`);
-        console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
+        console.log(` └ 📸 サンプル画像を検出: ${uniqueSampleImages.length}枚`);
 
         return {
             userReviews: reviewSummary || '（まだ購入者レビューがありません。公式あらすじのシチュエーションから最高の妄想を膨らませて執筆してください）',
-            sampleImages: sampleImages,
+            sampleImages: uniqueSampleImages,
             tachiyomiUrl: realTachiyomiUrl 
         };
 
