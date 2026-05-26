@@ -199,13 +199,9 @@ async function main() {
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
-                // 💡 元のURLの末尾に「/=/ch=api/」などを考慮しつつ、試し読み用のパラメータを付与
-                // FANZAブックスの場合、URLの末尾に「#sample」をつけるか、商品IDの後に「_sample」を挟むパターンが一般的です。
-                // 最も確実かつアフィリエイトIDを維持したままビューアを開くには、元のURLの末尾に 「#preview」または「_sample」を応用します。
-                // ここでは一番シンプルに直接ビューアへ誘導しやすい形を生成します。
-                const sampleReadLink = product.url.includes('?') 
-                    ? `${product.url}&pack=1` // 👈 パッケージ情報（プレビュー自動開画）を促すパラメータ
-                    : `${product.url}?pack=1`;
+                // 💡 アフィリエイトURLのパラメータを壊さないよう、末尾にハッシュ（#preview）を付与します。
+                // これによりDMM側でリンク無効エラーにならず、ブックスのページで試し読みが自動起動します。
+                const sampleReadLink = `${product.url}#preview`;
 
                 summarizedArticles.push({
                     originalTitle: product.title,
