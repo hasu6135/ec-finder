@@ -127,16 +127,19 @@ async function fetchDmmProducts() {
             // ① 本編購入用のリンク（末尾は確実に動作する -001 をベースにします）
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
 
-            // ② 試し読み用のリンク（先ほどお伝えした公式のビューア直行URL。商品ID（cid）を自動挿入）
-            const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${item.cid}&affiliate_id=${finalAffiliateId}`;
+			// 💡 電子書籍（ブックス）の固有IDは「content_id」に入っているため、こちらを適用します！
+            const targetCid = item.content_id || item.cid;
+
+            // ② 試し読み用のリンク（これで「undefined」が消え去り、正しいIDが挿入されます）
+            const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${targetCid}&affiliate_id=${finalAffiliateId}`;
 
             return {
                 title: item.title,
-                url: perfectAffiliateUrl, // 👈 修正した完璧なリンク
-                sampleReadLink: sampleReadLink, // 👈 完璧な試し読みリンク
+                url: perfectAffiliateUrl, 
+                sampleReadLink: sampleReadLink, 
                 imageUrl: item.imageURL?.large || item.imageURL?.list,
                 description: item.description || '',
-                cid: item.cid
+                cid: targetCid // main側へ渡すIDも補正
             };
         });
 
