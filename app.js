@@ -23,61 +23,85 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（FANZAブックス完全特化版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
     try {
-        // 💡 魔法の逆算処理：アフィリエイトURLから生のDMM/FANZA商品ページURLを取り出す
         const urlObj = new URL(affiliateUrl);
-        let rawUrl = urlObj.searchParams.get('lurl'); // 転送先の生URLを抽出
+        let rawUrl = urlObj.searchParams.get('lurl'); 
 
         if (!rawUrl) {
-            console.log('⚠️ 生のURLが抽出できなかったため、アフィURLで直接試みます。');
             rawUrl = affiliateUrl;
         } else {
-            rawUrl = decodeURIComponent(rawUrl); // 安全のためにデコード
+            rawUrl = decodeURIComponent(rawUrl); 
         }
 
         console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
         
-        // DMMの年齢認証（R18クッキー）をエミュレートしてアクセス
         const response = await axios.get(rawUrl, {
             headers: { 
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Cookie': 'age_check_done=1' // 💡 これがないと年齢確認画面に飛ばされて400や404になることがあります
+                'Cookie': 'age_check_done=1; g_device=pc' // PC版画面のHTMLを強制取得
             }
         });
         
         const dom = new JSDOM(response.data);
         const doc = dom.window.document;
 
-        // 1. 購入者のレビュー（口コミ）のテキストを抽出
-        const reviewElements = doc.querySelectorAll('.review__text, .commentBox, .comment, .d-review__list__comment'); 
+        // 1. 💡 【大幅強化】FANZAブックスの購入者レビューをピンポイント奪取
+        // ブックス特有のクラス名「.d-review__unit__comment」「.review__text」などを網羅
+        const reviewSelectors = [
+            '.d-review__unit__comment', 
+            '.d-review__list__comment',
+            '.review__text', 
+            '.commentBox p', 
+            '.rev-comment',
+            '.p-review__comment'
+        ];
+        const reviewElements = doc.querySelectorAll(reviewSelectors.join(', ')); 
         let userReviews = [];
+        
         reviewElements.forEach(el => {
             const text = el.textContent.trim();
-            if (text.length > 10) userReviews.push(text);
+            // ノイズ（運営の注意書きなど）を除外してピュアな感想だけを抽出
+            if (text.length > 10 && !text.includes('無断転載') && !text.includes('ガイドライン') && !text.includes('レビューはありません')) {
+                // 余計な改行や空白を綺麗に掃除
+                const cleanText = text.replace(/\s+/g, ' ');
+                if (!userReviews.includes(cleanText)) {
+                    userReviews.push(cleanText);
+                }
+            }
         });
+
+        // 💡 もし通常のレビュー欄に文字がなかった場合の保険：
+        // ページ内の「作品の感想・評価タグ」や「一言レビュー」をかき集める
+        if (userReviews.length === 0) {
+            const altReviews = doc.querySelectorAll('.u-text-break, [class*="review"]');
+            altReviews.forEach(el => {
+                const text = el.textContent.trim();
+                if (text.length > 15 && text.length < 300 && !text.includes('<')) {
+                    userReviews.push(text.replace(/\s+/g, ' '));
+                }
+            });
+        }
+
         const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
 
         // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出
-        // 同人誌（digital_doujin）のサンプル画像用セレクターに対応
-        const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img');
+        const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img, #sample-image img');
         let sampleImages = [];
         sampleImgElements.forEach(img => {
             let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy');
             if (src) {
-                // サムネイルを拡大画像のURLパターンに変換
                 if (src.includes('pt.jpg')) src = src.replace('pt.jpg', 'pl.jpg'); 
-                if (src.includes('js-')) src = src.replace('js-', ''); // 同人特有の文字置換
+                if (src.includes('js-')) src = src.replace('js-', ''); 
                 if (!src.startsWith('http')) src = 'https:' + src;
                 if (!sampleImages.includes(src)) sampleImages.push(src);
             }
         });
 
-		// 3. 💡 【新設】ページ内から本物の試し読み（立ち読み）URLをダイレクトに抽出
-        // FANZAブックスのページ内にある「立ち読み」ボタンのリンクを狙い撃ちします
+        // 3. ページ内から本物の試し読み（立ち読み）URLをダイレクトに抽出
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         let realTachiyomiUrl = '';
         
@@ -94,15 +118,15 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
         console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
-		return {
-            userReviews: reviewSummary || '（まだ購入者レビューがありません。あらすじから妄想してください）',
+        return {
+            userReviews: reviewSummary || '（まだ購入者レビューがありません。公式あらすじのシチュエーションから最高の妄想を膨らませて執筆してください）',
             sampleImages: sampleImages,
-            tachiyomiUrl: realTachiyomiUrl // 💡 抽出したURLを戻り値に追加
+            tachiyomiUrl: realTachiyomiUrl 
         };
 
     } catch (error) {
         console.error('⚠️ 詳細ページの解析に失敗しました（スキップします）:', error.message);
-        return { userReviews: '（レビュー取得エラー）', sampleImages: [] };
+        return { userReviews: '（レビュー取得エラー）', sampleImages: [], tachiyomiUrl: '' };
     }
 }
 
