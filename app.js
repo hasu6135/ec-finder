@@ -24,7 +24,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューを厳選抽出する関数（ネタバレ排除版）
+ * 🔍 DMMの作品個別ページからレビューと作品紹介を抽出・学習する関数
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -56,8 +56,7 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         await page.goto(rawUrl, { waitUntil: 'networkidle2', timeout: 45000 });
         
-        // 隠れたレビューを発生させるための高速自動スクロール
-        console.log(` 📜 レビューを読み込むため、ページを自動スクロール中...`);
+        console.log(` 📜 レビューと作品紹介を読み込むため、ページを自動スクロール中...`);
         await page.evaluate(async () => {
             await new Promise((resolve) => {
                 let totalHeight = 0;
@@ -82,9 +81,24 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         const doc = dom.window.document;
 
         let userReviews = [];
+        let productDescription = '';
         let realTachiyomiUrl = '';
 
-        // --- ⚙️ レビュー抽出ロジックA: data-testid="nickname" の周辺スキャン ---
+        // ===================================================
+        // 📝 1. 作品紹介（あらすじ）のハッキング抽出
+        // ===================================================
+        const descElem = doc.querySelector('[data-testid="description-text"]') || doc.querySelector('.sc-ef68d909-1');
+        if (descElem) {
+            // <br>タグを改行文字に変換しつつテキストを取得
+            productDescription = descElem.innerHTML
+                .replace(/<br\s*\/?>/gi, '\n') // 改行タグを本物の改行に
+                .replace(/<[^>]+>/g, '')       // その他のHTMLタグを消去
+                .trim();
+        }
+
+        // ===================================================
+        // 💬 2. レビュー抽出（ロジックA & B）
+        // ===================================================
         const nicknames = doc.querySelectorAll('[data-testid="nickname"]');
         nicknames.forEach(nick => {
             const reviewBox = nick.closest('div');
@@ -99,7 +113,6 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
-        // --- ⚙️ レビュー抽出ロジックB: クラス名（モダンUI構造）からの直接ぶち抜き ---
         const pElements = doc.querySelectorAll('p[class*="biNCbZ"], p[class*="eFdjNy"], div[data-testid="review-evaluation"] pre');
         pElements.forEach(p => {
             const text = p.textContent.trim().replace(/\s+/g, ' ');
@@ -108,7 +121,9 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
-        // --- 👀 試し読みURLの抽出 ---
+        // ===================================================
+        // 👀 3. 試し読みURL
+        // ===================================================
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
@@ -119,45 +134,51 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         await browser.close();
 
-        // ===================================================
-        // 🛑 厳格なフィルター処理（ネタバレ・警告文・サイトノイズの完全排除）
-        // ===================================================
+        // レビューのネタバレ・ノイズフィルター
         const filteredReviews = userReviews.filter(r => {
-            // ネタバレ警告の定型文や、NGワードが含まれる場合は除外(false)
             if (r.includes('作品の内容に関する記述が含まれています')) return false;
             if (r.includes('ネタバレ')) return false;
             if (r.includes('特定商取引法') || r.includes('ご利用規約') || r.includes('ポイント') || r.includes('公式アカウント')) return false;
             if (r.includes('JavaScript') || r.includes('推奨環境') || r.includes('クッキー')) return false;
-            
-            // あまりにも短すぎる、または長すぎるものは除外
             if (r.length < 10 || r.length > 400) return false;
-            
-            return true; // 合格
+            return true;
         });
 
-        console.log(` └ 💬 ネタバレ等を除外した有効な参考レビュー: ${filteredReviews.length}件`);
-        
+        // ===================================================
+        // 📊 4. 進行状況をコンソールに美しく可視化
+        // ===================================================
+        console.log(` └ 💬 有効な参考レビュー: ${filteredReviews.length}件`);
         if (filteredReviews.length > 0) {
             console.log(` 📥 --- [厳選されたレビューの中身] ---`);
             filteredReviews.forEach((rev, index) => {
                 console.log(`   [${index + 1}] ${rev.substring(0, 60)}${rev.length > 60 ? '...' : ''}`);
             });
             console.log(` -------------------------------------`);
+        }
+
+        if (productDescription) {
+            console.log(` └ 📝 作品紹介（あらすじ）の取得に成功！(文字数: ${productDescription.length}文字)`);
+            console.log(` 📥 --- [あらすじ冒頭スナップ] ---`);
+            console.log(`   ${productDescription.substring(0, 120).replace(/\n/g, ' ')}...`);
+            console.log(` ---------------------------------`);
         } else {
-            console.log(` 📥 --- [厳選されたレビューの中身]: なし (AIが公式あらすじから執筆します) ---`);
+            console.log(` └ ⚠️ 作品紹介の取得に失敗しました。`);
         }
 
         const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
+        
+        // AIライターに渡すデータをここで合体させます
         return {
-            userReviews: reviewSummary || '（現在、ネタバレのない購入者レビューがありません。公式あらすじのシチュエーションから最高の妄想を膨らませて執筆してください）',
-            sampleImages: [], // 画像はスキップ
+            userReviews: reviewSummary || '（ネタバレなしレビューなし）',
+            productDescription: productDescription || '（作品紹介なし）',
+            sampleImages: [],
             tachiyomiUrl: realTachiyomiUrl 
         };
 
     } catch (error) {
         if (browser) await browser.close();
         console.error('⚠️ 詳細ページの解析に失敗しました（Puppeteerエラー）:', error.message);
-        return { userReviews: '（レビュー取得エラー）', sampleImages: [], tachiyomiUrl: '' };
+        return { userReviews: '', productDescription: '', sampleImages: [], tachiyomiUrl: '' };
     }
 }
 
@@ -236,18 +257,22 @@ async function main() {
             const detailData = await scrapeDmmProductDetail(product.url);
 
             try {
+ 				// ===================================================
+                // 🔥 エロ同人ソムリエ AIライター 生成セクション（最終完全版）
+                // ===================================================
                 const response = await openai.chat.completions.create({
-                    model: 'loading-model',
+                    model: 'loading-model', // ⚠️お使いの環境のモデル名（gpt-4oなど）に適宜合わせてください
                     messages: [
                         { 
                             role: 'system', 
-                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトル、公式のあらすじ、そして【実際に購入したユーザーの生レビュー（口コミ）】を徹底的に分析し、その作品が持つ「羞恥シチュエーション（公開羞恥、言葉責め、モブ視線、尊厳破壊など）」のどこが読者に刺さっているのかを反映した、狂気的なほど熱量の高い紹介記事（日本語）を執筆してください。
+                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトル、公式の詳細なあらすじ、そして【実際に購入したユーザーの生レビュー（口コミ）】を徹底的に分析し、その作品が持つ「羞恥シチュエーション（公開羞恥、言葉責め、モブ視線、尊厳破壊など）」のどこが読者に刺さっているのかを反映した、狂気的なほど熱量の高い紹介記事（日本語）を執筆してください。
 
 以下の【執筆ルール】を限界まで遵守すること：
 1. 【タイトルは『一撃で理性を吹き飛ばすフック』にせよ】
    - 機械的なラベル（「分析結果：」など）は絶対に出力禁止。読者が悶絶してクリックしてしまう、強烈にキャッチーな日本語タイトルを1行目で作ること。
 2. 【レビューは『実際の読者の興奮ポイント』を突き、HTMLで飾れ】
    - 与えられたユーザーの生口コミの内容（例：「○○のシーンの赤面が最高」「言葉責めが抜ける」など）の要素をレビュー内に自然に溶け込ませ、「実際に読んだ人が絶賛しているポイント」として熱弁してください。
+   - 公式あらすじに複数の収録作品やエピソード名（短編集など）が記載されている場合は、単一の作品だけでなく、それら複数のシチュエーション（例：壁尻、性処理課、わからせる等）のバリエーション豊かな魅力についても網羅して熱く語ること。
    - 適切な改行を挟み、以下のHTMLタグを文章中に【必ず積極的かつ効果的に】散りばめること：
      * 最も興奮する属性キーワード： <b>太字</b>
      * 妄想を加速させる最高にエロい一言： <mark class="bg-rose-100 text-rose-900 px-1 rounded">ピンクのハイライト</mark>
@@ -257,7 +282,7 @@ async function main() {
                         },
                         { 
                             role: 'user', 
-                            content: `【作品タイトル】\n${product.title}\n\n【公式あらすじ】\n${product.description}\n\n【購入者の生の口コミ・レビュー】\n${detailData.userReviews}` 
+                            content: `【作品タイトル】\n${product.title}\n\n【公式あらすじ】\n${detailData.productDescription}\n\n【購入者の生の口コミ・レビュー】\n${detailData.userReviews}` 
                         }
                     ],
                     temperature: 0.75 
