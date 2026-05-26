@@ -395,45 +395,43 @@ function renderArticleCards(articles) {
             `;
         }
 
-        return `
-        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col p-6 sm:p-8 group">
-            <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
-                <div class="md:w-1/3 bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner sticky top-6 self-start">
-                    <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
-                    <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
-                </div>
+// ... (renderArticleCards 関数の内側)
 
-                <div class="md:w-2/3 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
-                                羞恥・ランキング上位
-                            </span>
-                            <span class="text-xs text-slate-400">口コミ分析レビュー</span>
-                        </div>
-                        <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-rose-600 transition-colors">
-                            ${article.originalTitle}
-                        </h3>
-                        <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
-                            ${article.summary}
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6 flex flex-col sm:flex-row gap-3">
-                        <a href="${article.link}" target="_blank" rel="nofollow" class="flex-1 text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
-                            <span>🔞 FANZAブックスで今すぐ読む ↗</span>
-                        </a>
-                        
-                        <a href="${article.sampleReadLink}" target="_blank" rel="nofollow" class="flex-1 text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-bold rounded-xl border border-slate-200 hover:border-rose-200 transition-all text-sm tracking-wider">
-                            <span>👀 無料で試し読み（ブラウザ起動）</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+// 💡 【修正】左側の追従エリア（イラスト ＋ ボタン）
+return `
+<article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col md:flex-row p-6 sm:p-8 group items-start gap-8">
+    
+    <div class="md:w-1/3 sticky top-6 self-start space-y-4">
+        <div class="bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner">
+            <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+            <a href="${article.link}" target="_blank" rel="nofollow" class="w-full text-center py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm">
+                🔞 今すぐ読む
+            </a>
+            <a href="${article.sampleReadLink}" target="_blank" rel="nofollow" class="w-full text-center py-3 bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-200 transition-all text-sm">
+                👀 無料で試し読み
+            </a>
+        </div>
+    </div>
 
-            ${samplesHtml}
-        </article>
-        `;
+    <div class="md:w-2/3 flex flex-col">
+        <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
+                羞恥・ランキング上位
+            </span>
+            <span class="text-xs text-slate-400">口コミ分析レビュー</span>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4">${article.originalTitle}</h3>
+        <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
+            ${article.summary}
+        </div>
+        
+        </div>
+    
+    `;
     }).join('\n');
 }
 
