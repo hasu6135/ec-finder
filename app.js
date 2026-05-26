@@ -42,9 +42,6 @@ async function fetchDmmProducts() {
             ].slice(0, FETCH_COUNT);
         }
 
-        // 安全対策：日本語キーワードを確実な文字コード（URLエンコード）に変換
-        const encodedKeyword = encodeURIComponent('羞恥');
-
         console.log('📡 DMM APIへリクエストを送信中...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
@@ -52,9 +49,9 @@ async function fetchDmmProducts() {
                 affiliate_id: DMM_AFFILIATE_ID,
                 site: 'FANZA',           
                 floor: [{"id": "81","name": "同人","code": "digital_doujin"}],
-                keyword: '羞恥', // エンコード済みのキーワード
+                keyword: '羞恥',
                 hits: FETCH_COUNT,       
-                sort: 'date'             
+                sort: 'rank'             //date：新着順、rank：人気順
             }
         });
 
