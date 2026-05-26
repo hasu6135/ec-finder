@@ -43,7 +43,7 @@ async function fetchDmmProducts() {
         }
 
         // 安全対策：日本語キーワードを確実な文字コード（URLエンコード）に変換
-        const encodedKeyword = encodeURIComponent('羞恥 露出');
+        const encodedKeyword = encodeURIComponent('羞恥');
 
         console.log('📡 DMM APIへリクエストを送信中...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
