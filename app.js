@@ -24,7 +24,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（Puppeteer遅延待機版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（スクロール＆可視化版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -34,39 +34,50 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         let rawUrl = urlObj.searchParams.get('lurl') || affiliateUrl;
         rawUrl = decodeURIComponent(rawUrl);
         
-        // ドメイン修正
         if (rawUrl.includes('published.fanza.co.jp') || rawUrl.includes('book.fanza.co.jp')) {
             rawUrl = rawUrl.replace('published.fanza.co.jp', 'book.dmm.co.jp').replace('book.fanza.co.jp', 'book.dmm.co.jp');
         }
 
         console.log(`🔍 本物のブラウザ(Puppeteer)で詳細ページを起動中...`);
         
-        // 1. 裏側で本物のブラウザを立ち上げる
         browser = await puppeteer.launch({
-            headless: true, // 画面は非表示で高速実行
+            headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
         
-        // 人間っぽく見せるための設定
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
         
-        // 🔞 年齢認証の壁をクッキーで事前に突破
         await page.setCookie(
             { name: 'age_check_done', value: '1', domain: '.dmm.co.jp', path: '/' },
             { name: 'r18', value: '1', domain: '.dmm.co.jp', path: '/' },
             { name: 'g_device', value: 'pc', domain: '.dmm.co.jp', path: '/' }
         );
 
-        // ページへ移動
         await page.goto(rawUrl, { waitUntil: 'networkidle2', timeout: 45000 });
         
-        // 💡【ユーザーさんの大正解アイデア】
-        // ページが開いた後、JavaScriptが動いてレビューを生成するまで「3秒間」じっと待ちます
-        console.log(` ⏳ ページ読み込み完了。JSの描画（レビュー発生）を3秒間待機します...`);
+        // 💡【新機能】隠れたレビューと画像を引っ張り出すため、自動でページ最下部までスクロール
+        console.log(` 📜 隠れた画像とレビューを読み込むため、ページを自動スクロール中...`);
+        await page.evaluate(async () => {
+            await new Promise((resolve) => {
+                let totalHeight = 0;
+                const distance = 400; // 400pxずつスクロール
+                const timer = setInterval(() => {
+                    const scrollHeight = document.body.scrollHeight;
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
+
+                    if (totalHeight >= scrollHeight || totalHeight > 8000) { // 最大8000pxまで
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 100); // 0.1秒間隔で高速スクロール
+            });
+        });
+
+        console.log(` ⏳ スクロール完了。データが完全に生成されるのを3秒間待機します...`);
         await new Promise(resolve => setTimeout(resolve, 3000));
 
-        // 3秒待って、完全に中身が書き換わった「最新のHTMLソース」を丸ごと取得
         const rawHtml = await page.content();
         const dom = new JSDOM(rawHtml);
         const doc = dom.window.document;
@@ -75,10 +86,9 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         let sampleImages = [];
         let realTachiyomiUrl = '';
 
-        // --- ⚙️ 抽出ロジックA: ユーザー様提供の「新レビューシステム」ピンポイントハック ---
+        // --- ⚙️ レビュー抽出ロジックA: data-testid="nickname" の周辺から正確に抜く ---
         const nicknames = doc.querySelectorAll('[data-testid="nickname"]');
         nicknames.forEach(nick => {
-            // ニックネーム（〇〇さんのレビュー）の親要素周辺から、投稿された<p>タグ（本文）を探す
             const reviewBox = nick.closest('div');
             if (reviewBox && reviewBox.parentElement) {
                 const pTxt = reviewBox.parentElement.querySelector('p');
@@ -91,33 +101,31 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
-        // --- ⚙️ 抽出ロジックB: 保険用・全 p タグ全方位スキャン ---
-        if (userReviews.length === 0) {
-            const pElements = doc.querySelectorAll('p');
-            pElements.forEach(p => {
-                const text = p.textContent.trim();
-                if (text.length > 15 && text.length < 400) {
-                    if (!text.includes('JavaScript') && !text.includes('推奨環境') && !text.includes('クッキー') && !text.includes('権利')) {
-                        const cleanText = text.replace(/\s+/g, ' ');
-                        if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
-                    }
+        // --- ⚙️ レビュー抽出ロジックB: クラス名（ユーザー様提供の構造）から直接ぶち抜く ---
+        // ※クラス名の一部(biNCbZやeFdjNyなど)が含まれる要素を全スキャン
+        const pElements = doc.querySelectorAll('p[class*="biNCbZ"], p[class*="eFdjNy"], div[data-testid="review-evaluation"] pre');
+        pElements.forEach(p => {
+            const text = p.textContent.trim().replace(/\s+/g, ' ');
+            if (text.length > 10 && text.length < 500) {
+                if (!userReviews.includes(text) && !text.includes('JavaScript') && !text.includes('推奨環境')) {
+                    userReviews.push(text);
                 }
-            });
-        }
+            }
+        });
 
-        // --- 📸 サンプル画像の抽出（ブラウザが読み込んだ後の本物のURLを全取得） ---
+        // --- 📸 サンプル画像の抽出 ---
+        // スクロールしたことで、Lazy Loadされていた画像URL（srcやdata-src）がすべて本物に入れ替わっています
         const allImgs = doc.querySelectorAll('img');
         allImgs.forEach(img => {
-            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy');
+            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-original');
             if (src && (src.includes('pr.jpg') || src.includes('pt.jpg') || src.includes('pl.jpg') || src.includes('ps.jpg') || src.includes('sample'))) {
-                // サムネイル用を綺麗に大画像(pl.jpg)に変換
                 src = src.replace('pt.jpg', 'pl.jpg').replace('ps.jpg', 'pl.jpg').replace('pr.jpg', 'pl.jpg');
                 if (!src.startsWith('http')) src = 'https:' + src;
                 if (!sampleImages.includes(src)) sampleImages.push(src);
             }
         });
 
-        // --- 👀 本物の試し読みURLの抽出 ---
+        // --- 👀 試し読みURL ---
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
@@ -126,20 +134,31 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         }
 
-        // ブラウザを綺麗に閉じる
         await browser.close();
 
-        // 共通のフッターノイズなどの最終フィルター
+        // ノイズ除去
         const filteredReviews = userReviews.filter(r => 
             !r.includes('特定商取引法') && !r.includes('ご利用規約') && !r.includes('ポイント') && !r.includes('公式アカウント')
         );
 
-        const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
         console.log(` └ 💬 参考レビューを取得: ${filteredReviews.length}件`);
+        
+        // 💡【新機能】取得したレビューの内容をコンソールに綺麗に表示する
+        if (filteredReviews.length > 0) {
+            console.log(` 📥 --- [取得したレビューの中身] ---`);
+            filteredReviews.forEach((rev, index) => {
+                console.log(`   [${index + 1}] ${rev.substring(0, 60)}${rev.length > 60 ? '...' : ''}`);
+            });
+            console.log(` ---------------------------------`);
+        } else {
+            console.log(` 📥 --- [取得したレビューの中身]: なし ---`);
+        }
+
         console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
+        const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
         return {
-            userReviews: reviewSummary || '（レビューの抽出に失敗しました。公式あらすじから最高の妄想を広げて執筆してください）',
+            userReviews: reviewSummary || '（レビューの抽出に失敗しました）',
             sampleImages: sampleImages,
             tachiyomiUrl: realTachiyomiUrl 
         };
