@@ -398,7 +398,7 @@ function renderArticleCards(articles) {
         return `
         <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col p-6 sm:p-8 group">
             <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
-                <div class="md:w-1/3 bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner">
+                <div class="md:w-1/3 bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner sticky top-6 self-start">
                     <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
                     <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
                 </div>
