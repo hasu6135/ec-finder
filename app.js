@@ -41,10 +41,12 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         
         let userReviews = [];
 
-        // 💡 【超重要】URLの中から「b + 英数字」の商品ID（cid）を正規表現で100%確実に抜き出します
-        // これにより、URLの末尾にスラッシュがあろうがなかろうが、正確に「b915awnmg04310」が取得できます
-        const cidMatch = rawUrl.match(/(b[a-z0-9]+)/i);
-        const productId = cidMatch ? cidMatch[1] : null;
+		// 💡 ドメインの「book」を誤認しないよう、前後にスラッシュがある、またはURLの独立した塊としての「b+英数字」を厳密に抽出します
+        let productId = null;
+        const cidMatch = rawUrl.match(/\/([b][a-z0-9]{5,})\/?/i) || rawUrl.match(/(b[a-z0-9]{10,})/i);
+        if (cidMatch) {
+            productId = cidMatch[1].replace(/\//g, ''); // 余計なスラッシュを除去
+        }
 
         if (productId) {
             try {
