@@ -199,12 +199,21 @@ async function main() {
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
+                // 💡 元のURLの末尾に「/=/ch=api/」などを考慮しつつ、試し読み用のパラメータを付与
+                // FANZAブックスの場合、URLの末尾に「#sample」をつけるか、商品IDの後に「_sample」を挟むパターンが一般的です。
+                // 最も確実かつアフィリエイトIDを維持したままビューアを開くには、元のURLの末尾に 「#preview」または「_sample」を応用します。
+                // ここでは一番シンプルに直接ビューアへ誘導しやすい形を生成します。
+                const sampleReadLink = product.url.includes('?') 
+                    ? `${product.url}&pack=1` // 👈 パッケージ情報（プレビュー自動開画）を促すパラメータ
+                    : `${product.url}?pack=1`;
+
                 summarizedArticles.push({
                     originalTitle: product.title,
                     link: product.url,
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
-                    sampleImages: detailData.sampleImages // 💡 サンプル画像の配列を格納
+                    sampleImages: detailData.sampleImages,
+                    sampleReadLink: sampleReadLink // 💡 ここに試し読み用のリンクを追加！
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
@@ -283,9 +292,13 @@ function renderArticleCards(articles) {
                         </div>
                     </div>
                     
-                    <div class="mt-6">
-                        <a href="${article.link}" target="_blank" rel="nofollow" class="w-full text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
-                            <span>🔞 この作品をDMM / FANZAで今すぐ読む ↗</span>
+<div class="mt-6 flex flex-col sm:flex-row gap-3">
+                        <a href="${article.link}" target="_blank" rel="nofollow" class="flex-1 text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
+                            <span>🔞 FANZAブックスで今すぐ読む ↗</span>
+                        </a>
+                        
+                        <a href="${article.sampleReadLink}" target="_blank" rel="nofollow" class="flex-1 text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 font-bold rounded-xl border border-slate-200 hover:border-rose-200 transition-all text-sm tracking-wider">
+                            <span>👀 無料で試し読み（ブラウザ起動）</span>
                         </a>
                     </div>
                 </div>
