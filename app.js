@@ -102,15 +102,15 @@ async function fetchDmmProducts() {
             ? DMM_AFFILIATE_ID.replace('-001', '-990') 
             : DMM_AFFILIATE_ID;
 
-        const encodedKeyword = encodeURIComponent();
-
         console.log('📡 DMM APIへリクエストを送信中（人気順）...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
                 affiliate_id: finalAffiliateId,
-                site: 'FANZA',           
-                floor: [{"id": "30","name": "コミック","code": "digital_doujin"}],
+                site: 'FANZA',  
+                service: 'digital',
+                floor: 'comic',
+                //floor: [{"id": "29","name": "コミック","code": "digital_doujin"}],
                 keyword: '羞恥 同人誌', 
                 hits: FETCH_COUNT,       
                 sort: 'rank'             
