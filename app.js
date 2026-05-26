@@ -110,7 +110,7 @@ async function fetchDmmProducts() {
                 api_id: DMM_API_ID,
                 affiliate_id: finalAffiliateId,
                 site: 'FANZA',           
-                floor: [{"id": "81","name": "同人","code": "digital_doujin"}],
+                floor: 'ebook',
                 keyword: '羞恥 同人誌', 
                 hits: FETCH_COUNT,       
                 sort: 'rank'             
