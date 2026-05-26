@@ -15,8 +15,8 @@ const ARCHIVE_DIR = 'archive';
 
 // DMMアフィリエイト・API設定（DMMアカウントのAPI IDとアフィリエイトIDを入力）
 // API IDはDMMデベロッパーネットワークで取得できます
-const DMM_API_ID = 'YOUR_DMM_API_ID'; 
-const DMM_AFFILIATE_ID = 'YOUR_DMM_AFFILIATE_ID'; 
+const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
+const DMM_AFFILIATE_ID = '132815-001'; 
 
 const openai = new OpenAI({
     baseURL: 'http://localhost:1234/v1',
