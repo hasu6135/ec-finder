@@ -92,25 +92,26 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
 /**
  * ===================================================
- * 📦 DMM Web Service API からデータを取得する関数（ユーザー最適化版）
+ * 📦 DMM Web Service API からデータを取得する関数
  * ===================================================
  */
 async function fetchDmmProducts() {
     try {
+        // 安全対策：アフィリエイトIDの末尾が「-001」などの場合、自動でAPI専用の「-990」に補正
         const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
             ? DMM_AFFILIATE_ID.replace('-001', '-990') 
             : DMM_AFFILIATE_ID;
 
+        const encodedKeyword = encodeURIComponent();
+
         console.log('📡 DMM APIへリクエストを送信中（人気順）...');
-        
-        // 🛠️ ユーザーさんの環境で100%成功する特殊形式をそのまま採用
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
                 affiliate_id: finalAffiliateId,
                 site: 'FANZA',           
-                floor: [{"id": "81","name": "同人","code": "digital_doujin"}], // 👈 成功が実証された神設定
-                keyword: '羞恥 同人誌',   // 動作確認済みのキーワード
+                floor: [{"id": "30","name": "コミック","code": "digital_doujin"}],
+                keyword: '羞恥 同人誌', 
                 hits: FETCH_COUNT,       
                 sort: 'rank'             
             }
@@ -120,18 +121,7 @@ async function fetchDmmProducts() {
             return [];
         }
 
-        // 💡 万が一動画などの不要なURLが混ざっていた場合の安全フィルター
-        const filteredItems = response.data.result.items.filter(item => {
-            const isVideo = item.affiliateURL.includes('video.dmm.co.jp') || item.URL.includes('/digital/video/');
-            return !isVideo; 
-        });
-
-        if (filteredItems.length === 0) {
-            console.log('⚠️ 条件に合う同人誌作品がヒットしなかったか、動画のみだったため終了します。');
-            return [];
-        }
-
-        return filteredItems.map(item => ({
+        return response.data.result.items.map(item => ({
             title: item.title,
             url: item.affiliateURL, 
             imageUrl: item.imageURL?.large || item.imageURL?.list,
