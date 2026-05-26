@@ -52,7 +52,7 @@ async function fetchDmmProducts() {
                 affiliate_id: DMM_AFFILIATE_ID,
                 site: 'FANZA',           
                 floor: [{"id": "81","name": "同人","code": "digital_doujin"}],
-                keyword: encodedKeyword, // エンコード済みのキーワード
+                keyword: '羞恥', // エンコード済みのキーワード
                 hits: FETCH_COUNT,       
                 sort: 'date'             
             }
