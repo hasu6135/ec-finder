@@ -124,22 +124,31 @@ async function fetchDmmProducts() {
             // 生の作品URL（item.URL）をエンコードして、正しいアフィリエイトの形にハメ込みます
             const encodedRawUrl = encodeURIComponent(item.URL);
             
-            // ① 本編購入用のリンク（末尾は確実に動作する -001 をベースにします）
+			// 💡 100%確実に動くアフィリエイトURL（今すぐ読む用）
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
 
-			// 💡 電子書籍（ブックス）の固有IDは「content_id」に入っているため、こちらを適用します！
-            const targetCid = item.content_id || item.cid;
+            // 💡 【超重要】提示していただいた正しい構造（/product/数字/ID/tachiyomi/?cid=...）を完璧に再現します
+            // APIが返してくる生の作品URL（item.URL）の「末尾のクエスチョンマーク（?）」の手前に、
+            // ピンポイントで「tachiyomi/」を割り込ませる魔法の文字列置換です！
+            let sampleReadLink = '';
+            if (item.URL.includes('?')) {
+                // 例: .../b915awnmg04310/?cid=...  の形を 
+                //    .../b915awnmg04310/tachiyomi/?cid=... に変換
+                sampleReadLink = item.URL.replace('/?', '/tachiyomi/?');
+            } else {
+                sampleReadLink = `${item.URL}tachiyomi/`;
+            }
 
-            // ② 試し読み用のリンク（これで「undefined」が消え去り、正しいIDが挿入されます）
-            const sampleReadLink = `https://book.dmm.co.jp/w/preview/?cid=${targetCid}&affiliate_id=${finalAffiliateId}`;
+            // 試し読みURLも安全にアフィリエイト化（ユーザー様提示の形式に完全一致させます）
+            const encodedSampleUrl = encodeURIComponent(sampleReadLink);
+            const perfectSampleReadLink = `https://al.fanza.co.jp/?lurl=${encodedSampleUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
 
             return {
                 title: item.title,
-                url: perfectAffiliateUrl, 
-                sampleReadLink: sampleReadLink, 
+                url: perfectAffiliateUrl,         // 🛒 本編購入（完璧）
+                sampleReadLink: perfectSampleReadLink, // 👀 試し読み（完璧・アフィ報酬付き）
                 imageUrl: item.imageURL?.large || item.imageURL?.list,
-                description: item.description || '',
-                cid: targetCid // main側へ渡すIDも補正
+                description: item.description || ''
             };
         });
 
