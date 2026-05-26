@@ -239,8 +239,9 @@ function parseMarkdownTableToHtml(text) {
 
             if (!inTable) {
                 inTable = true;
-                htmlOutput.push('<div class="overflow-x-auto my-6 shadow-sm border border-rose-100 rounded-xl">');
-                htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
+                // 💡修正：my-6（上下のマージン）を少し小さくし、space-y-0 で中の余白を抑える
+   				htmlOutput.push('<div class="overflow-x-auto my-2 shadow-sm border border-rose-100 rounded-xl">');
+   				htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
                 htmlOutput.push('<thead class="bg-rose-50 text-rose-900 font-bold"><tr>');
                 cells.forEach(cell => htmlOutput.push(`<th class="px-4 py-3">${cell}</th>`));
                 htmlOutput.push('</tr></thead>');
@@ -484,8 +485,12 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
             </div>
         </div>
     </main>
-    <footer class="mt-24 bg-slate-950 text-rose-300/40 py-12 px-4 border-t border-rose-950 text-center text-xs">
-        <div class="max-w-6xl mx-auto">
+	<footer class="mt-24 bg-slate-950 text-rose-300/40 py-12 px-4 border-t border-rose-950 text-center text-xs">
+        <div class="max-w-6xl mx-auto space-y-4">
+            <p class="max-w-2xl mx-auto leading-relaxed">
+                当サイトはFANZAのアフィリエイトプログラムに参加しています。<br>
+                掲載している商品リンクは、FANZAのWebサービスAPIを利用して表示しています。
+            </p>
             <p>© ${new Date().getFullYear()} ${SITE_TITLE}. All Rights Reserved. 18+ Only.</p>
         </div>
     </footer>
