@@ -30,47 +30,55 @@ const openai = new OpenAI({
  */
 async function fetchDmmProducts() {
     try {
-        // ※これはDMM商品検索API（V3）を呼び出す実装サンプルです
-        // 実際のアカウント情報を設定すればそのまま動作する形式にしています
-        if (DMM_API_ID === 'YOUR_DMM_API_ID') {
+        if (DMM_API_ID === 'YOUR_DMM_API_ID' || DMM_API_ID.includes('取得した長い')) {
             console.log('💡 DMM APIキーが未設定のため、テスト用ダミーデータでシミュレートします。');
             return [
                 {
                     title: '【電子限定特典付き】人前でハジカシめられて…赤面露出シチュエーションコミック',
-                    url: 'https://al.dmm.co.jp/?lurl=https%3A%2F%2Fwww.dmm.co.jp%2F&af_id=dummy-999', // 本来はここに自動生成されたアフィリンクが入ります
+                    url: 'https://al.dmm.co.jp/?lurl=https%3A%2F%2Fwww.dmm.co.jp%2F&af_id=132815-001',
                     imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&q=80',
                     description: '人前での公開羞恥プレイや、モブからの視線に耐えながら快感に屈していくヒロインの葛藤を描いたドM向け決定版。'
                 }
             ].slice(0, FETCH_COUNT);
         }
 
-        // 本番用のAPIリクエスト
+        // 安全対策：日本語キーワードを確実な文字コード（URLエンコード）に変換
+        const encodedKeyword = encodeURIComponent('羞恥 露出');
+
+        console.log('📡 DMM APIへリクエストを送信中...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
                 affiliate_id: DMM_AFFILIATE_ID,
-                site: 'FANZA',           // 同人・成人向けコミックを対象にする場合はFANZAを指定
-                floor: 'comic',          // コミックフロアを指定
-                keyword: '羞恥 露出',    // 狙いたい特化キーワード
-                hits: FETCH_COUNT,       // 取得件数（定数から自動反映）
-                sort: 'date'             // 最新順
+                site: 'FANZA',           
+                floor: 'comic',          // 一旦「電子コミック」に固定
+                keyword: encodedKeyword, // エンコード済みのキーワード
+                hits: FETCH_COUNT,       
+                sort: 'date'             
             }
         });
 
         if (!response.data.result || !response.data.result.items) {
-            throw new Error('DMM APIからのデータ構造が不正です。');
+            // DMMからエラーメッセージが返ってきている場合はそれを表示
+            if (response.data.result && response.data.result.status) {
+                console.error(`❌ DMMエラーレスポンス: ${response.data.result.status}`);
+            }
+            throw new Error('DMM APIからのデータ構造が不正、または該当作品がありません。');
         }
 
-        // 必要な情報（タイトル、アフィリンク、画像、商品説明）だけを抽出してマッピング
         return response.data.result.items.map(item => ({
             title: item.title,
-            url: item.affiliateURL, // 💡APIがあなた専用のアフィリンクを自動生成してくれています
+            url: item.affiliateURL, 
             imageUrl: item.imageURL?.large || item.imageURL?.list,
             description: item.description || ''
         }));
 
     } catch (error) {
         console.error('⚠️ DMM API取得エラー:', error.message);
+        // 400エラーの時、DMMが返してきた具体的なNG理由（メッセージ）があれば画面に出力する
+        if (error.response && error.response.data) {
+            console.error('📝 エラー詳細データ:', JSON.stringify(error.response.data));
+        }
         return [];
     }
 }
