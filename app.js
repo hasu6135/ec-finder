@@ -24,7 +24,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（スクロール＆可視化版）
+ * 🔍 DMMの作品個別ページからレビューを厳選抽出する関数（ネタバレ排除版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -56,26 +56,25 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         await page.goto(rawUrl, { waitUntil: 'networkidle2', timeout: 45000 });
         
-        // 💡【新機能】隠れたレビューと画像を引っ張り出すため、自動でページ最下部までスクロール
-        console.log(` 📜 隠れた画像とレビューを読み込むため、ページを自動スクロール中...`);
+        // 隠れたレビューを発生させるための高速自動スクロール
+        console.log(` 📜 レビューを読み込むため、ページを自動スクロール中...`);
         await page.evaluate(async () => {
             await new Promise((resolve) => {
                 let totalHeight = 0;
-                const distance = 400; // 400pxずつスクロール
+                const distance = 500;
                 const timer = setInterval(() => {
                     const scrollHeight = document.body.scrollHeight;
                     window.scrollBy(0, distance);
                     totalHeight += distance;
-
-                    if (totalHeight >= scrollHeight || totalHeight > 8000) { // 最大8000pxまで
+                    if (totalHeight >= scrollHeight || totalHeight > 6000) {
                         clearInterval(timer);
                         resolve();
                     }
-                }, 100); // 0.1秒間隔で高速スクロール
+                }, 100);
             });
         });
 
-        console.log(` ⏳ スクロール完了。データが完全に生成されるのを3秒間待機します...`);
+        console.log(` ⏳ スクロール完了。データ生成を3秒間待機します...`);
         await new Promise(resolve => setTimeout(resolve, 3000));
 
         const rawHtml = await page.content();
@@ -83,10 +82,9 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         const doc = dom.window.document;
 
         let userReviews = [];
-        let sampleImages = [];
         let realTachiyomiUrl = '';
 
-        // --- ⚙️ レビュー抽出ロジックA: data-testid="nickname" の周辺から正確に抜く ---
+        // --- ⚙️ レビュー抽出ロジックA: data-testid="nickname" の周辺スキャン ---
         const nicknames = doc.querySelectorAll('[data-testid="nickname"]');
         nicknames.forEach(nick => {
             const reviewBox = nick.closest('div');
@@ -101,31 +99,16 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         });
 
-        // --- ⚙️ レビュー抽出ロジックB: クラス名（ユーザー様提供の構造）から直接ぶち抜く ---
-        // ※クラス名の一部(biNCbZやeFdjNyなど)が含まれる要素を全スキャン
+        // --- ⚙️ レビュー抽出ロジックB: クラス名（モダンUI構造）からの直接ぶち抜き ---
         const pElements = doc.querySelectorAll('p[class*="biNCbZ"], p[class*="eFdjNy"], div[data-testid="review-evaluation"] pre');
         pElements.forEach(p => {
             const text = p.textContent.trim().replace(/\s+/g, ' ');
-            if (text.length > 10 && text.length < 500) {
-                if (!userReviews.includes(text) && !text.includes('JavaScript') && !text.includes('推奨環境')) {
-                    userReviews.push(text);
-                }
+            if (text.length > 10 && text.length < 500 && !userReviews.includes(text)) {
+                userReviews.push(text);
             }
         });
 
-        // --- 📸 サンプル画像の抽出 ---
-        // スクロールしたことで、Lazy Loadされていた画像URL（srcやdata-src）がすべて本物に入れ替わっています
-        const allImgs = doc.querySelectorAll('img');
-        allImgs.forEach(img => {
-            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-original');
-            if (src && (src.includes('pr.jpg') || src.includes('pt.jpg') || src.includes('pl.jpg') || src.includes('ps.jpg') || src.includes('sample'))) {
-                src = src.replace('pt.jpg', 'pl.jpg').replace('ps.jpg', 'pl.jpg').replace('pr.jpg', 'pl.jpg');
-                if (!src.startsWith('http')) src = 'https:' + src;
-                if (!sampleImages.includes(src)) sampleImages.push(src);
-            }
-        });
-
-        // --- 👀 試し読みURL ---
+        // --- 👀 試し読みURLの抽出 ---
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
@@ -136,30 +119,38 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         await browser.close();
 
-        // ノイズ除去
-        const filteredReviews = userReviews.filter(r => 
-            !r.includes('特定商取引法') && !r.includes('ご利用規約') && !r.includes('ポイント') && !r.includes('公式アカウント')
-        );
+        // ===================================================
+        // 🛑 厳格なフィルター処理（ネタバレ・警告文・サイトノイズの完全排除）
+        // ===================================================
+        const filteredReviews = userReviews.filter(r => {
+            // ネタバレ警告の定型文や、NGワードが含まれる場合は除外(false)
+            if (r.includes('作品の内容に関する記述が含まれています')) return false;
+            if (r.includes('ネタバレ')) return false;
+            if (r.includes('特定商取引法') || r.includes('ご利用規約') || r.includes('ポイント') || r.includes('公式アカウント')) return false;
+            if (r.includes('JavaScript') || r.includes('推奨環境') || r.includes('クッキー')) return false;
+            
+            // あまりにも短すぎる、または長すぎるものは除外
+            if (r.length < 10 || r.length > 400) return false;
+            
+            return true; // 合格
+        });
 
-        console.log(` └ 💬 参考レビューを取得: ${filteredReviews.length}件`);
+        console.log(` └ 💬 ネタバレ等を除外した有効な参考レビュー: ${filteredReviews.length}件`);
         
-        // 💡【新機能】取得したレビューの内容をコンソールに綺麗に表示する
         if (filteredReviews.length > 0) {
-            console.log(` 📥 --- [取得したレビューの中身] ---`);
+            console.log(` 📥 --- [厳選されたレビューの中身] ---`);
             filteredReviews.forEach((rev, index) => {
                 console.log(`   [${index + 1}] ${rev.substring(0, 60)}${rev.length > 60 ? '...' : ''}`);
             });
-            console.log(` ---------------------------------`);
+            console.log(` -------------------------------------`);
         } else {
-            console.log(` 📥 --- [取得したレビューの中身]: なし ---`);
+            console.log(` 📥 --- [厳選されたレビューの中身]: なし (AIが公式あらすじから執筆します) ---`);
         }
-
-        console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
         const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
         return {
-            userReviews: reviewSummary || '（レビューの抽出に失敗しました）',
-            sampleImages: sampleImages,
+            userReviews: reviewSummary || '（現在、ネタバレのない購入者レビューがありません。公式あらすじのシチュエーションから最高の妄想を膨らませて執筆してください）',
+            sampleImages: [], // 画像はスキップ
             tachiyomiUrl: realTachiyomiUrl 
         };
 
