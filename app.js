@@ -16,7 +16,7 @@ const ARCHIVE_DIR = 'archive';
 // DMMアフィリエイト・API設定（DMMアカウントのAPI IDとアフィリエイトIDを入力）
 // API IDはDMMデベロッパーネットワークで取得できます
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
-const DMM_AFFILIATE_ID = '132815-001'; 
+const DMM_AFFILIATE_ID = '132815-990'; 
 
 const openai = new OpenAI({
     baseURL: 'http://localhost:1234/v1',
@@ -49,7 +49,7 @@ async function fetchDmmProducts() {
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
-                //affiliate_id: DMM_AFFILIATE_ID,
+                affiliate_id: DMM_AFFILIATE_ID,
                 site: 'FANZA',           
                 floor: 'comic',          // 一旦「電子コミック」に固定
                 keyword: encodedKeyword, // エンコード済みのキーワード
