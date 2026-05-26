@@ -49,7 +49,7 @@ async function fetchDmmProducts() {
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
-                affiliate_id: DMM_AFFILIATE_ID,
+                //affiliate_id: DMM_AFFILIATE_ID,
                 site: 'FANZA',           
                 floor: 'comic',          // 一旦「電子コミック」に固定
                 keyword: encodedKeyword, // エンコード済みのキーワード
