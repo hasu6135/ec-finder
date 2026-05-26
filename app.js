@@ -23,7 +23,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（FANZAブックス完全特化版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（非同期データ解析版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -42,48 +42,75 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         const response = await axios.get(rawUrl, {
             headers: { 
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Cookie': 'age_check_done=1; g_device=pc' // PC版画面のHTMLを強制取得
+                'Cookie': 'age_check_done=1; g_device=pc' 
             }
         });
         
         const dom = new JSDOM(response.data);
         const doc = dom.window.document;
+        const htmlText = response.data; // 生のHTMLテキスト
 
-        // 1. 💡 【大幅強化】FANZAブックスの購入者レビューをピンポイント奪取
-        // ブックス特有のクラス名「.d-review__unit__comment」「.review__text」などを網羅
-        const reviewSelectors = [
-            '.d-review__unit__comment', 
-            '.d-review__list__comment',
-            '.review__text', 
-            '.commentBox p', 
-            '.rev-comment',
-            '.p-review__comment'
-        ];
-        const reviewElements = doc.querySelectorAll(reviewSelectors.join(', ')); 
         let userReviews = [];
-        
-        reviewElements.forEach(el => {
-            const text = el.textContent.trim();
-            // ノイズ（運営の注意書きなど）を除外してピュアな感想だけを抽出
-            if (text.length > 10 && !text.includes('無断転載') && !text.includes('ガイドライン') && !text.includes('レビューはありません')) {
-                // 余計な改行や空白を綺麗に掃除
-                const cleanText = text.replace(/\s+/g, ' ');
-                if (!userReviews.includes(cleanText)) {
-                    userReviews.push(cleanText);
-                }
-            }
-        });
 
-        // 💡 もし通常のレビュー欄に文字がなかった場合の保険：
-        // ページ内の「作品の感想・評価タグ」や「一言レビュー」をかき集める
-        if (userReviews.length === 0) {
-            const altReviews = doc.querySelectorAll('.u-text-break, [class*="review"]');
-            altReviews.forEach(el => {
-                const text = el.textContent.trim();
-                if (text.length > 15 && text.length < 300 && !text.includes('<')) {
-                    userReviews.push(text.replace(/\s+/g, ' '));
+        // 💡 対策①：HTMLの中に最初から埋め込まれている「構造化データ（JSON-LD）」を解析する
+        // DMMブックスはSEO対策として、レビューデータをJSON形式でHTMLに最初から隠し持っています。
+        try {
+            const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+            jsonLdScripts.forEach(script => {
+                const jsonData = JSON.parse(script.textContent);
+                // JSONの中にレビュー配列（review）が存在するかチェック
+                if (jsonData && jsonData.review) {
+                    const reviews = Array.isArray(jsonData.review) ? jsonData.review : [jsonData.review];
+                    reviews.forEach(rev => {
+                        const body = rev.reviewBody || rev.description;
+                        if (body && body.length > 10) {
+                            userReviews.push(body.trim().replace(/\s+/g, ' '));
+                        }
+                    });
                 }
             });
+        } catch (jsonErr) {
+            // JSON解析エラーは無視して次へ
+        }
+
+        // 💡 対策②：もし隠しデータになければ、HTML内のすべてのレビュー用クラスから力技で抽出
+        if (userReviews.length === 0) {
+            const reviewSelectors = [
+                '.d-review__unit__comment', 
+                '.d-review__list__comment',
+                '.review__text', 
+                '.commentBox p', 
+                '.rev-comment',
+                '.p-review__comment',
+                '#review .content'
+            ];
+            const reviewElements = doc.querySelectorAll(reviewSelectors.join(', ')); 
+            reviewElements.forEach(el => {
+                const text = el.textContent.trim();
+                if (text.length > 10 && !text.includes('無断転載') && !text.includes('ガイドライン') && !text.includes('レビューはありません')) {
+                    const cleanText = text.replace(/\s+/g, ' ');
+                    if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
+                }
+            });
+        }
+
+        // 💡 対策③：【最終兵器】HTMLテキスト全体から「レビュー本文」っぽい部分を正規表現で強制抽出
+        if (userReviews.length === 0) {
+            // "reviewBody": "ここを狙い撃ち" というパターンの文字列をHTMLから直接探す
+            const regex = /"reviewBody"\s*:\s*"([^"]+)"/g;
+            let match;
+            while ((match = regex.exec(htmlText)) !== null) {
+                const text = match[1].trim();
+                if (text.length > 10 && !userReviews.includes(text)) {
+                    // Unicodeエスケープ（\u3042 等）を日本語に復元
+                    try {
+                        const decodedText = JSON.parse(`"${text}"`);
+                        userReviews.push(decodedText.replace(/\s+/g, ' '));
+                    } catch(e) {
+                        userReviews.push(text.replace(/\s+/g, ' '));
+                    }
+                }
+            }
         }
 
         const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
@@ -104,15 +131,12 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         // 3. ページ内から本物の試し読み（立ち読み）URLをダイレクトに抽出
         const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
         let realTachiyomiUrl = '';
-        
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
             if (!realTachiyomiUrl.startsWith('http')) {
                 realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
             }
             console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
-        } else {
-            console.log(` └ ⚠️ ページ内に試し読みリンクが見つかりませんでした`);
         }
 
         console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
