@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const { OpenAI } = require('openai');
-// ※DMM APIを本格導入する際は、標準の axios や node-fetch パッケージを使用すると便利です
 const axios = require('axios'); 
+const { JSDOM } = require('jsdom'); // 💡 詳細ページ解析用のライブラリを追加
 
 /**
  * ===================================================
@@ -10,13 +10,11 @@ const axios = require('axios');
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 1; // テスト用に最初は1件（本番運用時は10等に変更可能）
+const FETCH_COUNT = 1; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
-// DMMアフィリエイト・API設定（DMMアカウントのAPI IDとアフィリエイトIDを入力）
-// API IDはDMMデベロッパーネットワークで取得できます
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
-const DMM_AFFILIATE_ID = '132815-990'; 
+const DMM_AFFILIATE_ID = '132815-001'; // 👈 自動で末尾-990に変換する処理を入れました
 
 const openai = new OpenAI({
     baseURL: 'http://localhost:1234/v1',
@@ -25,42 +23,87 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数
+ * ===================================================
+ */
+async function scrapeDmmProductDetail(url) {
+    try {
+        console.log(`🔍 詳細ページを詳細分析中...: ${url}`);
+        // クローリング対策を回避するため、一般的なブラウザのふり（User-Agent）をしてアクセス
+        const response = await axios.get(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+        });
+        
+        const dom = new JSDOM(response.data);
+        const doc = dom.window.document;
+
+        // 1. 購入者のレビュー（口コミ）のテキストを抽出
+        const reviewElements = doc.querySelectorAll('.review__text, .commentBox, .comment'); // DMMのレビュー用クラス候補
+        let userReviews = [];
+        reviewElements.forEach(el => {
+            const text = el.textContent.trim();
+            if (text.length > 10) userReviews.push(text);
+        });
+        // 最初の3件程度に絞ってAIの参考にする
+        const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
+
+        // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出
+        // DMM/FANZAの電子書籍は「#sample-image」や「fn-sampleImage」内のimgタグに格納されています
+        const sampleImgElements = doc.querySelectorAll('img[src*="pr.jpg"], img[src*="-sample"], .sample-preview img');
+        let sampleImages = [];
+        sampleImgElements.forEach(img => {
+            let src = img.getAttribute('src') || img.getAttribute('data-src');
+            if (src) {
+                // スモール画像を拡大画像（ラージ）のURLパターンに変換
+                if (src.includes('pt.jpg')) src = src.replace('pt.jpg', 'pl.jpg'); 
+                if (!src.startsWith('http')) src = 'https:' + src;
+                if (!sampleImages.includes(src)) sampleImages.push(src);
+            }
+        });
+
+        console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
+        console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
+
+        return {
+            userReviews: reviewSummary || '（まだ購入者レビューがありません）',
+            sampleImages: sampleImages
+        };
+
+    } catch (error) {
+        console.error('⚠️ 詳細ページの解析に失敗しました（スキップします）:', error.message);
+        return { userReviews: '（レビュー取得エラー）', sampleImages: [] };
+    }
+}
+
+/**
+ * ===================================================
  * 📦 DMM Web Service API からデータを取得する関数
  * ===================================================
  */
 async function fetchDmmProducts() {
     try {
-        if (DMM_API_ID === 'YOUR_DMM_API_ID' || DMM_API_ID.includes('取得した長い')) {
-            console.log('💡 DMM APIキーが未設定のため、テスト用ダミーデータでシミュレートします。');
-            return [
-                {
-                    title: '【電子限定特典付き】人前でハジカシめられて…赤面露出シチュエーションコミック',
-                    url: 'https://al.dmm.co.jp/?lurl=https%3A%2F%2Fwww.dmm.co.jp%2F&af_id=132815-001',
-                    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&q=80',
-                    description: '人前での公開羞恥プレイや、モブからの視線に耐えながら快感に屈していくヒロインの葛藤を描いたドM向け決定版。'
-                }
-            ].slice(0, FETCH_COUNT);
-        }
+        // 安全対策：アフィリエイトIDの末尾が「-001」などの場合、自動でAPI専用の「-990」に補正
+        const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
+            ? DMM_AFFILIATE_ID.replace('-001', '-990') 
+            : DMM_AFFILIATE_ID;
 
-        console.log('📡 DMM APIへリクエストを送信中...');
+        const encodedKeyword = encodeURIComponent();
+
+        console.log('📡 DMM APIへリクエストを送信中（人気順）...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
-                affiliate_id: DMM_AFFILIATE_ID,
+                affiliate_id: finalAffiliateId,
                 site: 'FANZA',           
-                floor: [{"id": "81","name": "同人","code": "digital_doujin"}],
-                keyword: '羞恥 同人誌',
+                floor: 'ebook',          
+                keyword: '羞恥 同人誌', 
                 hits: FETCH_COUNT,       
-                sort: 'rank'             //date：新着順、rank：人気順
+                sort: 'rank'             
             }
         });
 
         if (!response.data.result || !response.data.result.items) {
-            // DMMからエラーメッセージが返ってきている場合はそれを表示
-            if (response.data.result && response.data.result.status) {
-                console.error(`❌ DMMエラーレスポンス: ${response.data.result.status}`);
-            }
-            throw new Error('DMM APIからのデータ構造が不正、または該当作品がありません。');
+            return [];
         }
 
         return response.data.result.items.map(item => ({
@@ -72,10 +115,6 @@ async function fetchDmmProducts() {
 
     } catch (error) {
         console.error('⚠️ DMM API取得エラー:', error.message);
-        // 400エラーの時、DMMが返してきた具体的なNG理由（メッセージ）があれば画面に出力する
-        if (error.response && error.response.data) {
-            console.error('📝 エラー詳細データ:', JSON.stringify(error.response.data));
-        }
         return [];
     }
 }
@@ -91,20 +130,21 @@ async function main() {
             fs.mkdirSync(ARCHIVE_DIR);
         }
 
-        console.log(`🔄 DMMから「羞恥系」最新作品情報を取得中...（ターゲット: ${FETCH_COUNT}件）`);
         const products = await fetchDmmProducts();
-        
         if (products.length === 0) {
-            console.log('⚠️ 取得できた作品データが0件のため、処理を終了します。');
+            console.log('⚠️ 取得できた作品データが0件のため終了します。');
             return;
         }
 
         const summarizedArticles = [];
-        console.log(`🤖 LM Studio(Qwen)による官能ソムリエレビューの執筆を開始します...`);
+        console.log(`🤖 LM Studio(Qwen)による、生レビューを反映した超濃厚レビュー執筆を開始...`);
 
         for (let i = 0; i < products.length; i++) {
             const product = products[i];
-            console.log(`\n[${i + 1}/${products.length}] レビュー執筆中: ${product.title}`);
+            console.log(`\n[${i + 1}/${products.length}] ターゲット作品: ${product.title}`);
+
+            // 💡 拡張ステップ：詳細ページへ行ってレビューとサンプル画像を引っこ抜く
+            const detailData = await scrapeDmmProductDetail(product.url);
 
             try {
                 const response = await openai.chat.completions.create({
@@ -112,29 +152,23 @@ async function main() {
                     messages: [
                         { 
                             role: 'system', 
-                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る、狂気の「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトルやあらすじ等の情報から、その作品が持つ「羞恥シチュエーション（公開ハジカシ、言葉責め、モブ視線、尊厳破壊など）」のヤバさを妄想プロファイリングし、読者のドM心を限界まで煽る極上レビュー記事（日本語）を執筆してください。
+                            content: `あなたは成人向けマンガ・同人誌の紹介で爆発的な人気を誇る「エロ同人ソムリエ（天才ライター）」です。与えられた作品タイトル、公式のあらすじ、そして【実際に購入したユーザーの生レビュー（口コミ）】を徹底的に分析し、その作品が持つ「羞恥シチュエーション（公開羞恥、言葉責め、モブ視線、尊厳破壊など）」のどこが読者に刺さっているのかを反映した、狂気的なほど熱量の高い紹介記事（日本語）を執筆してください。
 
 以下の【執筆ルール】を限界まで遵守すること：
-
 1. 【タイトルは『一撃で理性を吹き飛ばすフック』にせよ】
-   - 機械的なラベル（「分析結果：」など）は【絶対に出力禁止】。
-   - 読者が「ウッ…！これは俺の性癖に刺さりすぎる…！」と思わず悶絶してクリックしてしまう、強烈にキャッチーな日本語タイトルを1行目で作成してください。
-   - 煽り文句（例：【脳が溶ける】、【神作】、公開羞恥、絶望の快感、など）を効果的に使うこと。
-
-2. 【レビューは『ドM心の核心』を突き、リッチなHTMLで飾れ】
-   - 単なるストーリー紹介は退屈です。「どんな羞恥プレイが待っているのか」「ヒロインがどうプライドをへし折られて快感に沈んでいくのか」の魅力を、熱量の高い長文で深く解説してください。
-   - 読者がスマホでスクロールしながら興奮できるよう、適切な改行、そして以下のHTMLタグを文章中に【必ず積極的かつ効果的に】散りばめること：
-     * 最も興奮するシチュエーション・属性キーワード： <b>太字</b>
-     * 読者の妄想を加速させる最高にエロい一言： <mark class="bg-rose-100 text-rose-900 px-1 rounded">ピンクのハイライト</mark>
-     * 作品の「抜きどころ・見どころ」を整理する際： <ul>と<li>を使ったリスト形式
-   - 各リストの先頭（<li>の中）には、内容にマッチした絵文字（🔞, 💦, 💋, 😳, 🧠 など）を必ず1つ入れてください。
-
+   - 機械的なラベル（「分析結果：」など）は絶対に出力禁止。読者が悶絶してクリックしてしまう、強烈にキャッチーな日本語タイトルを1行目で作ること。
+2. 【レビューは『実際の読者の興奮ポイント』を突き、HTMLで飾れ】
+   - 与えられたユーザーの生口コミの内容（例：「○○のシーンの赤面が最高」「言葉責めが抜ける」など）の要素をレビュー内に自然に溶け込ませ、「実際に読んだ人が絶賛しているポイント」として熱弁してください。
+   - 適切な改行を挟み、以下のHTMLタグを文章中に【必ず積極的かつ効果的に】散りばめること：
+     * 最も興奮する属性キーワード： <b>太字</b>
+     * 妄想を加速させる最高にエロい一言： <mark class="bg-rose-100 text-rose-900 px-1 rounded">ピンクのハイライト</mark>
+     * 作品の「抜きどころ」を整理する際： <ul>と<li>を使ったリスト形式（先頭に🔞, 💦, 💋 などの絵文字を1つ入れる）
 3. 【Markdown記号の完全排除】
-   - 「#」や「##」、「**」、「---」といったMarkdown記号、および「\`\`\`html」や「\`\`\`」のようなコードブロック記号は使用禁止。すべてHTMLタグ（<b>、<mark>、<ul>、<li>）のみで表現してください。`
+   - 「#」や「##」、「**」、「---」といったMarkdown記号、および「\`\`\`」のようなコードブロック記号はWebサイトのバグになるため使用一切禁止。`
                         },
                         { 
                             role: 'user', 
-                            content: `Title: ${product.title}\nDescription: ${product.description}` 
+                            content: `【作品タイトル】\n${product.title}\n\n【公式あらすじ】\n${product.description}\n\n【購入者の生の口コミ・レビュー】\n${detailData.userReviews}` 
                         }
                     ],
                     temperature: 0.75 
@@ -144,21 +178,16 @@ async function main() {
 
                 // 安全装置：余計な記号を徹底削除
                 summary = summary
-                    .replace(/```html/g, '')
-                    .replace(/```/g, '')
-                    .replace(/##+/g, '')
-                    .replace(/\*\*/g, '')
-                    .replace(/---+/g, '')
-                    .replace(/#/g, '')
-                    .trim();
+                    .replace(/```html/g, '').replace(/```/g, '').replace(/##+/g, '').replace(/\*\*/g, '').replace(/---+/g, '').replace(/#/g, '').trim();
 
                 const formattedSummary = summary.replace(/\n/g, '<br>');
 
                 summarizedArticles.push({
                     originalTitle: product.title,
-                    link: product.url,          // 自動紐付けされたDMMアフィリエイトリンク
-                    imgUrl: product.imageUrl,    // DMMサーバー上の画像URL（直リンク）
-                    summary: formattedSummary
+                    link: product.url,
+                    imgUrl: product.imageUrl,
+                    summary: formattedSummary,
+                    sampleImages: detailData.sampleImages // 💡 サンプル画像の配列を格納
                 });
 
                 console.log(`✅ [${i + 1}/${products.length}] レビューの執筆が完了しました！`);
@@ -175,10 +204,7 @@ async function main() {
         const archiveHtml = generateTopPageHTML(summarizedArticles, displayDate, [], true);
         fs.writeFileSync(path.join(ARCHIVE_DIR, `${dateStr}.html`), archiveHtml, 'utf-8');
 
-        const archiveFiles = fs.readdirSync(ARCHIVE_DIR)
-            .filter(file => file.endsWith('.html'))
-            .map(file => file.replace('.html', ''))
-            .sort((a, b) => b.localeCompare(a));
+        const archiveFiles = fs.readdirSync(ARCHIVE_DIR).filter(file => file.endsWith('.html')).map(file => file.replace('.html', '')).sort((a, b) => b.localeCompare(a));
 
         const indexHtml = generateTopPageHTML(summarizedArticles, displayDate, archiveFiles, false);
         fs.writeFileSync('index.html', indexHtml, 'utf-8');
@@ -190,45 +216,74 @@ async function main() {
     }
 }
 
-// 共通パーツ：エロ同人・コミック専用カードレイアウト
+// 共通パーツ：カードレイアウトの中に「全サンプル画像」のグリッド表示を追加
 function renderArticleCards(articles) {
-    return articles.map(article => `
-        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transform border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col md:flex-row justify-between group">
-            <div class="md:w-1/3 bg-slate-900 flex items-center justify-center overflow-hidden relative min-h-[240px]">
-                <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100">
-                <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
+    return articles.map(article => {
+        // 📸 サンプル画像のHTMLを組み立てる（Cloudflareの転送量を消費しない直リンク仕様）
+        let samplesHtml = '';
+        if (article.sampleImages && article.sampleImages.length > 0) {
+            const imgTags = article.sampleImages.map(imgUrl => `
+                <div class="aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                    <img src="${imgUrl}" alt="サンプル" class="w-full h-full object-cover lazy" loading="lazy">
+                </div>
+            `).join('\n');
+
+            samplesHtml = `
+                <div class="mt-6 pt-6 border-t border-rose-50">
+                    <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-3 flex items-center gap-1">
+                        <span>👀 本編チラ見せ・サンプル画像一覧（${article.sampleImages.length}枚）</span>
+                    </h4>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                        ${imgTags}
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+        <article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col p-6 sm:p-8 group">
+            <div class="flex flex-col md:flex-row gap-6 md:gap-8 justify-between">
+                <!-- 左：メイン表紙画像 -->
+                <div class="md:w-1/3 bg-slate-900 flex items-center justify-center overflow-hidden relative min-h-[260px] rounded-xl shadow-inner">
+                    <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-opacity">
+                    <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
+                </div>
+
+                <!-- 右：生レビューを参考にしてAIが書いた濃厚テキスト -->
+                <div class="md:w-2/3 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
+                                羞恥・ランキング上位
+                            </span>
+                            <span class="text-xs text-slate-400">口コミ分析レビュー</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-rose-600 transition-colors">
+                            ${article.originalTitle}
+                        </h3>
+                        <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
+                            ${article.summary}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <a href="${article.link}" target="_blank" rel="nofollow" class="w-full text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
+                            <span>🔞 この作品をDMM / FANZAで今すぐ読む ↗</span>
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-6 sm:p-8 md:w-2/3 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
-                            羞恥・露出プレイ
-                        </span>
-                        <span class="text-xs text-slate-400">最新コミック速報</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4 group-hover:text-rose-600 transition-colors">
-                        ${article.originalTitle}
-                    </h3>
-                    <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
-                        ${article.summary}
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <a href="${article.link}" target="_blank" rel="nofollow" class="w-full text-center inline-flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm tracking-wider">
-                        <span>🔞 この作品をDMM / FANZAで今すぐ読む ↗</span>
-                    </a>
-                </div>
-            </div>
+            <!-- 💡 下部：サンプル画像一覧をここに美しく配置 -->
+            ${samplesHtml}
         </article>
-    `).join('\n');
+        `;
+    }).join('\n');
 }
 
-// 📄 テンプレート（大人向けデザイン）
+// 📄 テンプレート（変更なし）
 function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
     const cards = renderArticleCards(articles);
-    
     const archiveLinks = archiveFiles.map(date => `
         <li>
             <a href="${isArchive ? '../' : '/'}archive/${date}.html" class="flex items-center justify-between p-3 rounded-lg hover:bg-rose-50 text-sm font-medium text-slate-700 hover:text-rose-600 transition-all border border-transparent hover:border-slate-100">
@@ -254,7 +309,6 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
     </style>
 </head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
-
     <header class="bg-slate-950 text-white py-14 px-4 border-b border-rose-950 relative overflow-hidden">
         <div class="max-w-6xl mx-auto text-center relative z-10">
             <span class="text-xs font-bold tracking-widest text-rose-400 uppercase bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">⚠️ AGE VERIFICATION: 18+ ONLY</span>
@@ -281,7 +335,6 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
                 </h2>
                 ${cards}
             </div>
-
             <div class="lg:col-span-1">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
                     <h2 class="text-md font-bold text-slate-900 mb-4 pb-3 border-b border-rose-100 flex items-center gap-2">
@@ -294,7 +347,6 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
             </div>
         </div>
     </main>
-
     <footer class="mt-24 bg-slate-950 text-rose-300/40 py-12 px-4 border-t border-rose-950 text-center text-xs">
         <div class="max-w-6xl mx-auto">
             <p>© ${new Date().getFullYear()} ${SITE_TITLE}. All Rights Reserved. 18+ Only.</p>
