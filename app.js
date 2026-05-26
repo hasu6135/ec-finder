@@ -11,7 +11,7 @@ const { JSDOM } = require('jsdom');
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 10; // 最初はテスト用に1件
+const FETCH_COUNT = 2; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
@@ -372,66 +372,49 @@ async function main() {
     }
 }
 
-// 共通パーツ：カードレイアウト
+// 共通パーツ：カードレイアウトの修正
 function renderArticleCards(articles) {
     return articles.map(article => {
         let samplesHtml = '';
         if (article.sampleImages && article.sampleImages.length > 0) {
             const imgTags = article.sampleImages.map(imgUrl => `
-                <div class="aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+                <div class="aspect-[3/4] bg-slate-100 rounded-lg overflow-hidden border border-slate-100">
                     <img src="${imgUrl}" alt="サンプル" class="w-full h-full object-cover lazy" loading="lazy">
                 </div>
             `).join('\n');
 
             samplesHtml = `
                 <div class="mt-6 pt-6 border-t border-rose-50">
-                    <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-3 flex items-center gap-1">
-                        <span>👀 本編チラ見せ・サンプル画像一覧（${article.sampleImages.length}枚）</span>
-                    </h4>
-                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                    <h4 class="text-xs font-bold text-slate-400 tracking-wider uppercase mb-3">👀 チラ見せサンプル</h4>
+                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
                         ${imgTags}
                     </div>
                 </div>
             `;
         }
 
-// ... (renderArticleCards 関数の内側)
+        // 💡修正ポイント：追従エリアとレビューエリアを明確なdivで分け、構造崩れを防ぐ
+        return `
+        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-start mb-8">
+            <div class="md:w-1/3 sticky top-6 self-start space-y-4 shrink-0">
+                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[300px]">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <a href="${article.link}" class="w-full py-3 bg-rose-600 text-white font-bold rounded-lg text-center text-sm shadow-md hover:bg-rose-700">🔞 今すぐ読む</a>
+                    <a href="${article.sampleReadLink}" class="w-full py-3 bg-white text-rose-600 font-bold rounded-lg text-center text-sm border border-rose-200 hover:bg-rose-50">👀 試し読み</a>
+                </div>
+            </div>
 
-// 💡 【修正】左側の追従エリア（イラスト ＋ ボタン）
-return `
-<article class="bg-white rounded-2xl shadow-sm hover:shadow-xl border border-rose-50 transition-all duration-300 overflow-hidden flex flex-col md:flex-row p-6 sm:p-8 group items-start gap-8">
-    
-    <div class="md:w-1/3 sticky top-6 self-start space-y-4">
-        <div class="bg-slate-50 flex items-center justify-center overflow-hidden relative min-h-[320px] max-h-[400px] rounded-xl border border-slate-100 shadow-inner">
-            <img src="${article.imgUrl}" alt="作品サンプル" class="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">R-18</span>
-        </div>
-        
-        <div class="flex flex-col gap-2">
-            <a href="${article.link}" target="_blank" rel="nofollow" class="w-full text-center py-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm">
-                🔞 今すぐ読む
-            </a>
-            <a href="${article.sampleReadLink}" target="_blank" rel="nofollow" class="w-full text-center py-3 bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-200 hover:bg-slate-200 transition-all text-sm">
-                👀 無料で試し読み
-            </a>
-        </div>
-    </div>
-
-    <div class="md:w-2/3 flex flex-col">
-        <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
-                羞恥・ランキング上位
-            </span>
-            <span class="text-xs text-slate-400">口コミ分析レビュー</span>
-        </div>
-        <h3 class="text-xl font-bold text-slate-900 tracking-tight leading-snug mb-4">${article.originalTitle}</h3>
-        <div class="text-slate-600 text-sm leading-relaxed space-y-2 pt-4 border-t border-rose-50">
-            ${article.summary}
-        </div>
-        
-        </div>
-    
-    `;
+            <div class="md:w-2/3 flex flex-col min-w-0">
+                <h3 class="text-xl font-bold text-slate-900 mb-4">${article.originalTitle}</h3>
+                <div class="text-slate-700 text-sm leading-relaxed space-y-4">
+                    ${article.summary}
+                </div>
+                ${samplesHtml}
+            </div>
+        </article>
+        `;
     }).join('\n');
 }
 
