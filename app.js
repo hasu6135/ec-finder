@@ -221,27 +221,29 @@ async function fetchDmmProducts() {
  * ===================================================
  */
 function parseMarkdownTableToHtml(text) {
-    const lines = text.split('\n');
+    // 1. まず、AIが生成しがちな「空の改行タグの羅列」を事前に抹殺する
+    const cleanedText = text.replace(/(<br\s*\/?>\s*){3,}/gi, '\n\n');
+    
+    const lines = cleanedText.split('\n');
     let inTable = false;
     let htmlOutput = [];
 
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         
-        // パイプ「|」で始まる行を表として認識
+        // 💡重要：テーブルの一部ではない、単なる空行（<br>変換の元）は極力無視する
+        if (line === '' || line === '<br>') continue;
+
         if (line.startsWith('|') && line.endsWith('|')) {
             const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
             
-            // 区切り行（|---|---|）は無視する
-            if (line.includes('---') || line.includes('===')) {
-                continue;
-            }
+            // 区切り行（|---|---|）は無視
+            if (line.includes('---') || line.includes('===')) continue;
 
             if (!inTable) {
                 inTable = true;
-                // 💡修正：my-6（上下のマージン）を少し小さくし、space-y-0 で中の余白を抑える
-   				htmlOutput.push('<div class="overflow-x-auto my-2 shadow-sm border border-rose-100 rounded-xl">');
-   				htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
+                htmlOutput.push('<div class="overflow-x-auto my-4 shadow-sm border border-rose-100 rounded-xl">');
+                htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
                 htmlOutput.push('<thead class="bg-rose-50 text-rose-900 font-bold"><tr>');
                 cells.forEach(cell => htmlOutput.push(`<th class="px-4 py-3">${cell}</th>`));
                 htmlOutput.push('</tr></thead>');
@@ -256,7 +258,8 @@ function parseMarkdownTableToHtml(text) {
                 inTable = false;
                 htmlOutput.push('</tbody></table></div>');
             }
-            htmlOutput.push(line);
+            // 💡重要：テーブル以外の文章の改行処理
+            htmlOutput.push(line + '<br>');
         }
     }
     if (inTable) {
