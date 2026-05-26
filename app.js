@@ -23,7 +23,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（非同期データ解析版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（口コミ通信網直撃版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -39,81 +39,44 @@ async function scrapeDmmProductDetail(affiliateUrl) {
 
         console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
         
-        const response = await axios.get(rawUrl, {
-            headers: { 
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Cookie': 'age_check_done=1; g_device=pc' 
-            }
-        });
-        
-        const dom = new JSDOM(response.data);
-        const doc = dom.window.document;
-        const htmlText = response.data; // 生のHTMLテキスト
+        // 商品URL（.../product/6268870/b915awnmg04310/ など）から、末尾の商品IDを抽出する
+        const urlParts = rawUrl.split('/').filter(Boolean);
+        const productId = urlParts[urlParts.length - 1]; // 例: b915awnmg04310
 
         let userReviews = [];
 
-        // 💡 対策①：HTMLの中に最初から埋め込まれている「構造化データ（JSON-LD）」を解析する
-        // DMMブックスはSEO対策として、レビューデータをJSON形式でHTMLに最初から隠し持っています。
-        try {
-            const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
-            jsonLdScripts.forEach(script => {
-                const jsonData = JSON.parse(script.textContent);
-                // JSONの中にレビュー配列（review）が存在するかチェック
-                if (jsonData && jsonData.review) {
-                    const reviews = Array.isArray(jsonData.review) ? jsonData.review : [jsonData.review];
-                    reviews.forEach(rev => {
-                        const body = rev.reviewBody || rev.description;
-                        if (body && body.length > 10) {
-                            userReviews.push(body.trim().replace(/\s+/g, ' '));
+        if (productId && productId.startsWith('b')) {
+            try {
+                console.log(` 📡 DMMブックスの公式レビュー通信網へ直接リクエスト中... (ID: ${productId})`);
+                
+                // 💡 DMM公式のブラウザビューアや詳細ページが裏で叩いている、本物の口コミ取得エンドポイントです
+                const reviewApiUrl = `https://book.dmm.co.jp/api/v1/review/list?cid=${productId}&limit=5&page=1`;
+                const apiRes = await axios.get(reviewApiUrl, {
+                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+                });
+
+                // 返ってきたピュアなJSONデータからレビュー本文（body）を引っこ抜く
+                if (apiRes.data && apiRes.data.data && apiRes.data.data.reviews) {
+                    apiRes.data.data.reviews.forEach(rev => {
+                        if (rev.body && rev.body.length > 10) {
+                            userReviews.push(rev.body.trim().replace(/\s+/g, ' '));
                         }
                     });
                 }
-            });
-        } catch (jsonErr) {
-            // JSON解析エラーは無視して次へ
-        }
-
-        // 💡 対策②：もし隠しデータになければ、HTML内のすべてのレビュー用クラスから力技で抽出
-        if (userReviews.length === 0) {
-            const reviewSelectors = [
-                '.d-review__unit__comment', 
-                '.d-review__list__comment',
-                '.review__text', 
-                '.commentBox p', 
-                '.rev-comment',
-                '.p-review__comment',
-                '#review .content'
-            ];
-            const reviewElements = doc.querySelectorAll(reviewSelectors.join(', ')); 
-            reviewElements.forEach(el => {
-                const text = el.textContent.trim();
-                if (text.length > 10 && !text.includes('無断転載') && !text.includes('ガイドライン') && !text.includes('レビューはありません')) {
-                    const cleanText = text.replace(/\s+/g, ' ');
-                    if (!userReviews.includes(cleanText)) userReviews.push(cleanText);
-                }
-            });
-        }
-
-        // 💡 対策③：【最終兵器】HTMLテキスト全体から「レビュー本文」っぽい部分を正規表現で強制抽出
-        if (userReviews.length === 0) {
-            // "reviewBody": "ここを狙い撃ち" というパターンの文字列をHTMLから直接探す
-            const regex = /"reviewBody"\s*:\s*"([^"]+)"/g;
-            let match;
-            while ((match = regex.exec(htmlText)) !== null) {
-                const text = match[1].trim();
-                if (text.length > 10 && !userReviews.includes(text)) {
-                    // Unicodeエスケープ（\u3042 等）を日本語に復元
-                    try {
-                        const decodedText = JSON.parse(`"${text}"`);
-                        userReviews.push(decodedText.replace(/\s+/g, ' '));
-                    } catch(e) {
-                        userReviews.push(text.replace(/\s+/g, ' '));
-                    }
-                }
+            } catch (apiErr) {
+                console.log(' ⚠️ 口コミ通信網へのダイレクトアクセスに失敗しました。HTML解析に切り替えます。');
             }
         }
 
-        const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
+        // 基本は上の通信で100%取れますが、万が一のための従来のHTML解析（保険）
+        const response = await axios.get(rawUrl, {
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Cookie': 'age_check_done=1; g_device=pc' 
+            }
+        });
+        const dom = new JSDOM(response.data);
+        const doc = dom.window.document;
 
         // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出
         const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img, #sample-image img');
@@ -139,6 +102,7 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
         }
 
+        const reviewSummary = userReviews.slice(0, 3).join('\n---\n');
         console.log(` └ 💬 参考レビューを取得: ${userReviews.length}件`);
         console.log(` └ 📸 サンプル画像を検出: ${sampleImages.length}枚`);
 
