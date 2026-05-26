@@ -11,7 +11,7 @@ const { JSDOM } = require('jsdom');
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 1; // 最初はテスト用に1件
+const FETCH_COUNT = 10; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
@@ -454,7 +454,7 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${SITE_TITLE} - 最新成人向け羞恥マンガ・同人誌レビューまとめ</title>
-    <meta name="description" content="【18禁】言葉責め・公開羞恥・露出系シチュエーションコミックに特化。AIソムリエが最新作の抜きどころを徹底レビュー。">
+    <meta name="description" content="【18禁】言葉責め・公開羞恥・露出系シチュエーションコミックに特化。最新作の抜きどころを徹底レビュー。">
     <meta name="rating" content="adult">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -470,7 +470,7 @@ function generateTopPageHTML(articles, displayDate, archiveFiles, isArchive) {
                 🔞 ${SITE_TITLE}
             </h1>
             <p class="mt-3 text-sm text-rose-300/80 max-w-xl mx-auto font-light">
-                言葉責め、公開プレイ、尊厳破壊……。紳士の性癖を深く抉る「羞恥系コミック・同人誌」のみを厳選し、AIソムリエが毎晩その魅力を限界まで語り尽くす特化型レビューメディア。
+                言葉責め、公開プレイ、尊厳破壊……。紳士の性癖を深く抉る「羞恥系コミック・同人誌」のみを厳選し、毎晩その魅力を限界まで語り尽くす特化型レビューメディア。
             </p>
             <div class="mt-4 text-xs text-rose-400 font-medium">最終更新: ${displayDate}</div>
         </div>
