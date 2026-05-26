@@ -109,8 +109,8 @@ async function fetchDmmProducts() {
                 affiliate_id: finalAffiliateId,
                 site: 'FANZA',  
                 service: 'digital',
-                floor: 'digital',
-                //floor: [{"id": "29","name": "コミック","code": "digital_doujin"}],
+                floor: 'comic',
+                //floor: [{"id": "19","name": "コミック","code": "comic"}],
                 keyword: '羞恥 同人誌', 
                 hits: FETCH_COUNT,       
                 sort: 'rank'             
