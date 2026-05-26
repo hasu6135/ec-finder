@@ -102,14 +102,17 @@ async function fetchDmmProducts() {
             ? DMM_AFFILIATE_ID.replace('-001', '-990') 
             : DMM_AFFILIATE_ID;
 
+//参考：https://note.com/challengepclife/n/nef91d6b4e78b
         console.log('📡 DMM APIへリクエストを送信中（人気順）...');
         const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
             params: {
                 api_id: DMM_API_ID,
                 affiliate_id: finalAffiliateId,
                 site: 'FANZA',  
-                service: 'doujin',
-                floor: 'digital_doujin',
+                //service: 'doujin',
+                //floor: 'digital_doujin',
+                service: 'ebook',
+                floor: 'comic',
                 keyword: '羞恥', 
                 hits: FETCH_COUNT,       
                 sort: 'rank'             
