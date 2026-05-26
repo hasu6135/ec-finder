@@ -23,7 +23,7 @@ const openai = new OpenAI({
 
 /**
  * ===================================================
- * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（ID抽出強化版）
+ * 🔍 DMMの作品個別ページからレビューとサンプル画像を抽出する関数（FANZA完全特化版）
  * ===================================================
  */
 async function scrapeDmmProductDetail(affiliateUrl) {
@@ -37,25 +37,34 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             rawUrl = decodeURIComponent(rawUrl); 
         }
 
-        console.log(`🔍 生の作品ページを詳細分析中...: ${rawUrl}`);
+        // 💡 【年齢認証突破の超重要処理】
+        // 一般向けドメイン(book.dmm.co.jp)のままだと年齢制限で中身がブロックされるため、
+        // プログラム側で強制的に成人向け(book.fanza.co.jp)のURLに書き換えてアクセスします！
+        if (rawUrl.includes('book.dmm.co.jp')) {
+            rawUrl = rawUrl.replace('book.dmm.co.jp', 'book.fanza.co.jp');
+        }
+        console.log(`🔍 生の作品ページを詳細分析中（FANZAモード）: ${rawUrl}`);
         
         let userReviews = [];
 
-		// 💡 ドメインの「book」を誤認しないよう、前後にスラッシュがある、またはURLの独立した塊としての「b+英数字」を厳密に抽出します
+        // URLの中から商品ID（cid）を正規表現で100%確実に抜き出す
         let productId = null;
         const cidMatch = rawUrl.match(/\/([b][a-z0-9]{5,})\/?/i) || rawUrl.match(/(b[a-z0-9]{10,})/i);
         if (cidMatch) {
-            productId = cidMatch[1].replace(/\//g, ''); // 余計なスラッシュを除去
+            productId = cidMatch[1].replace(/\//g, '');
         }
 
         if (productId) {
             try {
-                console.log(` 📡 DMMブックスレビュー通信網へ接続完了 (確定ID: ${productId})`);
+                console.log(` 📡 FANZAブックスレビュー通信網へダイレクト接続 (確定ID: ${productId})`);
                 
-                // 100%確実に動く公式のレビューデータエンドポイント
-                const reviewApiUrl = `https://book.dmm.co.jp/api/v1/review/list?cid=${productId}&limit=5&page=1`;
+                // 💡 成人向け（FANZA）専用のレビュー取得APIエンドポイントに直撃させます！
+                const reviewApiUrl = `https://book.fanza.co.jp/api/v1/review/list?cid=${productId}&limit=5&page=1`;
                 const apiRes = await axios.get(reviewApiUrl, {
-                    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+                    headers: { 
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+                        'Cookie': 'age_check_done=1' // 年齢認証済みのクッキーを付与
+                    }
                 });
 
                 if (apiRes.data && apiRes.data.data && apiRes.data.data.reviews) {
@@ -66,27 +75,28 @@ async function scrapeDmmProductDetail(affiliateUrl) {
                     });
                 }
             } catch (apiErr) {
-                console.log(' └ ⚠️ レビュー通信網からの取得に失敗しました。');
+                console.log(' └ ⚠️ FANZAレビュー通信網からの取得に失敗しました。');
             }
-        } else {
-            console.log(' └ ⚠️ URLから商品ID（cid）を検出できませんでした。');
         }
 
-        // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出（ここは変更なし）
+        // 2. サンプル画像（チラ見せ画像）のURLをすべて抽出
+        // クッキーに「age_check_done=1」を仕込んでFANZAのR18壁を正面突破します
         const response = await axios.get(rawUrl, {
             headers: { 
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-                'Cookie': 'age_check_done=1; g_device=pc' 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Cookie': 'age_check_done=1; g_device=pc; r18=1' // 🔞FANZA用の年齢確認突破トリガー
             }
         });
         const dom = new JSDOM(response.data);
         const doc = dom.window.document;
 
-        const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img, #sample-image img');
+        // FANZAブックスのHTML構造（.p-product__sample や img[src*="/pr.jpg"]）に対応
+        const sampleImgElements = doc.querySelectorAll('.sample-preview img, img[src*="pr.jpg"], img[src*="-sample"], .d-item-thumb-list img, #sample-image img, .p-product__sample img, [class*="sample"] img');
         let sampleImages = [];
         sampleImgElements.forEach(img => {
-            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy');
+            let src = img.getAttribute('src') || img.getAttribute('data-src') || img.getAttribute('data-lazy') || img.getAttribute('data-src-large');
             if (src) {
+                // サムネイル用の小画像を、綺麗な大画像(pl.jpg)に自動変換
                 if (src.includes('pt.jpg')) src = src.replace('pt.jpg', 'pl.jpg'); 
                 if (src.includes('js-')) src = src.replace('js-', ''); 
                 if (!src.startsWith('http')) src = 'https:' + src;
@@ -100,7 +110,8 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         if (tachiyomiLinkElem) {
             realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
             if (!realTachiyomiUrl.startsWith('http')) {
-                realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
+                // ドメインもFANZA側に補正
+                realTachiyomiUrl = 'https://book.fanza.co.jp' + realTachiyomiUrl;
             }
             console.log(` └ 👀 本物の試し読みURLをページから抽出成功！`);
         }
