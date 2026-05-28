@@ -66,7 +66,7 @@ function generateSinglePostHTML(article, siteTitle) {
                 </div>
                 
                 <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
-                    <div class="text-xs font-bold text-rose-900 mb-1">FANZAユーザー評価</div>
+                    <div class="text-xs font-bold text-rose-900 mb-1">ユーザー評価</div>
                     <div class="flex items-center justify-center gap-1">
                         <span class="text-lg">${starIcons}</span>
                         <span class="text-base font-extrabold text-slate-800 ml-1">${article.reviewRating}</span>
@@ -74,12 +74,12 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2 w-full clear-both">
-                    <a href="${article.link}" target="_blank" rel="noopener" class="block w-full py-3.5 bg-rose-600 text-white font-extrabold rounded-xl text-center text-sm shadow-md hover:bg-rose-700 transition-all">
-                        🔞 FANZAで今すぐ読む
+                <div class="space-y-2 w-full block">
+                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" data-role="content-link" class="content-btn block w-full py-3.5 bg-rose-600 text-white font-extrabold rounded-xl text-center text-sm shadow-md hover:bg-rose-700 transition-all">
+                        公式ページで作品を読む
                     </a>
-                    <a href="${article.sampleReadLink}" target="_blank" rel="noopener" class="block w-full py-3.5 bg-white text-rose-600 font-extrabold rounded-xl text-center text-sm border border-rose-200 hover:bg-rose-50 transition-all">
-                        👀 無料試し読みをする
+                    <a href="${article.sampleReadLink}" target="_blank" rel="noopener noreferrer" data-role="content-link" class="content-btn block w-full py-3.5 bg-white text-rose-600 font-extrabold rounded-xl text-center text-sm border border-rose-200 hover:bg-rose-50 transition-all">
+                        無料の試し読みはこちら
                     </a>
                 </div>
             </div>
@@ -94,7 +94,7 @@ function generateSinglePostHTML(article, siteTitle) {
 
                 <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
-                        <span>FANZA公式全性癖属性 (${allTags.length}個)</span>
+                        <span>公式全性癖属性 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
                         <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべての属性を展開中...</span>
                     </div>
@@ -120,7 +120,7 @@ function generateTagPageHTML(tagName, articles) {
                 <div class="text-xs text-amber-500 font-bold mb-2">⭐ ${article.reviewRating || '0.0'}</div>
                 <div class="flex gap-2">
                     <a href="../posts/${article.id}.html" class="px-3 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-xs border border-rose-100 hover:bg-rose-100">🔎 レビュー</a>
-                    <a href="${article.link}" class="px-3 py-1.5 bg-rose-600 text-white font-bold rounded text-xs hover:bg-rose-700">🔞 FANZA</a>
+                    <a href="${article.link}" class="px-3 py-1.5 bg-rose-600 text-white font-bold rounded text-xs hover:bg-rose-700">公式ページ</a>
                 </div>
             </div>
         </article>
@@ -134,7 +134,7 @@ function generateTagPageHTML(tagName, articles) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>タグ: ${tagName} のおすすめ羞恥コミック一覧</title>
+    <title>タグ: ${tagName} のおすすめコミック一覧</title>
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
@@ -168,7 +168,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </div>
                 <div class="flex gap-2">
                     <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a href="${article.link}" class="px-3 sm:px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-[11px] sm:text-xs hover:bg-rose-700 text-center flex-1">🔞 FANZA</a>
+                    <a href="${article.link}" class="px-3 sm:px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-[11px] sm:text-xs hover:bg-rose-700 text-center flex-1">公式ページ</a>
                 </div>
             </div>
         </article>
