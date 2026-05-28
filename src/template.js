@@ -71,14 +71,15 @@ function makeStarString(rating) {
     return stars || '⭐';
 }
 
+/**
+ * 📖 個別レビュー詳細ページの生成
+ */
 function generateSinglePostHTML(article, siteTitle) {
     const allTags = article.pageGenres || [];
-    // 主要属性バッジ（上部に残すもの）
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
         `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
     ).join(' ');
 
-    // 公式性癖属性バッジ一式
     const officialBadgesHtml = allTags.length > 0
         ? allTags.map(g => `<a href="../tags/${g}.html" class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors">#${g}</a>`).join(' ')
         : '<span class="text-xs text-slate-400">なし</span>';
@@ -181,6 +182,9 @@ function generateSinglePostHTML(article, siteTitle) {
 </html>`;
 }
 
+/**
+ * 🏷️ タグ別一覧ページの生成
+ */
 function generateTagPageHTML(tagName, articles) {
     const cards = articles.map(article => {
         let rawLurl = '';
@@ -189,21 +193,37 @@ function generateTagPageHTML(tagName, articles) {
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
+        // 📝 概要文（summary）からHTMLタグを取り除き、綺麗なプレーンテキストにする処理
+        const plainSummary = (article.summary || '').replace(/<[^>]*>/g, '');
+
         return `
-        <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-3 flex gap-3 items-center">
-            <div style="flex-shrink:0;width:32%;max-width:100px;aspect-ratio:3/4;">
+        <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-2.5 flex gap-2.5 items-center">
+            <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:2px;border:none;">
                 </a>
             </div>
             <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
                 <div>
-                    <h3 class="text-sm font-bold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
-                    <div class="text-xs text-amber-500 font-bold mb-1">⭐ ${article.reviewRating || '0.0'}</div>
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-900 leading-tight mb-0.5 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    
+                    <div class="text-[10px] text-amber-500 font-bold mb-0.5">⭐ ${article.reviewRating || '0.0'}</div>
+
+                    <div class="flex flex-wrap gap-0.5 mb-1">
+                        ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
+                    </div>
+
+                    <div class="text-[9px] text-slate-500 space-y-0.5 mb-1.5 leading-tight border-l-2 border-rose-100 pl-1">
+                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || '不明'}</div>
+                    </div>
+
+                    <p class="text-[9px] leading-snug text-slate-400 overflow-hidden mb-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${plainSummary}</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-1.5 items-stretch sm:items-center w-full mt-1">
-                    <a href="../posts/${article.id}.html" class="px-2 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-[11px] border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 10px;border-radius:25px;font-size:11px;font-weight:bold;text-decoration:none;text-align:center;cursor:pointer;" class="flex-1">FANZA</a>
+                <div class="flex flex-col sm:flex-row gap-1 w-full">
+                    <a href="../posts/${article.id}.html" class="py-1 bg-rose-50 text-rose-600 font-bold rounded text-[10px] border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:4px 6px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;cursor:pointer;" class="flex-1">FANZA</a>
                 </div>
             </div>
         </article>
@@ -237,6 +257,9 @@ function generateTagPageHTML(tagName, articles) {
 </html>`;
 }
 
+/**
+ * 🏠 総合トップページの生成
+ */
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const cards = articles.map(article => {
         let rawLurl = '';
@@ -245,7 +268,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
-        // 概要文（summary）からHTMLタグを除去してプレーンテキストにする
+        // 📝 概要文（summary）からHTMLタグを取り除き、綺麗なプレーンテキストにする処理
         const plainSummary = (article.summary || '').replace(/<[^>]*>/g, '');
 
         return `
@@ -259,19 +282,27 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 <div>
                     <h3 class="text-xs sm:text-base font-bold text-slate-900 leading-tight mb-0.5 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     
-                    <div class="flex flex-wrap items-center gap-1 mb-1">
-                        <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
-                        <div class="flex flex-wrap gap-0.5">
-                            <span class="sm:hidden flex gap-0.5">
-                                ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
-                            </span>
-                            <span class="hidden sm:flex gap-0.5">
-                                ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
-                            </span>
-                        </div>
+                    <div class="text-[10px] text-slate-500 flex items-center gap-1 mb-0.5">
+                        <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
+                        <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
                     </div>
 
-                    <p class="text-[10px] leading-snug text-slate-500 overflow-hidden mb-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${plainSummary}</p>
+                    <div class="flex flex-wrap gap-0.5 mb-1">
+                        <span class="sm:hidden flex flex-wrap gap-0.5">
+                            ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
+                        </span>
+                        <span class="hidden sm:flex flex-wrap gap-0.5">
+                            ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                        </span>
+                    </div>
+
+                    <div class="text-[9px] text-slate-500 space-y-0.5 mb-1.5 leading-tight border-l-2 border-rose-100 pl-1">
+                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || '不明'}</div>
+                    </div>
+
+                    <p class="text-[9px] leading-snug text-slate-400 overflow-hidden mb-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${plainSummary}</p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full">
                     <a href="posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
