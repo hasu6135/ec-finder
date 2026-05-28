@@ -62,9 +62,11 @@ function generateSinglePostHTML(article, siteTitle) {
             
             <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
                 
-                <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="block bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px] w-full hover:opacity-90 transition-opacity cursor-pointer shadow-sm ui-view-frame">
-                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2 max-h-[350px] ui-thumb-element">
-                </a>
+                <div class="er-hero-image-wrap">
+                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="block bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px] w-full hover:opacity-90 transition-opacity cursor-pointer shadow-sm">
+                        <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2 max-h-[350px]">
+                    </a>
+                </div>
                 
                 <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
                     <div class="text-xs font-bold text-rose-900 mb-1">ユーザー評価</div>
@@ -75,11 +77,11 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="space-y-2 w-full block">
-                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="site-nav-btn block w-full py-3.5 bg-rose-600 text-white font-extrabold rounded-xl text-center text-sm shadow-md hover:bg-rose-700 transition-all">
-                        FANZAで作品を読む
+                <div class="er-hero-cta-row space-y-2 w-full block">
+                    <a href="${article.link}" target="_blank" rel="noopener" class="er-hero-cta-primary block w-full py-3.5 bg-rose-600 text-white font-extrabold rounded-xl text-center text-sm shadow-md hover:bg-rose-700 transition-all">
+                        FANZAで今すぐ読む
                     </a>
-                    <a href="${article.sampleReadLink}" target="_blank" rel="noopener noreferrer" class="site-nav-btn-sub block w-full py-3.5 bg-white text-rose-600 font-extrabold rounded-xl text-center text-sm border border-rose-200 hover:bg-rose-50 transition-all">
+                    <a href="${article.sampleReadLink}" target="_blank" rel="noopener" class="er-hero-cta-secondary block w-full py-3.5 bg-white text-rose-600 font-extrabold rounded-xl text-center text-sm border border-rose-200 hover:bg-rose-50 transition-all">
                         無料の試し読みはこちら
                     </a>
                 </div>
@@ -115,15 +117,17 @@ function generateSinglePostHTML(article, siteTitle) {
 function generateTagPageHTML(tagName, articles) {
     const cards = articles.map(article => `
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-4 flex gap-4 items-center">
-            <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="w-16 h-24 bg-slate-50 rounded border shrink-0 flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity ui-view-frame">
-                <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-0.5 ui-thumb-element">
-            </a>
+            <div class="er-hero-image-wrap shrink-0">
+                <a href="${article.link}" target="_blank" rel="noopener" class="w-16 h-24 bg-slate-50 rounded border flex items-center justify-center overflow-hidden hover:opacity-90 transition-opacity">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-0.5">
+                </a>
+            </div>
             <div class="min-w-0 flex-1">
                 <h3 class="text-sm font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
                 <div class="text-xs text-amber-500 font-bold mb-2">⭐ ${article.reviewRating || '0.0'}</div>
-                <div class="flex gap-2">
-                    <a href="../posts/${article.id}.html" class="px-3 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-xs border border-rose-100 hover:bg-rose-100">🔎 レビュー</a>
-                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-rose-600 text-white font-bold rounded text-xs hover:bg-rose-700">FANZA</a>
+                <div class="er-hero-cta-row flex gap-2">
+                    <a href="../posts/${article.id}.html" class="er-hero-cta-secondary px-3 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-xs border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a href="${article.link}" target="_blank" rel="noopener" class="er-hero-cta-primary px-3 py-1.5 bg-rose-600 text-white font-bold rounded text-xs hover:bg-rose-700 text-center flex-1">FANZA</a>
                 </div>
             </div>
         </article>
@@ -157,9 +161,11 @@ function generateTagPageHTML(tagName, articles) {
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const cards = articles.map(article => `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-4 sm:p-6 flex flex-row gap-4 sm:gap-6 items-center hover:shadow-md transition-all">
-            <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="w-20 h-28 sm:w-24 sm:h-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shrink-0 flex items-center justify-center hover:opacity-90 transition-opacity ui-view-frame">
-                <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-1 ui-thumb-element">
-            </a>
+            <div class="er-hero-image-wrap shrink-0">
+                <a href="${article.link}" target="_blank" rel="noopener" class="w-20 h-28 sm:w-24 sm:h-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 flex items-center justify-center hover:opacity-90 transition-opacity">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-1">
+                </a>
+            </div>
             <div class="flex flex-col min-w-0 flex-1">
                 <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
                 <div class="text-xs text-slate-500 flex items-center gap-1 mb-2">
@@ -169,9 +175,9 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 <div class="flex flex-wrap gap-1 mb-3">
                     ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] sm:text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
                 </div>
-                <div class="flex gap-2">
-                    <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="px-3 sm:px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-[11px] sm:text-xs hover:bg-rose-700 text-center flex-1">FANZA</a>
+                <div class="er-hero-cta-row flex gap-2">
+                    <a href="posts/${article.id}.html" class="er-hero-cta-secondary px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a href="${article.link}" target="_blank" rel="noopener" class="er-hero-cta-primary px-3 sm:px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-[11px] sm:text-xs hover:bg-rose-700 text-center flex-1">FANZA</a>
                 </div>
             </div>
         </article>
