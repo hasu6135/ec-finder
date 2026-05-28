@@ -61,9 +61,10 @@ function generateSinglePostHTML(article, siteTitle) {
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             
             <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
-                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px] w-full">
+                
+                <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="block bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px] w-full hover:opacity-90 transition-opacity cursor-pointer shadow-sm">
                     <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2 max-h-[350px]">
-                </div>
+                </a>
                 
                 <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
                     <div class="text-xs font-bold text-rose-900 mb-1">ユーザー評価</div>
