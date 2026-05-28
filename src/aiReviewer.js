@@ -12,39 +12,23 @@ async function generateAiReview(product, detailData) {
             { 
                 role: 'system', 
                 content: `あなたは成人向けマンガの紹介で爆発的な人気を誇る「エロ同人ソムリエ」です。
-与えられた作品情報から狂気的なほど熱量の高い紹介記事を執筆してください。
-
-【重要：出力フォーマットの厳守】
-あなたの出力の最後に、必ず以下の形式で【作品に最も適合する性癖タグ（3〜5個）】をJSON形式で1行で出力してください。これ以外の文字をJSONの行に混ぜないでください。
-TAG_JSON: ["公開羞恥", "言葉責め", "拘束"]
+与えられた作品情報（タイトル、あらすじ、口コミなど）から、狂気的なほど熱量の高い紹介記事を執筆してください。
 
 【執筆ルール】
 1. タイトルは読者が悶絶するキャッチーなものを1行目に。
 2. 本文には <b>太字</b> やピンクハイライト（<mark class="bg-rose-100 text-rose-900 px-1 rounded">文章</mark>）を積極的に使用。
-3. Markdownの記号（#や**など）は一切禁止。`
+3. Markdownの記号（#や**など）は一切禁止。HTMLタグのみを使用してください。`
             },
             { 
                 role: 'user', 
-                content: `【作品タイトル】\n${product.title}\n\n【公式ジャンル】\n${product.officialKeywords.join(', ')}\n\n【公式あらすじ】\n${detailData.productDescription}\n\n【購入者の口コミ】\n${detailData.userReviews}` 
+                content: `【作品タイトル】\n${product.title}\n\n【公式ジャンル】\n${detailData.pageGenres.join(', ')}\n\n【公式あらすじ】\n${detailData.productDescription}\n\n【購入者の口コミ】\n${detailData.userReviews}` 
             }
         ],
         temperature: 0.75 
     });
 
-    let rawContent = response.choices[0].message.content;
-    let tags = ["羞恥系"];
-
-    const jsonMatch = rawContent.match(/TAG_JSON:\s*(\[.*?\])/);
-    if (jsonMatch) {
-        try {
-            tags = JSON.parse(jsonMatch[1]);
-            rawContent = rawContent.replace(/TAG_JSON:.*$/, '').trim();
-        } catch (e) {
-            if (product.officialKeywords.length > 0) tags = product.officialKeywords.slice(0, 4);
-        }
-    }
-
-    return { rawContent, tags };
+    let rawContent = response.choices[0].message.content.trim();
+    return { rawContent };
 }
 
 function parseMarkdownTableToHtml(text) {

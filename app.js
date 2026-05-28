@@ -7,7 +7,7 @@ const { generateAiReview, parseMarkdownTableToHtml } = require('./src/aiReviewer
 const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = require('./src/template');
 
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 2; 
+const FETCH_COUNT = 1; 
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 
@@ -30,16 +30,18 @@ async function main() {
         const summarizedArticles = [];
         const tagMap = new Map();
 
-        console.log(`🤖 拡張エンジンによる、レビュー執筆・詳細タグ取得を開始...`);
+        console.log(`🤖 拡張エンジン（実取得タグ完全連動版）を開始...`);
 
         for (let i = 0; i < products.length; i++) {
             const product = products[i];
             console.log(`\n[${i + 1}/${products.length}] ターゲット: ${product.title}`);
             
+            // 1. 詳細ページから実際の「生タグ」や「評価」を取得
             const detailData = await scrapeDmmProductDetail(product.url);
 
             try {
-                const { rawContent, tags } = await generateAiReview(product, detailData);
+                // 2. AIレビュー執筆（タグはもうAIに生成させない）
+                const { rawContent } = await generateAiReview(product, detailData);
 
                 let summary = rawContent.replace(/```html/g, '').replace(/```/g, '').replace(/##+/g, '').replace(/\*\*/g, '').replace(/---+/g, '').replace(/#/g, '').trim();
                 const tableParsedSummary = parseMarkdownTableToHtml(summary);
@@ -51,7 +53,11 @@ async function main() {
 
                 const articleId = generateSafeId(product.title);
                 
-                // 💡詳細ページから抜いたタグと評価をオブジェクトに統合
+                // 💡【重要】 画面から取得した本物のタグ（pageGenres）のみを使用する
+                const finalTags = detailData.pageGenres && detailData.pageGenres.length > 0 
+                    ? detailData.pageGenres 
+                    : ["羞恥系"]; // 万が一タグが1つも取れなかった場合の保険
+
                 const articleData = {
                     id: articleId,
                     originalTitle: product.title,
@@ -59,22 +65,24 @@ async function main() {
                     imgUrl: product.imageUrl,
                     summary: formattedSummary,
                     sampleReadLink: perfectSampleReadLink,
-                    tags: tags,
-                    pageGenres: detailData.pageGenres,       // 💡追加
-                    reviewRating: detailData.reviewRating,   // 💡追加
-                    reviewCount: detailData.reviewCount      // 💡追加
+                    tags: finalTags,                       // トップと一覧用のタグ
+                    pageGenres: finalTags,                  // ホバー展開用のタグ（同一にする）
+                    reviewRating: detailData.reviewRating,
+                    reviewCount: detailData.reviewCount
                 };
 
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE);
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml, 'utf-8');
 
                 summarizedArticles.push(articleData);
-                tags.forEach(tag => {
+                
+                // 本物の全タグをベースに、カテゴリ分けマップを作成
+                finalTags.forEach(tag => {
                     if (!tagMap.has(tag)) tagMap.set(tag, []);
                     tagMap.get(tag).push(articleData);
                 });
 
-                console.log(`✅ 完了: ⭐${detailData.reviewRating} [公式タグ: ${detailData.pageGenres.length}個]`);
+                console.log(`✅ 完了: ⭐${detailData.reviewRating} [取得公式タグ: ${finalTags.join(', ')}]`);
             } catch (itemError) {
                 console.error(`⚠️ アイテム処理エラー:`, itemError.message);
             }
@@ -83,16 +91,19 @@ async function main() {
         const todayObj = new Date();
         const displayDate = todayObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
+        // 3. 実際の公式タグごとのページを書き出し
+        console.log(`📂 公式タグベースで一覧ページを生成中...`);
         for (const [tagName, articles] of tagMap.entries()) {
             const tagHtml = generateTagPageHTML(tagName, articles);
             fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtml, 'utf-8');
         }
 
+        // 4. トップページの書き出し
         const allAvailableTags = Array.from(tagMap.keys());
         const indexHtml = generateTopPageHTML(summarizedArticles, displayDate, allAvailableTags, SITE_TITLE);
         fs.writeFileSync('index.html', indexHtml, 'utf-8');
 
-        console.log('✨ すべての更新が完了しました！星評価と公式全タグが個別ページに搭載されました。');
+        console.log('✨ すべての連動が完了しました！実際のタグとHTML表示が100%一致します。');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }
