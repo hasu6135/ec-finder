@@ -233,27 +233,34 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
+        // 概要文（summary）からHTMLタグを除去してプレーンテキストにする
+        const plainSummary = (article.summary || '').replace(/<[^>]*>/g, '');
+
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
-            <!-- 【トップページ】スマホ画面幅のきっちり半分（50%）をイラストに使用 -->
             <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
                 </a>
             </div>
-            <!-- 右側テキストセクション（残り50%） -->
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div>
-                    <h3 class="text-xs sm:text-base font-bold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
-                    <div class="text-[11px] text-slate-500 flex items-center gap-1 mb-1">
-                        <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
-                        <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
+                    <h3 class="text-xs sm:text-base font-bold text-slate-900 leading-tight mb-0.5 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    
+                    <div class="flex flex-wrap items-center gap-1 mb-1">
+                        <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
+                        <div class="flex flex-wrap gap-0.5">
+                            <span class="sm:hidden flex gap-0.5">
+                                ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
+                            </span>
+                            <span class="hidden sm:flex gap-0.5">
+                                ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                            </span>
+                        </div>
                     </div>
-                    <div class="flex flex-wrap gap-1 mb-2 hidden sm:flex">
-                        ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
-                    </div>
+
+                    <p class="text-[10px] leading-snug text-slate-500 overflow-hidden mb-1" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${plainSummary}</p>
                 </div>
-                <!-- 50%の幅でも絶対に崩れない縦並びミニマルボタン -->
                 <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full">
                     <a href="posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
                     <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 12px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;line-height:16px;cursor:pointer;" class="flex-1">FANZAで見る</a>
