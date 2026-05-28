@@ -134,7 +134,7 @@ function generateSinglePostHTML(article, siteTitle) {
 
                 <div style="display:block;width:100%;margin-top:8px;">
                     <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);cursor:pointer;">
-                        FANZAで詳細を見る →
+                        FANZAで見る →
                     </a>
                     <a href="${article.sampleReadLink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#fff;color:#e84393;padding:11px 24px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;border:1px solid #fd79a8;">
                         無料の試し読みはこちら
@@ -250,7 +250,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </div>
                 <div class="flex gap-2 items-center">
                     <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:10px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;margin-top:0px;text-align:center;flex-1:1;max-height:38px;line-height:18px;cursor:pointer;" class="sm:text-xs">FANZAで詳細を見る →</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:10px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;margin-top:0px;text-align:center;flex-1:1;max-height:38px;line-height:18px;cursor:pointer;" class="sm:text-xs">FANZAで見る →</a>
                 </div>
             </div>
         </article>
