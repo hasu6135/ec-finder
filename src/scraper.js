@@ -53,31 +53,26 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         let productDescription = '';
         let realTachiyomiUrl = '';
         
-        // 💡追加：公式ページ上の全タグを抽出
+        // 💡修正：作品詳細エリアの全ジャンルタグ（volume-detail-info-genre）を正確に全取得
         let pageGenres = [];
-        const genreContainer = doc.querySelector('[data-testid="genres"]');
-        if (genreContainer) {
-            const genreLinks = genreContainer.querySelectorAll('[data-testid="genre-link"]');
-            genreLinks.forEach(link => {
-                const tagText = link.textContent.replace('#', '').trim();
-                if (tagText && !pageGenres.includes(tagText)) {
-                    pageGenres.push(tagText);
-                }
-            });
-        }
+        const genreElements = doc.querySelectorAll('[data-testid="volume-detail-info-genre"]');
+        genreElements.forEach(elem => {
+            const tagText = elem.textContent.replace('#', '').trim();
+            if (tagText && !pageGenres.includes(tagText)) {
+                pageGenres.push(tagText);
+            }
+        });
 
-        // 💡追加：★星評価の平均点とレビュー件数を抽出
+        // 星評価の抽出
         let reviewRating = '0.0';
         let reviewCount = '0';
-        // 評価点数（例: 4.8）が入るクラスや属性を探す
         const ratingScoreElem = doc.querySelector('.sc-77ef7150-2'); 
         if (ratingScoreElem) {
             reviewRating = ratingScoreElem.textContent.trim();
         }
-        // レビュー件数（例: (6)）が入るクラスや属性を探す
         const ratingCountElem = doc.querySelector('.sc-77ef7150-3');
         if (ratingCountElem) {
-            reviewCount = ratingCountElem.textContent.replace(/[\(\)]/g, '').trim(); // カッコを除去
+            reviewCount = ratingCountElem.textContent.replace(/[\(\)]/g, '').trim();
         }
 
         const descElem = doc.querySelector('[data-testid="description-text"]') || doc.querySelector('.sc-ef68d909-1');
@@ -120,9 +115,9 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             userReviews: filteredReviews.slice(0, 3).join('\n---\n') || '（ネタバレなしレビューなし）',
             productDescription: productDescription || '（作品紹介なし）',
             tachiyomiUrl: realTachiyomiUrl,
-            pageGenres: pageGenres,       // 💡戻り値に追加
-            reviewRating: reviewRating,   // 💡戻り値に追加
-            reviewCount: reviewCount      // 💡戻り値に追加
+            pageGenres: pageGenres,       
+            reviewRating: reviewRating,   
+            reviewCount: reviewCount      
         };
     } catch (error) {
         if (browser) await browser.close();

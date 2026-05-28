@@ -1,4 +1,3 @@
-// 星の数に応じて簡易的に★マークを生成するヘルパー関数
 function makeStarString(rating) {
     const score = parseFloat(rating) || 0;
     const fullStars = Math.floor(score);
@@ -9,12 +8,16 @@ function makeStarString(rating) {
 }
 
 function generateSinglePostHTML(article, siteTitle) {
-    // AI生成の性癖タグ
-    const aiBadges = article.tags.map(t => `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`).join(' ');
+    const allTags = article.pageGenres || [];
+    
+    // 💡 最初の5個だけをメインの視認用バッジにする
+    const mainVisibleBadges = allTags.slice(0, 5).map(t => 
+        `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
+    ).join(' ');
 
-    // 💡公式から取得した大量のジャンルタグ（マウスオーバーで展開するTailwindデザイン）
-    const officialBadges = article.pageGenres && article.pageGenres.length > 0
-        ? article.pageGenres.map(g => `<span class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium">#${g}</span>`).join(' ')
+    // 💡 マウスオーバーで全表示される「すべての公式生タグ」のリスト
+    const officialBadgesHtml = allTags.length > 0
+        ? allTags.map(g => `<a href="../tags/${g}.html" class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors">#${g}</a>`).join(' ')
         : '<span class="text-xs text-slate-400">なし</span>';
 
     const starIcons = makeStarString(article.reviewRating);
@@ -59,19 +62,22 @@ function generateSinglePostHTML(article, siteTitle) {
             <div class="md:w-2/3 flex flex-col min-w-0 w-full">
                 <h1 class="text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
                 
+                <!-- 💡主要タグ（常に5個だけ表示する枠） -->
                 <div class="mb-4">
-                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">AI抽出・主要性癖属性</div>
-                    <div class="flex flex-wrap gap-1.5">${aiBadges}</div>
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">主要属性</div>
+                    <div class="flex flex-wrap gap-1.5">${mainVisibleBadges}</div>
                 </div>
 
-                <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group transition-all duration-300">
+                <!-- 💡全公式属性（初期状態は高さ固定、ホバーするとアコーディオンのように全開する枠） -->
+                <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
-                        <span>FANZA公式全ジャンル</span>
-                        <span class="text-[10px] text-rose-500 font-normal group-hover:hidden">⏳ マウスホバーで全表示</span>
-                        <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">解禁中...</span>
+                        <span>FANZA公式全性癖属性 (${allTags.length}個)</span>
+                        <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ マウスを乗せて全表示</span>
+                        <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべての属性を展開中...</span>
                     </div>
-                    <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[500px] transition-all duration-500 ease-in-out">
-                        ${officialBadges}
+                    <!-- 💡初期状態は1行分(max-h-7)に収め、ホバーしたら一気に縦幅を解放(max-h-[500px])する実用的なUI -->
+                    <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[600px] transition-all duration-500 ease-in-out">
+                        ${officialBadgesHtml}
                     </div>
                 </div>
 
@@ -133,7 +139,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                     <span>(${article.reviewCount || '0'}件の評価)</span>
                 </div>
                 <div class="flex flex-wrap gap-1 mb-3">
-                    ${article.tags.map(t => `<span class="text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                    ${(article.tags || []).slice(0, 5).map(t => `<span class="text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
                 </div>
                 <div class="flex gap-2">
                     <a href="posts/${article.id}.html" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-xs border border-rose-200 hover:bg-rose-100 text-center">🔎 濃厚レビューを読む</a>
@@ -163,7 +169,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-12 px-4 text-center">
         <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
-        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化したデータベース型レビューメディア。</p>
+        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した究極のデータベース型レビューメディア。</p>
         <div class="mt-2 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
     </header>
     <main class="max-w-6xl mx-auto px-4 py-12">
