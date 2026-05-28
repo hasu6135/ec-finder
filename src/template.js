@@ -178,18 +178,20 @@ function generateTagPageHTML(tagName, articles) {
         const encImg = encryptStr(article.imgUrl);
 
         return `
-        <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-4 flex gap-4 items-center">
-            <div style="flex-shrink:0;width:84px;height:120px;">
+        <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-3 flex gap-3 items-center">
+            <div style="flex-shrink:0;width:32%;max-width:100px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:2px;border:none;">
                 </a>
             </div>
-            <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
-                <div class="text-xs text-amber-500 font-bold mb-2">⭐ ${article.reviewRating || '0.0'}</div>
-                <div class="flex gap-2 items-center">
-                    <a href="../posts/${article.id}.html" class="px-3 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-xs border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:8px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;text-align:center;min-w-[85px];cursor:pointer;">FANZA</a>
+            <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    <div class="text-xs text-amber-500 font-bold mb-1">⭐ ${article.reviewRating || '0.0'}</div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-1.5 items-stretch sm:items-center w-full mt-1">
+                    <a href="../posts/${article.id}.html" class="px-2 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-[11px] border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 10px;border-radius:25px;font-size:11px;font-weight:bold;text-decoration:none;text-align:center;cursor:pointer;" class="flex-1">FANZA</a>
                 </div>
             </div>
         </article>
@@ -232,24 +234,26 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         const encImg = encryptStr(article.imgUrl);
 
         return `
-        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-4 sm:p-6 flex flex-row gap-4 sm:gap-6 items-center hover:shadow-md transition-all">
-            <div style="flex-shrink:0;width:92px;height:128px;" class="sm:w-[110px] sm:h-[150px]">
+        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-4 flex flex-row gap-4 items-center hover:shadow-md transition-all">
+            <div style="flex-shrink:0;width:32%;max-width:115px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
                 </a>
             </div>
-            <div class="flex flex-col min-w-0 flex-1">
-                <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
-                <div class="text-xs text-slate-500 flex items-center gap-1 mb-2">
-                    <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
-                    <span>(${article.reviewCount || '0'}件)</span>
+            <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-1">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 leading-snug mb-1 overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    <div class="text-xs text-slate-500 flex items-center gap-1 mb-1.5">
+                        <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
+                        <span>(${article.reviewCount || '0'}件)</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mb-2 hidden sm:flex">
+                        ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-1 mb-3">
-                    ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] sm:text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
-                </div>
-                <div class="flex gap-2 items-center">
-                    <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:10px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;margin-top:0px;text-align:center;flex-1:1;max-height:38px;line-height:18px;cursor:pointer;" class="sm:text-xs">FANZAで見る</a>
+                <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center w-full">
+                    <a href="posts/${article.id}.html" class="px-3 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビューを読む</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:8px 16px;border-radius:25px;font-size:11px;font-weight:bold;text-decoration:none;text-align:center;max-height:38px;line-height:18px;cursor:pointer;" class="flex-1">FANZAで見る</a>
                 </div>
             </div>
         </article>
