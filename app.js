@@ -161,17 +161,21 @@ async function main() {
         const todayObj = new Date();
         const displayDate = todayObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // 公式タグごとの全ページを書き出し
+		// 5. タグ別ページの書き出し
         console.log(`📂 全${tagMap.size}個の公式タグページを再マージ中...`);
         for (const [tagName, articles] of tagMap.entries()) {
             const tagHtml = generateTagPageHTML(tagName, articles);
-            fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtml, 'utf-8');
+            // 💡 改行コードをWindowsのCRLFに置換して保存
+            const tagHtmlCrlf = tagHtml.replace(/\r?\n/g, '\r\n');
+            fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
 
-        // 総合トップページの書き出し
+        // 6. 総合トップページの書き出し
         const allAvailableTags = Array.from(tagMap.keys());
         const indexHtml = generateTopPageHTML(sortedArticles, displayDate, allAvailableTags, SITE_TITLE);
-        fs.writeFileSync('index.html', indexHtml, 'utf-8');
+        // 💡 改行コードをWindowsのCRLFに置換して保存
+        const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
+        fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
         console.log('✨ [全自動蓄積完了] 既存の記事を破壊せず、新しい記事だけが美しく積み上がりました！');
     } catch (error) {
