@@ -121,9 +121,11 @@ async function main() {
                     createdAt: new Date().toISOString() // 登録日時を記録
                 };
 
-                // 個別HTMLの保存
+				// 個別HTMLの保存
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE);
-                fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml, 'utf-8');
+                // 💡 改行コードをWindowsのCRLFに置換して保存
+                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
+                fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
                 // 💡 データベース（配列）に新しく作った記事データを追加
                 dbArticles.push(articleData);
