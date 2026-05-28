@@ -11,7 +11,7 @@ const { JSDOM } = require('jsdom');
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 10; // 最初はテスト用に1件
+const FETCH_COUNT = 1; // 最初はテスト用に1件
 const ARCHIVE_DIR = 'archive';
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
