@@ -52,6 +52,33 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         let userReviews = [];
         let productDescription = '';
         let realTachiyomiUrl = '';
+        
+        // 💡追加：公式ページ上の全タグを抽出
+        let pageGenres = [];
+        const genreContainer = doc.querySelector('[data-testid="genres"]');
+        if (genreContainer) {
+            const genreLinks = genreContainer.querySelectorAll('[data-testid="genre-link"]');
+            genreLinks.forEach(link => {
+                const tagText = link.textContent.replace('#', '').trim();
+                if (tagText && !pageGenres.includes(tagText)) {
+                    pageGenres.push(tagText);
+                }
+            });
+        }
+
+        // 💡追加：★星評価の平均点とレビュー件数を抽出
+        let reviewRating = '0.0';
+        let reviewCount = '0';
+        // 評価点数（例: 4.8）が入るクラスや属性を探す
+        const ratingScoreElem = doc.querySelector('.sc-77ef7150-2'); 
+        if (ratingScoreElem) {
+            reviewRating = ratingScoreElem.textContent.trim();
+        }
+        // レビュー件数（例: (6)）が入るクラスや属性を探す
+        const ratingCountElem = doc.querySelector('.sc-77ef7150-3');
+        if (ratingCountElem) {
+            reviewCount = ratingCountElem.textContent.replace(/[\(\)]/g, '').trim(); // カッコを除去
+        }
 
         const descElem = doc.querySelector('[data-testid="description-text"]') || doc.querySelector('.sc-ef68d909-1');
         if (descElem) {
@@ -92,12 +119,15 @@ async function scrapeDmmProductDetail(affiliateUrl) {
         return {
             userReviews: filteredReviews.slice(0, 3).join('\n---\n') || '（ネタバレなしレビューなし）',
             productDescription: productDescription || '（作品紹介なし）',
-            tachiyomiUrl: realTachiyomiUrl 
+            tachiyomiUrl: realTachiyomiUrl,
+            pageGenres: pageGenres,       // 💡戻り値に追加
+            reviewRating: reviewRating,   // 💡戻り値に追加
+            reviewCount: reviewCount      // 💡戻り値に追加
         };
     } catch (error) {
         if (browser) await browser.close();
         console.error('⚠️ 詳細ページの解析に失敗しました:', error.message);
-        return { userReviews: '', productDescription: '', tachiyomiUrl: '' };
+        return { userReviews: '', productDescription: '', tachiyomiUrl: '', pageGenres: [], reviewRating: '0.0', reviewCount: '0' };
     }
 }
 

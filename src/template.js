@@ -1,5 +1,23 @@
+// 星の数に応じて簡易的に★マークを生成するヘルパー関数
+function makeStarString(rating) {
+    const score = parseFloat(rating) || 0;
+    const fullStars = Math.floor(score);
+    const hasHalf = score % 1 >= 0.4;
+    let stars = '⭐'.repeat(fullStars);
+    if (hasHalf && fullStars < 5) stars += '🌟';
+    return stars || '⭐';
+}
+
 function generateSinglePostHTML(article, siteTitle) {
-    const tagBadges = article.tags.map(t => `<a href="../tags/${t}.html" class="bg-rose-50 text-rose-600 border border-rose-200 px-2 py-1 rounded-full text-xs font-bold hover:bg-rose-100 transition-all"># ${t}</a>`).join(' ');
+    // AI生成の性癖タグ
+    const aiBadges = article.tags.map(t => `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`).join(' ');
+
+    // 💡公式から取得した大量のジャンルタグ（マウスオーバーで展開するTailwindデザイン）
+    const officialBadges = article.pageGenres && article.pageGenres.length > 0
+        ? article.pageGenres.map(g => `<span class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium">#${g}</span>`).join(' ')
+        : '<span class="text-xs text-slate-400">なし</span>';
+
+    const starIcons = makeStarString(article.reviewRating);
 
     return `
 <!DOCTYPE html>
@@ -23,14 +41,40 @@ function generateSinglePostHTML(article, siteTitle) {
                 <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[300px]">
                     <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2">
                 </div>
+                
+                <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center">
+                    <div class="text-xs font-bold text-rose-900 mb-1">FANZAユーザー評価</div>
+                    <div class="flex items-center justify-center gap-1">
+                        <span class="text-lg">${starIcons}</span>
+                        <span class="text-base font-extrabold text-slate-800 ml-1">${article.reviewRating}</span>
+                        <span class="text-xs text-slate-400">(${article.reviewCount}件)</span>
+                    </div>
+                </div>
+
                 <div class="flex flex-col gap-2">
                     <a href="${article.link}" class="w-full py-3 bg-rose-600 text-white font-bold rounded-lg text-center text-sm shadow-md hover:bg-rose-700">🔞 今すぐ読む</a>
                     <a href="${article.sampleReadLink}" class="w-full py-3 bg-white text-rose-600 font-bold rounded-lg text-center text-sm border border-rose-200 hover:bg-rose-50">👀 試し読み</a>
                 </div>
             </div>
-            <div class="md:w-2/3 flex flex-col min-w-0">
-                <h1 class="text-2xl font-extrabold text-slate-900 mb-2 leading-snug">${article.originalTitle}</h1>
-                <div class="flex flex-wrap gap-2 mb-6">${tagBadges}</div>
+            <div class="md:w-2/3 flex flex-col min-w-0 w-full">
+                <h1 class="text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
+                
+                <div class="mb-4">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">AI抽出・主要性癖属性</div>
+                    <div class="flex flex-wrap gap-1.5">${aiBadges}</div>
+                </div>
+
+                <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group transition-all duration-300">
+                    <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
+                        <span>FANZA公式全ジャンル</span>
+                        <span class="text-[10px] text-rose-500 font-normal group-hover:hidden">⏳ マウスホバーで全表示</span>
+                        <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">解禁中...</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[500px] transition-all duration-500 ease-in-out">
+                        ${officialBadges}
+                    </div>
+                </div>
+
                 <div class="text-slate-700 text-sm leading-relaxed space-y-4 border-t border-rose-50 pt-4">${article.summary}</div>
             </div>
         </article>
@@ -44,7 +88,8 @@ function generateTagPageHTML(tagName, articles) {
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-4 flex gap-4 items-center">
             <img src="${article.imgUrl}" alt="表紙" class="w-16 h-24 object-contain rounded border bg-slate-50 shrink-0">
             <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-bold text-slate-900 truncate mb-2">${article.originalTitle}</h3>
+                <h3 class="text-sm font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
+                <div class="text-xs text-amber-500 font-bold mb-2">⭐ ${article.reviewRating || '0.0'}</div>
                 <div class="flex gap-2">
                     <a href="../posts/${article.id}.html" class="px-3 py-1.5 bg-rose-50 text-rose-600 font-bold rounded text-xs border border-rose-100 hover:bg-rose-100">🔎 レビュー</a>
                     <a href="${article.link}" class="px-3 py-1.5 bg-rose-600 text-white font-bold rounded text-xs hover:bg-rose-700">🔞 FANZA</a>
@@ -83,6 +128,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
             </div>
             <div class="flex flex-col min-w-0 flex-1">
                 <h3 class="text-base font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
+                <div class="text-xs text-slate-500 flex items-center gap-1 mb-2">
+                    <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
+                    <span>(${article.reviewCount || '0'}件の評価)</span>
+                </div>
                 <div class="flex flex-wrap gap-1 mb-3">
                     ${article.tags.map(t => `<span class="text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
                 </div>
@@ -114,7 +163,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-12 px-4 text-center">
         <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
-        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した究極のデータベース型レビューメディア。</p>
+        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化したデータベース型レビューメディア。</p>
         <div class="mt-2 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
     </header>
     <main class="max-w-6xl mx-auto px-4 py-12">
