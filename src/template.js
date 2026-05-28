@@ -99,9 +99,6 @@ function generateSinglePostHTML(article, siteTitle) {
     const encLurl = encryptStr(rawLurl);
     const encImg = encryptStr(article.imgUrl);
 
-    // 個別ページ用のフォールバックテキスト抽出
-    const plainTextSummary = (article.summary || '').replace(/<[^>]*>/g, '').trim();
-
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -151,10 +148,10 @@ function generateSinglePostHTML(article, siteTitle) {
                 
                 <div class="mb-4 space-y-1 text-xs border-b border-dashed border-rose-100 pb-3">
                     ${article.series ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">シリーズ名</span>${article.series}</div>` : ''}
-                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">作家</span>${article.author || plainTextSummary.substring(0,8) || '羞恥コミック編集部'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">作家</span>${article.author || '（未取得データ）'}</div>
                     ${article.label ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">レーベル</span>${article.label}</div>` : ''}
-                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">出版社</span>${article.publisher || plainTextSummary.substring(8,16) || 'FANZA COMICS'}</div>
-                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">カテゴリー</span>${article.category || 'アダルトマンガ'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">出版社</span>${article.publisher || '（未取得データ）'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">カテゴリー</span>${article.category || '（未取得データ）'}</div>
                 </div>
 
                 <div class="mb-4">
@@ -196,9 +193,6 @@ function generateTagPageHTML(tagName, articles) {
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
-        // 不明防止用：HTMLを除去した文字データ
-        const backupText = (article.summary || '').replace(/<[^>]*>/g, '').trim();
-
         return `
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-2.5 flex gap-2.5 items-center">
             <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
@@ -207,19 +201,19 @@ function generateTagPageHTML(tagName, articles) {
                 </a>
             </div>
             <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
-                <div class="space-y-1">
+                <div class="space-y-1.5">
                     <h3 class="text-[13px] sm:text-sm font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     
                     <div class="text-[11px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.0'}</div>
 
-                    <div class="flex flex-wrap gap-0.5 pt-0.5">
+                    <div class="flex flex-wrap gap-0.5">
                         ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
                     </div>
 
-                    <div class="text-[10.5px] text-slate-500 space-y-0.5 pt-1 leading-normal border-l-2 border-rose-100 pl-1.5">
-                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || backupText.substring(0,6) || '作家情報あり'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || backupText.substring(6,12) || 'ワニマガジン社'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                    <div class="text-[11px] text-slate-500 space-y-0.5 pt-0.5 leading-normal border-l-2 border-rose-100 pl-1.5">
+                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '（未取得）'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '（未取得）'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || '（未取得）'}</div>
                     </div>
                 </div>
                 
@@ -270,9 +264,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
-        // 不明防止用：HTMLを除去した文字データ
-        const backupText = (article.summary || '').replace(/<[^>]*>/g, '').trim();
-
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
             <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
@@ -281,15 +272,15 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </a>
             </div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
-                <div class="space-y-1">
+                <div class="space-y-1.5">
                     <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     
                     <div class="text-[11px] text-slate-500 flex items-center gap-1">
                         <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
-                        <span class="hidden sm:inline">(${article.reviewCount || '12'}件)</span>
+                        <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
                     </div>
 
-                    <div class="flex flex-wrap gap-0.5 pt-0.5">
+                    <div class="flex flex-wrap gap-0.5">
                         <span class="sm:hidden flex flex-wrap gap-0.5">
                             ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
                         </span>
@@ -298,10 +289,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                         </span>
                     </div>
 
-                    <div class="text-[10.5px] sm:text-xs text-slate-500 space-y-0.5 pt-1 leading-normal border-l-2 border-rose-100 pl-1.5">
-                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || backupText.substring(0,6) || '作家情報あり'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || backupText.substring(6,12) || 'ワニマガジン社'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                    <div class="text-[11px] sm:text-xs text-slate-500 space-y-0.5 pt-0.5 leading-normal border-l-2 border-rose-100 pl-1.5">
+                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '（未取得）'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '（未取得）'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || '（未取得）'}</div>
                     </div>
                 </div>
                 
