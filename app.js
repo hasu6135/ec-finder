@@ -107,19 +107,24 @@ async function main() {
                     ? detailData.pageGenres 
                     : ["羞恥系"];
 
-                const articleData = {
-                    id: articleId,
-                    originalTitle: product.title,
-                    link: product.url,
-                    imgUrl: product.imageUrl,
-                    summary: formattedSummary,
-                    sampleReadLink: perfectSampleReadLink,
-                    tags: finalTags,
-                    pageGenres: finalTags,
-                    reviewRating: detailData.reviewRating,
-                    reviewCount: detailData.reviewCount,
-                    createdAt: new Date().toISOString() // 登録日時を記録
-                };
+const articleData = {
+    id: articleId,
+    originalTitle: product.title,
+    link: product.url,
+    imgUrl: product.imageUrl,
+    summary: formattedSummary,
+    sampleReadLink: perfectSampleReadLink,
+    tags: finalTags,
+    pageGenres: finalTags,
+    // 追加部分
+    author: detailData.author || '不明',
+    publisher: detailData.publisher || '不明',
+    category: detailData.category || 'アダルトマンガ',
+    // 既存
+    reviewRating: detailData.reviewRating,
+    reviewCount: detailData.reviewCount,
+    createdAt: new Date().toISOString()
+};
 
 				// 個別HTMLの保存
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE);
