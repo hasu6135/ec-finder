@@ -2,12 +2,9 @@
  * ===================================================
  * 📈 Google アナリティクス (GA4) の設定
  * ===================================================
- * ご自身のGoogleアナリティクスで発行された「測定ID（G-から始まるコード）」をここに入力してください。
- * 空白（''）のときは、コードが非表示（トラッキング無効）になり、エラーを防ぎます。
  */
-const GA_TRACKING_ID = 'G-1Z5RQ06GCN'; // 👈 ここをご自身のIDに書き換えてください！
+const GA_TRACKING_ID = 'G-1Z5RQ06GCN'; // 💡 設定されたIDに書き換え済みです！
 
-// アナリティクスの計測タグを生成するヘルパー関数
 function getAnalyticsTag() {
     if (!GA_TRACKING_ID) return '';
     return `
@@ -41,7 +38,7 @@ function generateSinglePostHTML(article, siteTitle) {
         : '<span class="text-xs text-slate-400">なし</span>';
 
     const starIcons = makeStarString(article.reviewRating);
-    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
+    const googleAnalyticsCode = getAnalyticsTag();
 
     return `
 <!DOCTYPE html>
@@ -51,7 +48,8 @@ function generateSinglePostHTML(article, siteTitle) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    ${googleAnalyticsCode}</head>
+    ${googleAnalyticsCode}
+</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -59,11 +57,12 @@ function generateSinglePostHTML(article, siteTitle) {
             <span class="text-xs font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">18+ ONLY</span>
         </div>
     </header>
-    <main class="max-w-4xl mx-auto px-4 py-12">
-        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-6 sm:p-10 flex flex-col md:flex-row gap-8 items-start">
-            <div class="md:w-1/3 sticky top-6 self-start space-y-4 shrink-0 w-full">
-                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[300px]">
-                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2">
+    <main class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
+            
+            <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full">
+                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px]">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2 max-h-[350px]">
                 </div>
                 
                 <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center">
@@ -75,13 +74,14 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-2">
-                    <a href="${article.link}" class="w-full py-3 bg-rose-600 text-white font-bold rounded-lg text-center text-sm shadow-md hover:bg-rose-700">🔞 今すぐ読む</a>
-                    <a href="${article.sampleReadLink}" class="w-full py-3 bg-white text-rose-600 font-bold rounded-lg text-center text-sm border border-rose-200 hover:bg-rose-50">👀 試し読み</a>
+                <div class="grid grid-cols-2 md:grid-cols-1 gap-2 w-full">
+                    <a href="${article.link}" class="w-full py-3 bg-rose-600 text-white font-bold rounded-lg text-center text-sm shadow-md hover:bg-rose-700 block">🔞 今すぐ読む</a>
+                    <a href="${article.sampleReadLink}" class="w-full py-3 bg-white text-rose-600 font-bold rounded-lg text-center text-sm border border-rose-200 hover:bg-rose-50 block">👀 試し読み</a>
                 </div>
             </div>
-            <div class="md:w-2/3 flex flex-col min-w-0 w-full">
-                <h1 class="text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
+            
+            <div class="md:w-2/3 flex flex-col min-w-0 w-full mt-2 md:mt-0">
+                <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
                 
                 <div class="mb-4">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">主要属性</div>
@@ -91,7 +91,7 @@ function generateSinglePostHTML(article, siteTitle) {
                 <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                         <span>FANZA公式全性癖属性 (${allTags.length}個)</span>
-                        <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ マウスを乗せて全表示</span>
+                        <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
                         <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべての属性を展開中...</span>
                     </div>
                     <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[600px] transition-all duration-500 ease-in-out">
@@ -122,7 +122,7 @@ function generateTagPageHTML(tagName, articles) {
         </article>
     `).join('\n');
 
-    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
+    const googleAnalyticsCode = getAnalyticsTag();
 
     return `
 <!DOCTYPE html>
@@ -132,7 +132,8 @@ function generateTagPageHTML(tagName, articles) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>タグ: ${tagName} のおすすめ羞恥コミック一覧</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    ${googleAnalyticsCode}</head>
+    ${googleAnalyticsCode}
+</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <main class="max-w-3xl mx-auto px-4 py-12">
         <a href="../index.html" class="text-xs font-bold text-rose-500 hover:underline">← 総合トップに戻る</a>
@@ -148,22 +149,22 @@ function generateTagPageHTML(tagName, articles) {
 
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const cards = articles.map(article => `
-        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-6 flex flex-row gap-6 items-center hover:shadow-md transition-all">
-            <div class="w-24 h-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shrink-0 flex items-center justify-center">
+        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-4 sm:p-6 flex flex-row gap-4 sm:gap-6 items-center hover:shadow-md transition-all">
+            <div class="w-20 h-28 sm:w-24 sm:h-32 bg-slate-50 rounded-lg overflow-hidden border border-slate-100 shrink-0 flex items-center justify-center">
                 <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-1">
             </div>
             <div class="flex flex-col min-w-0 flex-1">
-                <h3 class="text-base font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
+                <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate mb-1">${article.originalTitle}</h3>
                 <div class="text-xs text-slate-500 flex items-center gap-1 mb-2">
                     <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '0.0'}</span>
-                    <span>(${article.reviewCount || '0'}件の評価)</span>
+                    <span>(${article.reviewCount || '0'}件)</span>
                 </div>
                 <div class="flex flex-wrap gap-1 mb-3">
-                    ${(article.tags || []).slice(0, 5).map(t => `<span class="text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                    ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] sm:text-[10px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
                 </div>
                 <div class="flex gap-2">
-                    <a href="posts/${article.id}.html" class="px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-xs border border-rose-200 hover:bg-rose-100 text-center">🔎 濃厚レビューを読む</a>
-                    <a href="${article.link}" class="px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-xs hover:bg-rose-700 text-center">🔞 FANZA</a>
+                    <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a href="${article.link}" class="px-3 sm:px-4 py-2 bg-rose-600 text-white font-bold rounded-lg text-[11px] sm:text-xs hover:bg-rose-700 text-center flex-1">🔞 FANZA</a>
                 </div>
             </div>
         </article>
@@ -177,7 +178,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         </li>
     `).join('\n');
 
-    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
+    const googleAnalyticsCode = getAnalyticsTag();
 
     return `
 <!DOCTYPE html>
@@ -187,14 +188,15 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${siteTitle} - 羞恥専門成人向けレビューまとめ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    ${googleAnalyticsCode}</head>
+    ${googleAnalyticsCode}
+</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-12 px-4 text-center">
         <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
-        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した究極 of データベース型レビューメディア。</p>
+        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した大容量データベース型レビューメディア。</p>
         <div class="mt-2 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
     </header>
-    <main class="max-w-6xl mx-auto px-4 py-12">
+    <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
                 <h2 class="text-lg font-bold text-slate-900 mb-4">最新の濃厚レビュー一覧</h2>
