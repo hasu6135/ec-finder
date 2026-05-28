@@ -42,7 +42,9 @@ function loadDatabase() {
 }
 
 function saveDatabase(data) {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    // 💡JSON文字列にした後、改行コード(\n)をWindows標準(\r\n)に強制置換して保存する
+    const jsonString = JSON.stringify(data, null, 2).replace(/\r?\n/g, '\r\n');
+    fs.writeFileSync(DB_FILE, jsonString, 'utf-8');
 }
 
 /**
