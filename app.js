@@ -1,3 +1,276 @@
+const puppeteer = require('puppeteer'); 
+const fs = require('fs');
+const path = require('path');
+const { OpenAI } = require('openai');
+const axios = require('axios'); 
+const { JSDOM } = require('jsdom'); 
+
+/**
+ * ===================================================
+ * ⚙️ 各種設定・定数管理
+ * ===================================================
+ */
+const SITE_TITLE = '羞恥系コミック';
+const FETCH_COUNT = 1; // 最初はテスト用に1件
+const ARCHIVE_DIR = 'archive';
+
+const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
+const DMM_AFFILIATE_ID = '132815-001'; 
+
+const openai = new OpenAI({
+    baseURL: 'http://localhost:1234/v1',
+    apiKey: 'lm-studio'
+});
+
+/**
+ * ===================================================
+ * 🔍 DMMの作品個別ページからレビューと作品紹介を抽出・学習する関数
+ * ===================================================
+ */
+async function scrapeDmmProductDetail(affiliateUrl) {
+    let browser;
+    try {
+        const urlObj = new URL(affiliateUrl);
+        let rawUrl = urlObj.searchParams.get('lurl') || affiliateUrl;
+        rawUrl = decodeURIComponent(rawUrl);
+        
+        if (rawUrl.includes('published.fanza.co.jp') || rawUrl.includes('book.fanza.co.jp')) {
+            rawUrl = rawUrl.replace('published.fanza.co.jp', 'book.dmm.co.jp').replace('book.fanza.co.jp', 'book.dmm.co.jp');
+        }
+
+        console.log(`🔍 本物のブラウザ(Puppeteer)で詳細ページを起動中...`);
+        
+        browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const page = await browser.newPage();
+        
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        
+        await page.setCookie(
+            { name: 'age_check_done', value: '1', domain: '.dmm.co.jp', path: '/' },
+            { name: 'r18', value: '1', domain: '.dmm.co.jp', path: '/' },
+            { name: 'g_device', value: 'pc', domain: '.dmm.co.jp', path: '/' }
+        );
+
+        await page.goto(rawUrl, { waitUntil: 'networkidle2', timeout: 45000 });
+        
+        console.log(` 📜 レビューと作品紹介を読み込むため、ページを自動スクロール中...`);
+        await page.evaluate(async () => {
+            await new Promise((resolve) => {
+                let totalHeight = 0;
+                const distance = 500;
+                const timer = setInterval(() => {
+                    const scrollHeight = document.body.scrollHeight;
+                    window.scrollBy(0, distance);
+                    totalHeight += distance;
+                    if (totalHeight >= scrollHeight || totalHeight > 6000) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 100);
+            });
+        });
+
+        console.log(` ⏳ スクロール完了。データ生成を3秒間待機します...`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        const rawHtml = await page.content();
+        const dom = new JSDOM(rawHtml);
+        const doc = dom.window.document;
+
+        let userReviews = [];
+        let productDescription = '';
+        let realTachiyomiUrl = '';
+
+        // 作品紹介（あらすじ）のハッキング抽出
+        const descElem = doc.querySelector('[data-testid="description-text"]') || doc.querySelector('.sc-ef68d909-1');
+        if (descElem) {
+            productDescription = descElem.innerHTML
+                .replace(/<br\s*\/?>/gi, '\n') 
+                .replace(/<[^>]+>/g, '')       
+                .trim();
+        }
+
+        // レビュー抽出
+        const nicknames = doc.querySelectorAll('[data-testid="nickname"]');
+        nicknames.forEach(nick => {
+            const reviewBox = nick.closest('div');
+            if (reviewBox && reviewBox.parentElement) {
+                const pTxt = reviewBox.parentElement.querySelector('p');
+                if (pTxt) {
+                    const text = pTxt.textContent.trim().replace(/\s+/g, ' ');
+                    if (text && text.length > 5 && !userReviews.includes(text)) {
+                        userReviews.push(text);
+                    }
+                }
+            }
+        });
+
+        const pElements = doc.querySelectorAll('p[class*="biNCbZ"], p[class*="eFdjNy"], div[data-testid="review-evaluation"] pre');
+        pElements.forEach(p => {
+            const text = p.textContent.trim().replace(/\s+/g, ' ');
+            if (text.length > 10 && text.length < 500 && !userReviews.includes(text)) {
+                userReviews.push(text);
+            }
+        });
+
+        // 試し読みURL
+        const tachiyomiLinkElem = doc.querySelector('a[href*="/tachiyomi/"]');
+        if (tachiyomiLinkElem) {
+            realTachiyomiUrl = tachiyomiLinkElem.getAttribute('href');
+            if (!realTachiyomiUrl.startsWith('http')) {
+                realTachiyomiUrl = 'https://book.dmm.co.jp' + realTachiyomiUrl;
+            }
+        }
+
+        await browser.close();
+
+        const filteredReviews = userReviews.filter(r => {
+            if (r.includes('作品の内容に関する記述が含まれています')) return false;
+            if (r.includes('ネタバレ')) return false;
+            if (r.includes('特定商取引法') || r.includes('ご利用規約') || r.includes('ポイント') || r.includes('公式アカウント')) return false;
+            if (r.includes('JavaScript') || r.includes('推奨環境') || r.includes('クッキー')) return false;
+            if (r.length < 10 || r.length > 400) return false;
+            return true;
+        });
+
+        console.log(` └ 💬 有効な参考レビュー: ${filteredReviews.length}件`);
+        if (filteredReviews.length > 0) {
+            console.log(` 📥 --- [厳選されたレビューの中身] ---`);
+            filteredReviews.forEach((rev, index) => {
+                console.log(`   [${index + 1}] ${rev.substring(0, 60)}${rev.length > 60 ? '...' : ''}`);
+            });
+            console.log(` -------------------------------------`);
+        }
+
+        if (productDescription) {
+            console.log(` └ 📝 作品紹介（あらすじ）の取得に成功！(文字数: ${productDescription.length}文字)`);
+            console.log(` 📥 --- [あらすじ冒頭スナップ] ---`);
+            console.log(`   ${productDescription.substring(0, 120).replace(/\n/g, ' ')}...`);
+            console.log(` ---------------------------------`);
+        }
+
+        const reviewSummary = filteredReviews.slice(0, 3).join('\n---\n');
+        
+        return {
+            userReviews: reviewSummary || '（ネタバレなしレビューなし）',
+            productDescription: productDescription || '（作品紹介なし）',
+            sampleImages: [],
+            tachiyomiUrl: realTachiyomiUrl 
+        };
+
+    } catch (error) {
+        if (browser) await browser.close();
+        console.error('⚠️ 詳細ページの解析に失敗しました（Puppeteerエラー）:', error.message);
+        return { userReviews: '', productDescription: '', sampleImages: [], tachiyomiUrl: '' };
+    }
+}
+
+/**
+ * 📦 DMM Web Service API からデータを取得する関数
+ * ===================================================
+ */
+async function fetchDmmProducts() {
+    try {
+        const finalAffiliateId = DMM_AFFILIATE_ID.endsWith('-001') 
+            ? DMM_AFFILIATE_ID.replace('-001', '-990') 
+            : DMM_AFFILIATE_ID;
+
+        console.log('📡 DMM APIへリクエストを送信中（人気順）...');
+        const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
+            params: {
+                api_id: DMM_API_ID,
+                affiliate_id: finalAffiliateId,
+                site: 'FANZA',  
+                service: 'ebook',
+                floor: 'comic',
+                keyword: '羞恥', 
+                hits: FETCH_COUNT,       
+                sort: 'rank'             
+            }
+        });
+
+        if (!response.data.result || !response.data.result.items) {
+            return [];
+        }
+
+        return response.data.result.items.map(item => {
+            const encodedRawUrl = encodeURIComponent(item.URL);
+            const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`;
+
+            return {
+                title: item.title,
+                url: perfectAffiliateUrl, 
+                imageUrl: item.imageURL?.large || item.imageURL?.list,
+                description: item.description || ''
+            };
+        });
+
+    } catch (error) {
+        console.error('⚠️ DMM API取得エラー:', error.message);
+        return [];
+    }
+}
+
+/**
+ * ===================================================
+ * 💡【重要変更】AIが作ったマークダウン形式のテーブル（表）を、
+ * 美しいHTMLのテーブルへ全自動で100%完全変換する超軽量関数
+ * ===================================================
+ */
+function parseMarkdownTableToHtml(text) {
+    // 1. 強力な正規表現で、連続する<br>や不要な空行を徹底的に消去・圧縮する
+    let cleanedText = text
+        .replace(/(<br\s*\/?>\s*){2,}/gi, '<br>') // <br>の連続を1つに圧縮
+        .replace(/\n{3,}/g, '\n\n');              // 改行3つ以上の連続を2つに制限
+
+    const lines = cleanedText.split('\n');
+    let inTable = false;
+    let htmlOutput = [];
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // 空行（余白の原因）は極力スキップするが、テーブル内は維持
+        if (!inTable && line === '') continue;
+
+        // マークダウンのテーブル記号
+        if (line.startsWith('|') && line.endsWith('|')) {
+            const cells = line.split('|').map(c => c.trim()).filter((c, idx, arr) => idx > 0 && idx < arr.length - 1);
+            if (line.includes('---')) continue; // 区切り行は無視
+
+            if (!inTable) {
+                inTable = true;
+                htmlOutput.push('<div class="overflow-x-auto my-2 shadow-sm border border-rose-100 rounded-xl">');
+                htmlOutput.push('<table class="min-w-full divide-y divide-rose-100 text-sm text-left">');
+                htmlOutput.push('<thead class="bg-rose-50 text-rose-900 font-bold"><tr>');
+                cells.forEach(cell => htmlOutput.push(`<th class="px-4 py-3">${cell}</th>`));
+                htmlOutput.push('</tr></thead>');
+                htmlOutput.push('<tbody class="divide-y divide-rose-50 bg-white text-slate-700">');
+            } else {
+                htmlOutput.push('<tr class="hover:bg-slate-50/50 transition-colors">');
+                cells.forEach(cell => htmlOutput.push(`<td class="px-4 py-3 font-medium">${cell}</td>`));
+                htmlOutput.push('</tr>');
+            }
+        } else {
+            if (inTable) {
+                inTable = false;
+                htmlOutput.push('</tbody></table></div>');
+            }
+            // 💡重要：テーブル以外の文章は、単なる改行ではなく<p>で囲むと最も美しい
+            if (line.length > 0) {
+                htmlOutput.push(`<p class="mb-4">${line}</p>`);
+            }
+        }
+    }
+    if (inTable) {
+        htmlOutput.push('</tbody></table></div>');
+    }
+    return htmlOutput.join('\n');
+}
+
 /**
  * ===================================================
  * 🛠️ 追加：ファイル名として安全なIDを生成する関数
@@ -279,3 +552,5 @@ function generateTopPageHTML(articles, displayDate, archiveFiles) {
 </html>
     `;
 }
+
+main();
