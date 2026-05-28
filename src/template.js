@@ -85,7 +85,6 @@ function generateSinglePostHTML(article, siteTitle) {
     const googleAnalyticsCode = getAnalyticsTag();
     const bypassScript = getBypassScript();
 
-    // DMM API経由のURLから純粋なリダイレクトURL（lurl）を抽出して暗号化
     let rawLurl = '';
     try {
         const u = new URL(article.link);
@@ -133,10 +132,10 @@ function generateSinglePostHTML(article, siteTitle) {
                 </div>
 
                 <div style="display:block;width:100%;margin-top:8px;">
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:12px 24px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);cursor:pointer;">
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:12px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);cursor:pointer;">
                         FANZAで見る →
                     </a>
-                    <a href="${article.sampleReadLink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#fff;color:#e84393;padding:11px 24px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;border:1px solid #fd79a8;">
+                    <a href="${article.sampleReadLink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#fff;color:#e84393;padding:11px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;border:1px solid #fd79a8;">
                         無料の試し読みはこちら
                     </a>
                 </div>
@@ -180,8 +179,8 @@ function generateTagPageHTML(tagName, articles) {
 
         return `
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-4 flex gap-4 items-center">
-            <div style="flex-shrink:0;width:64px;height:96px;">
-                <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
+            <div style="flex-shrink:0;width:84px;height:120px;">
+                <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:2px;border:none;">
                 </a>
             </div>
@@ -234,7 +233,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
 
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-4 sm:p-6 flex flex-row gap-4 sm:gap-6 items-center hover:shadow-md transition-all">
-            <div style="flex-shrink:0;width:80px;height:112px;" class="sm:w-24 sm:h-32">
+            <div style="flex-shrink:0;width:92px;height:128px;" class="sm:w-[110px] sm:h-[150px]">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
                 </a>
@@ -250,7 +249,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </div>
                 <div class="flex gap-2 items-center">
                     <a href="posts/${article.id}.html" class="px-3 sm:px-4 py-2 bg-rose-50 text-rose-600 font-bold rounded-lg text-[11px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:10px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;margin-top:0px;text-align:center;flex-1:1;max-height:38px;line-height:18px;cursor:pointer;" class="sm:text-xs">FANZAで見る →</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:10px 16px;border-radius:25px;font-size:12px;font-weight:bold;text-decoration:none;margin-top:0px;text-align:center;flex-1:1;max-height:38px;line-height:18px;cursor:pointer;" class="sm:text-xs">FANZAで見る</a>
                 </div>
             </div>
         </article>
