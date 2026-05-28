@@ -1,3 +1,26 @@
+/**
+ * ===================================================
+ * 📈 Google アナリティクス (GA4) の設定
+ * ===================================================
+ * ご自身のGoogleアナリティクスで発行された「測定ID（G-から始まるコード）」をここに入力してください。
+ * 空白（''）のときは、コードが非表示（トラッキング無効）になり、エラーを防ぎます。
+ */
+const GA_TRACKING_ID = 'G-1Z5RQ06GCN'; // 👈 ここをご自身のIDに書き換えてください！
+
+// アナリティクスの計測タグを生成するヘルパー関数
+function getAnalyticsTag() {
+    if (!GA_TRACKING_ID) return '';
+    return `
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${GA_TRACKING_ID}');
+    </script>
+    `;
+}
+
 function makeStarString(rating) {
     const score = parseFloat(rating) || 0;
     const fullStars = Math.floor(score);
@@ -9,18 +32,16 @@ function makeStarString(rating) {
 
 function generateSinglePostHTML(article, siteTitle) {
     const allTags = article.pageGenres || [];
-    
-    // 💡 最初の5個だけをメインの視認用バッジにする
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
         `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
     ).join(' ');
 
-    // 💡 マウスオーバーで全表示される「すべての公式生タグ」のリスト
     const officialBadgesHtml = allTags.length > 0
         ? allTags.map(g => `<a href="../tags/${g}.html" class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors">#${g}</a>`).join(' ')
         : '<span class="text-xs text-slate-400">なし</span>';
 
     const starIcons = makeStarString(article.reviewRating);
+    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
 
     return `
 <!DOCTYPE html>
@@ -30,7 +51,7 @@ function generateSinglePostHTML(article, siteTitle) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    ${googleAnalyticsCode}</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -62,20 +83,17 @@ function generateSinglePostHTML(article, siteTitle) {
             <div class="md:w-2/3 flex flex-col min-w-0 w-full">
                 <h1 class="text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
                 
-                <!-- 💡主要タグ（常に5個だけ表示する枠） -->
                 <div class="mb-4">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">主要属性</div>
                     <div class="flex flex-wrap gap-1.5">${mainVisibleBadges}</div>
                 </div>
 
-                <!-- 💡全公式属性（初期状態は高さ固定、ホバーするとアコーディオンのように全開する枠） -->
                 <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                         <span>FANZA公式全性癖属性 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ マウスを乗せて全表示</span>
                         <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべての属性を展開中...</span>
                     </div>
-                    <!-- 💡初期状態は1行分(max-h-7)に収め、ホバーしたら一気に縦幅を解放(max-h-[500px])する実用的なUI -->
                     <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[600px] transition-all duration-500 ease-in-out">
                         ${officialBadgesHtml}
                     </div>
@@ -104,6 +122,8 @@ function generateTagPageHTML(tagName, articles) {
         </article>
     `).join('\n');
 
+    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
+
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -112,7 +132,7 @@ function generateTagPageHTML(tagName, articles) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>タグ: ${tagName} のおすすめ羞恥コミック一覧</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    ${googleAnalyticsCode}</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <main class="max-w-3xl mx-auto px-4 py-12">
         <a href="../index.html" class="text-xs font-bold text-rose-500 hover:underline">← 総合トップに戻る</a>
@@ -157,6 +177,8 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         </li>
     `).join('\n');
 
+    const googleAnalyticsCode = getAnalyticsTag(); // 💡 GAコード取得
+
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -165,11 +187,11 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${siteTitle} - 羞恥専門成人向けレビューまとめ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
+    ${googleAnalyticsCode}</head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-12 px-4 text-center">
         <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
-        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した究極のデータベース型レビューメディア。</p>
+        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した究極 of データベース型レビューメディア。</p>
         <div class="mt-2 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
     </header>
     <main class="max-w-6xl mx-auto px-4 py-12">
