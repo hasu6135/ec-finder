@@ -3,7 +3,7 @@
  * 📈 Google アナリティクス (GA4) の設定
  * ===================================================
  */
-const GA_TRACKING_ID = 'G-1Z5RQ06GCN'; // 💡 設定されたIDに書き換え済みです！
+const GA_TRACKING_ID = 'G-1Z5RQ06GCN'; 
 
 function getAnalyticsTag() {
     if (!GA_TRACKING_ID) return '';
@@ -60,12 +60,12 @@ function generateSinglePostHTML(article, siteTitle) {
     <main class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             
-            <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full">
-                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px]">
+            <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
+                <div class="bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200 overflow-hidden min-h-[260px] sm:min-h-[300px] w-full">
                     <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-contain p-2 max-h-[350px]">
                 </div>
                 
-                <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center">
+                <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
                     <div class="text-xs font-bold text-rose-900 mb-1">FANZAユーザー評価</div>
                     <div class="flex items-center justify-center gap-1">
                         <span class="text-lg">${starIcons}</span>
@@ -74,9 +74,13 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 md:grid-cols-1 gap-2 w-full">
-                    <a href="${article.link}" class="w-full py-3 bg-rose-600 text-white font-bold rounded-lg text-center text-sm shadow-md hover:bg-rose-700 block">🔞 今すぐ読む</a>
-                    <a href="${article.sampleReadLink}" class="w-full py-3 bg-white text-rose-600 font-bold rounded-lg text-center text-sm border border-rose-200 hover:bg-rose-50 block">👀 試し読み</a>
+                <div class="flex flex-col gap-2 w-full clear-both">
+                    <a href="${article.link}" target="_blank" rel="noopener" class="block w-full py-3.5 bg-rose-600 text-white font-extrabold rounded-xl text-center text-sm shadow-md hover:bg-rose-700 transition-all">
+                        🔞 FANZAで今すぐ読む
+                    </a>
+                    <a href="${article.sampleReadLink}" target="_blank" rel="noopener" class="block w-full py-3.5 bg-white text-rose-600 font-extrabold rounded-xl text-center text-sm border border-rose-200 hover:bg-rose-50 transition-all">
+                        👀 無料試し読みをする
+                    </a>
                 </div>
             </div>
             
