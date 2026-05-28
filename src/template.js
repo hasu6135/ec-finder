@@ -73,10 +73,12 @@ function makeStarString(rating) {
 
 function generateSinglePostHTML(article, siteTitle) {
     const allTags = article.pageGenres || [];
+    // 主要属性バッジ（上部に残すもの）
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
         `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
     ).join(' ');
 
+    // 公式性癖属性バッジ一式
     const officialBadgesHtml = allTags.length > 0
         ? allTags.map(g => `<a href="../tags/${g}.html" class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors">#${g}</a>`).join(' ')
         : '<span class="text-xs text-slate-400">なし</span>';
@@ -117,7 +119,6 @@ function generateSinglePostHTML(article, siteTitle) {
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             
             <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
-                
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;width:100%;text-align:center;padding:8px;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="display:inline-block;max-width:100%;height:auto;max-height:350px;object-fit:contain;vertical-align:middle;border:none;">
                 </a>
@@ -126,8 +127,8 @@ function generateSinglePostHTML(article, siteTitle) {
                     <div class="text-xs font-bold text-rose-900 mb-1">ユーザー評価</div>
                     <div class="flex items-center justify-center gap-1">
                         <span class="text-lg">${starIcons}</span>
-                        <span class="text-base font-extrabold text-slate-800 ml-1">${article.reviewRating}</span>
-                        <span class="text-xs text-slate-400">(${article.reviewCount}件)</span>
+                        <span class="text-base font-extrabold text-slate-800 ml-1">${article.reviewRating || '0.0'}</span>
+                        <span class="text-xs text-slate-400">(${article.reviewCount || 0}件)</span>
                     </div>
                 </div>
 
@@ -142,14 +143,26 @@ function generateSinglePostHTML(article, siteTitle) {
             </div>
             
             <div class="md:w-2/3 flex flex-col min-w-0 w-full mt-2 md:mt-0">
-                <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 mb-4 leading-snug">${article.originalTitle}</h1>
+                <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 mb-3 leading-snug">${article.originalTitle}</h1>
                 
+                <div class="mb-4 space-y-1 text-xs border-b border-dashed border-rose-100 pb-3">
+                    ${article.series ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">シリーズ名</span>${article.series}</div>` : ''}
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">作家</span>${article.author || '（不明）'}</div>
+                    ${article.label ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">レーベル</span>${article.label}</div>` : ''}
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">出版社</span>${article.publisher || '（不明）'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">カテゴリー</span>${article.category || '（不明）'}</div>
+                </div>
+
                 <div class="mb-4">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">主要属性</div>
                     <div class="flex flex-wrap gap-1.5">${mainVisibleBadges}</div>
                 </div>
 
-                <div class="mb-6 bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
+                <div class="text-slate-700 text-sm leading-relaxed space-y-4 border-t border-rose-50 pt-4 mb-6">
+                    ${article.summary}
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                         <span>公式全性癖属性 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
@@ -160,7 +173,6 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="text-slate-700 text-sm leading-relaxed space-y-4 border-t border-rose-50 pt-4">${article.summary}</div>
             </div>
         </article>
     </main>

@@ -102,6 +102,39 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             }
         }
 
+		// --- 📥 新しい詳細情報（作家・出版社・カテゴリー・シリーズ等）のスクレイピングコード ---
+        const metaData = {
+            author: '（不明）',
+            publisher: '（不明）',
+            category: '（不明）',
+            series: '',
+            label: ''
+        };
+
+        // ページ内のすべてのdl要素をループしてdt（項目名）とdd（値）を抽出
+        const dls = doc.querySelectorAll('dl');
+        dls.forEach(dl => {
+            const dt = dl.querySelector('dt');
+            const dd = dl.querySelector('dd');
+            if (dt && dd) {
+                const labelText = dt.textContent.trim();
+                const valueText = dd.textContent.trim();
+
+                if (labelText.includes('作家')) {
+                    metaData.author = valueText;
+                } else if (labelText.includes('出版社')) {
+                    metaData.publisher = valueText;
+                } else if (labelText.includes('カテゴリー')) {
+                    metaData.category = valueText;
+                } else if (labelText.includes('シリーズ名')) {
+                    metaData.series = valueText;
+                } else if (labelText.includes('掲載誌・レーベル')) {
+                    metaData.label = valueText;
+                }
+            }
+        });
+        // ----------------------------------------------------------------------------------
+
         await browser.close();
 
         const filteredReviews = userReviews.filter(r => {
@@ -117,7 +150,13 @@ async function scrapeDmmProductDetail(affiliateUrl) {
             tachiyomiUrl: realTachiyomiUrl,
             pageGenres: pageGenres,       
             reviewRating: reviewRating,   
-            reviewCount: reviewCount      
+            reviewCount: reviewCount,
+            // 💡 新しくスクレイピングしたデータを返却に追加
+            author: metaData.author,
+            publisher: metaData.publisher,
+            category: metaData.category,
+            series: metaData.series,
+            label: metaData.label
         };
     } catch (error) {
         if (browser) await browser.close();
