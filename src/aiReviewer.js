@@ -29,7 +29,7 @@ async function generateAiReview(product, detailData) {
                 },
                 { 
                     role: 'user', 
-                    content: `【作品タイトル】\n${product.title}\n\n【公式ジャンル】\n${detailData.pageGenres.join(', ')}\n\n【公式あらすじ】\n${detailData.productDescription}\n\n【購入者の口コミ】\n${detailData.userReviews}` 
+                    content: `【作品タイトル】\n${product.title}\n\n【公式ジャンル】\n${detailData.pageGenres ? detailData.pageGenres.join(', ') : ''}\n\n【公式あらすじ】\n${detailData.productDescription || ''}\n\n【購入者の口コミ】\n${detailData.userReviews || ''}` 
                 }
             ],
             temperature: 0.7,
@@ -45,13 +45,18 @@ async function generateAiReview(product, detailData) {
 }
 
 /**
- * 🛠️ AIが万が一Markdownの改行を出してきた場合、HTMLの改行に安全に変換するヘルパー
+ * 🛠️ AIが万が一Markdown記法（*など）を出してきた場合、HTMLに安全に置換・成形するヘルパー
  */
 function formatAiResponseToHtml(text) {
     if (!text) return '';
     
+    // 💡【新設】AIが禁止を破って出力した「**太字**」や「*斜体*」をHTMLの<b>タグに強制変換
+    let cleanedText = text
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // **太字** を <b>太字</b> に
+        .replace(/\*(.*?)\*/g, '<b>$1</b>');    // *単一アスタリスク* も <b>太字</b> に
+
     // 行ごとに分解
-    const lines = text.split('\n');
+    const lines = cleanedText.split('\n');
     let htmlOutput = [];
     let isFirstLine = true;
 
@@ -59,7 +64,7 @@ function formatAiResponseToHtml(text) {
         const trimmed = line.trim();
         if (trimmed === '') return;
 
-        // 1行目はメインキャッチコピーとして特別扱い（すでにH1タグ等で囲まれていなければ囲む）
+        // 1行目はメインキャッチコピーとして特別扱い
         if (isFirstLine) {
             if (trimmed.startsWith('<h1') || trimmed.startsWith('<h2')) {
                 htmlOutput.push(trimmed);
@@ -70,11 +75,11 @@ function formatAiResponseToHtml(text) {
             return;
         }
 
-        // すでにAIがHTMLタグ（h3やpなど）で出力している場合はそのまま採用
+        // すでにHTMLタグがある場合はそのまま採用
         if (trimmed.startsWith('<')) {
             htmlOutput.push(trimmed);
         } else {
-            // タグがない行は、通常の段落として出力（下部に余白を持たせる）
+            // 通常の段落
             htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${trimmed}</p>`);
         }
     });
