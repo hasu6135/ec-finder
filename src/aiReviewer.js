@@ -50,10 +50,12 @@ async function generateAiReview(product, detailData) {
 function formatAiResponseToHtml(text) {
     if (!text) return '';
     
-    // AIが禁止を破って出力した「**太字**」や「*斜体*」をHTMLの<b>タグに強制変換
+    // 💡【修正】太字(b)やハイライト(mark)部分に、インラインで文字を少し大きく(105%)、さらに読みやすくするスタイルを適用
     let cleanedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\*(.*?)\*/g, '<b>$1</b>');
+        .replace(/\*\*(.*?)\*\*/g, '<b class="inline-block text-[106%] font-extrabold text-slate-950 px-0.5">$1</b>')
+        .replace(/\*(.*?)\*/g, '<b class="inline-block text-[106%] font-extrabold text-slate-950 px-0.5">$1</b>')
+        .replace(/<b>(.*?)<\/b>/g, '<b class="inline-block text-[106%] font-extrabold text-slate-950 px-0.5">$1</b>')
+        .replace(/<mark class="bg-rose-100 text-rose-900 px-1 rounded">(.*?)<\/mark>/g, '<mark class="bg-rose-100 text-rose-950 px-1 rounded font-bold inline-block text-[106%] shadow-sm">$1</mark>');
 
     // Windowsの改行コードを統一
     cleanedText = cleanedText.replace(/\r\n/g, '\n');
