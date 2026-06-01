@@ -55,7 +55,8 @@ function formatAiResponseToHtml(text) {
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\*(.*?)\*/g, '<b>$1</b>');
 
-    // 💡【修正】2連続以上の改行（空行）を、目印用の特殊な文字列（[BLANK_LINE]）に一度変換する
+    // 💡【修正】\r\n（Windows改行）を\nに統一し、あらゆるスペース混じりの空行を確実に[BLANK_LINE]に変換する
+    cleanedText = cleanedText.replace(/\r\n/g, '\n');
     cleanedText = cleanedText.replace(/\n\s*\n/g, '\n[BLANK_LINE]\n');
 
     // 行ごとに分解して処理

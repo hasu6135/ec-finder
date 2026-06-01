@@ -86,8 +86,9 @@ function generateSinglePostHTML(article, siteTitle) {
 
     // 👤 購入者の口コミを「人アイコン＋吹き出し風」に変換するロジック
     let reviewsHtml = '';
-    if (article.userReviews && article.userReviews !== '（ネタバレなしレビューなし）') {
-        const reviewList = article.userReviews.split('---');
+    // 💡 article.userReviews から article.reviews に修正します
+    if (article.reviews && article.reviews !== '（ネタバレなしレビューなし）') {
+        const reviewList = article.reviews.split('---');
         reviewsHtml = reviewList.map((rev, idx) => {
             const cleanRev = rev.trim();
             if (!cleanRev) return '';
