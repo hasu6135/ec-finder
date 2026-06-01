@@ -125,13 +125,9 @@ const articleData = {
     sampleReadLink: perfectSampleReadLink,
     tags: finalTags,
     pageGenres: finalTags,
-    // 追加部分
-    author: detailData.author || '不明',
-    publisher: detailData.publisher || '不明',
-    category: detailData.category || 'アダルトマンガ',
-    // 既存
     reviewRating: detailData.reviewRating,
     reviewCount: detailData.reviewCount,
+    reviews: detailData.userReviews,     // 💡 template側が使いやすいように「reviews」で渡す
     createdAt: new Date().toISOString()
 };
 

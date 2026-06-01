@@ -55,19 +55,34 @@ function formatAiResponseToHtml(text) {
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\*(.*?)\*/g, '<b>$1</b>');
 
-    // 💡 行ごとに完全に分解して処理
+    // 💡【修正】2連続以上の改行（空行）を、目印用の特殊な文字列（[BLANK_LINE]）に一度変換する
+    cleanedText = cleanedText.replace(/\n\s*\n/g, '\n[BLANK_LINE]\n');
+
+    // 行ごとに分解して処理
     const lines = cleanedText.split('\n');
     let htmlOutput = [];
     let isFirstLine = true;
+    let currentParagraph = []; // 💡 1つの段落内の文章を一時的に溜める配列
+
+    // 溜まった文章を<p>タグとして出力するヘルパー
+    const flushParagraph = () => {
+        if (currentParagraph.length > 0) {
+            htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${currentParagraph.join('<br>')}</p>`);
+            currentParagraph = [];
+        }
+    };
 
     lines.forEach(line => {
         const trimmed = line.trim();
         
-        // 💡 空白行、またはMarkdownの区切り線（---など）を見つけたら、HTMLの確実な空行・余白を作る
-        if (trimmed === '' || trimmed === '---' || trimmed === '***') {
-            htmlOutput.push(`<div class="h-4"></div>`); // 視覚的な「しっかりした空行」を挿入
+        // 💡 AIが意図的に作った「空行」の目印を見つけたら、しっかり余白の箱を入れる
+        if (trimmed === '[BLANK_LINE]' || trimmed === '---' || trimmed === '***') {
+            flushParagraph(); // 直前までの文章を一度区切る
+            htmlOutput.push(`<div class="h-4"></div>`); // 視覚的な空行を挿入
             return;
         }
+
+        if (trimmed === '') return;
 
         // 1行目はメインキャッチコピーとして特別扱い
         if (isFirstLine) {
@@ -80,17 +95,21 @@ function formatAiResponseToHtml(text) {
             return;
         }
 
-        // すでにAI自身が見出しタグ（h3等）で出力している場合は、余白クラスを強制注入してそのまま採用
+        // 見出しタグ（h3等）が出てきたら、それまでの文章を区切って見出しを挿入
         if (trimmed.startsWith('<h3') || trimmed.startsWith('<h4')) {
+            flushParagraph();
             htmlOutput.push(trimmed);
         } else if (trimmed.startsWith('<p')) {
-            // すでにpタグがある場合もそのまま
+            flushParagraph();
             htmlOutput.push(trimmed);
         } else {
-            // 💡 タグがない普通の文章だった場合、下部にしっかり余白（mb-4）を持たせた段落タグで包む
-            htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${trimmed}</p>`);
+            // 💡 普通の文章は、AIが改行（1行の改行）を入れた部分を <br> で繋ぎながら1つの段落にまとめる
+            currentParagraph.push(trimmed);
         }
     });
+
+    // 最後に残った文章を出力
+    flushParagraph();
 
     return htmlOutput.join('\n');
 }
