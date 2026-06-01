@@ -165,9 +165,9 @@ function generateSinglePostHTML(article, siteTitle) {
 
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
-                        <span>公式全性癖属性 (${allTags.length}個)</span>
+                        <span>公式タグ一覧 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
-                        <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべての属性を展開中...</span>
+                        <span class="text-[10px] text-slate-400 font-normal hidden group-hover:inline">すべてのタグを展開中...</span>
                     </div>
                     <div class="flex flex-wrap gap-1 max-h-7 overflow-hidden group-hover:max-h-[600px] transition-all duration-500 ease-in-out">
                         ${officialBadgesHtml}
@@ -244,7 +244,7 @@ function generateTagPageHTML(tagName, articles) {
         <a href="../index.html" class="text-xs font-bold text-rose-500 hover:underline">← 総合トップに戻る</a>
         <h1 class="text-xl font-extrabold text-slate-900 mt-4 mb-8 flex items-center gap-2">
             <span class="px-3 py-1 bg-rose-600 text-white rounded-lg text-sm">#</span>
-            <span>性癖属性: 「${tagName}」 の一覧（${articles.length}件）</span>
+            <span>タグ: 「${tagName}」 の一覧（${articles.length}件）</span>
         </h1>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${cards}</div>
     </main>
@@ -327,25 +327,57 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     ${googleAnalyticsCode}
 </head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
-    <header class="bg-slate-950 text-white py-12 px-4 text-center">
+    <header class="bg-slate-950 text-white py-10 px-4 text-center relative border-b border-rose-950/40">
         <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
         <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した大容量データベース型レビューメディア。</p>
-        <div class="mt-2 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
+        <div class="mt-1 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
+        
+        <div class="mt-5 max-w-md mx-auto px-4">
+            <button id="toggle-header-tags" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-rose-950/50 transition-all flex items-center justify-center gap-1.5 border border-rose-500/20">
+                <span>🏷️ タグから作品を探す</span>
+                <span id="header-arrow" class="transition-transform duration-300 transform inline-block">▼</span>
+            </button>
+            
+            <div id="header-tags-container" class="max-h-0 overflow-hidden transition-all duration-300 ease-in-out text-left mt-3 bg-slate-900 rounded-xl border border-slate-800 shadow-inner">
+                <div class="p-4">
+                    <ul class="flex flex-wrap -m-0.5">
+                        ${tagCloudLinks.length > 0 ? tagCloudLinks : '<li class="text-xs text-slate-500 py-1 pl-1">タグはまだありません。</li>'}
+                    </ul>
+                </div>
+            </div>
+        </div>
     </header>
+
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">最新の濃厚レビュー一覧</h2>
+                <h2 class="text-lg font-bold text-slate-900 mb-4">最新のレビュー一覧</h2>
                 ${cards}
             </div>
+            
             <div class="lg:col-span-1">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
-                    <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">性癖属性（タグ一覧）</h2>
+                    <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">タグ一覧</h2>
                     <ul class="flex flex-wrap -m-1">${tagCloudLinks.length > 0 ? tagCloudLinks : '<li class="text-xs text-slate-400 py-2">タグはまだありません。</li>'}</ul>
                 </div>
             </div>
         </div>
     </main>
+
+    <script>
+    document.getElementById('toggle-header-tags').addEventListener('click', function() {
+        var container = document.getElementById('header-tags-container');
+        var arrow = document.getElementById('header-arrow');
+        if (container.style.maxHeight === '0px' || !container.style.maxHeight) {
+            container.style.maxHeight = container.scrollHeight + 'px';
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            container.style.maxHeight = '0px';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    });
+    </script>
+
     ${bypassScript}
 </body>
 </html>`;
