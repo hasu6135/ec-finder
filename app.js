@@ -90,13 +90,9 @@ async function main() {
             // 詳細ページから実際の「生タグ」や「評価」を取得
             const detailData = await scrapeDmmProductDetail(product.url);
 
-            try {
-                // AIレビュー執筆
-                const { rawContent } = await generateAiReview(product, detailData);
-
-                let summary = rawContent.replace(/```html/g, '').replace(/```/g, '').replace(/##+/g, '').replace(/\*\*/g, '').replace(/---+/g, '').replace(/#/g, '').trim();
-                const tableParsedSummary = parseMarkdownTableToHtml(summary);
-                const formattedSummary = tableParsedSummary.replace(/\n/g, '<br>');
+			try {
+    			// AIレビュー執筆（aiReviewer.js側で完璧に成形されたHTML文字列が直接返ってきます）
+   				const formattedSummary = await generateAiReview(product, detailData);
 
                 let perfectSampleReadLink = detailData.tachiyomiUrl 
                     ? `https://al.fanza.co.jp/?lurl=${encodeURIComponent(detailData.tachiyomiUrl)}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`
