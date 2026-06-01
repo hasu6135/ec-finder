@@ -89,7 +89,20 @@ async function main() {
             
             // 詳細ページから実際の「生タグ」や「評価」を取得
             const detailData = await scrapeDmmProductDetail(product.url);
-
+            
+			// 💡【追加】取得した口コミが空でないかログに出力して確認する
+            console.log(`---------------------------------------------------`);
+            console.log(`💬 [口コミ取得チェック]`);
+            if (detailData.userReviews && detailData.userReviews !== '（ネタバレなしレビューなし）') {
+                const count = detailData.userReviews.split('---').filter(Boolean).length;
+                console.log(`   ✅ 口コミの取得に成功しました！（合計: ${count} 件）`);
+                // 最初の1件の冒頭部分だけをチラ見せでログに出す
+                console.log(`   📝 サンプル: ${detailData.userReviews.substring(0, 100).replace(/\n/g, ' ')}...`);
+            } else {
+                console.log(`   ⚠️ 口コミが空っぽ、または「なし」のテキストになっています。`);
+            }
+            console.log(`---------------------------------------------------`);
+            
 			try {
     			// AIレビュー執筆（aiReviewer.js側で完璧に成形されたHTML文字列が直接返ってきます）
    				const formattedSummary = await generateAiReview(product, detailData);
