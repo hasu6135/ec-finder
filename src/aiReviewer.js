@@ -55,20 +55,35 @@ function formatAiResponseToHtml(text) {
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
         .replace(/\*(.*?)\*/g, '<b>$1</b>');
 
-    // 💡【修正】\r\n（Windows改行）を\nに統一し、あらゆるスペース混じりの空行を確実に[BLANK_LINE]に変換する
+    // Windowsの改行コードを統一
     cleanedText = cleanedText.replace(/\r\n/g, '\n');
+    // AIが文中に混ぜてきた生改行タグ（<br>や<br />）を一旦すべて通常の改行にリセット
+    cleanedText = cleanedText.replace(/<br\s*\/?>/gi, '\n');
+
+    // 💡【強力空行検知】2連続以上の改行、またはスペースだけの行を確実に[BLANK_LINE]へ変換
     cleanedText = cleanedText.replace(/\n\s*\n/g, '\n[BLANK_LINE]\n');
 
     // 行ごとに分解して処理
     const lines = cleanedText.split('\n');
     let htmlOutput = [];
     let isFirstLine = true;
-    let currentParagraph = []; // 💡 1つの段落内の文章を一時的に溜める配列
+    let currentParagraph = [];
 
-    // 溜まった文章を<p>タグとして出力するヘルパー
+    // 💡【判定強化】溜まった文章を出力する際、長すぎる場合は2〜3行（約80〜120文字）ごとに空行を強制注入する
     const flushParagraph = () => {
         if (currentParagraph.length > 0) {
-            htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${currentParagraph.join('<br>')}</p>`);
+            let chunk = [];
+            currentParagraph.forEach((sentence, idx) => {
+                chunk.push(sentence);
+                // 💡 2行〜3行ごと、または句点(。)で終わるちょうどいいタイミングで空行を自動作成
+                if ((idx + 1) % 2 === 0 || sentence.endsWith('。') && chunk.length >= 2) {
+                    htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${chunk.join('<br>')}</p>`);
+                    chunk = [];
+                }
+            });
+            if (chunk.length > 0) {
+                htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${chunk.join('<br>')}</p>`);
+            }
             currentParagraph = [];
         }
     };
@@ -76,10 +91,10 @@ function formatAiResponseToHtml(text) {
     lines.forEach(line => {
         const trimmed = line.trim();
         
-        // 💡 AIが意図的に作った「空行」の目印を見つけたら、しっかり余白の箱を入れる
+        // AIが意図的に作った「空行」の目印、または区切り線
         if (trimmed === '[BLANK_LINE]' || trimmed === '---' || trimmed === '***') {
-            flushParagraph(); // 直前までの文章を一度区切る
-            htmlOutput.push(`<div class="h-4"></div>`); // 視覚的な空行を挿入
+            flushParagraph();
+            htmlOutput.push(`<div class="h-5"></div>`); // しっかりと高さを確保した空行を挿入
             return;
         }
 
@@ -104,7 +119,7 @@ function formatAiResponseToHtml(text) {
             flushParagraph();
             htmlOutput.push(trimmed);
         } else {
-            // 💡 普通の文章は、AIが改行（1行の改行）を入れた部分を <br> で繋ぎながら1つの段落にまとめる
+            // 普通の文章を一度配列に溜める
             currentParagraph.push(trimmed);
         }
     });
