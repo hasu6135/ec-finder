@@ -45,24 +45,29 @@ async function generateAiReview(product, detailData) {
 }
 
 /**
- * 🛠️ AIが万が一Markdown記法（*など）を出してきた場合、HTMLに安全に置換・成形するヘルパー
+ * 🛠️ AIの出力テキストを解析し、完璧な空行と段落を持ったHTMLに強制変換するヘルパー
  */
 function formatAiResponseToHtml(text) {
     if (!text) return '';
     
-    // 💡【新設】AIが禁止を破って出力した「**太字**」や「*斜体*」をHTMLの<b>タグに強制変換
+    // AIが禁止を破って出力した「**太字**」や「*斜体*」をHTMLの<b>タグに強制変換
     let cleanedText = text
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // **太字** を <b>太字</b> に
-        .replace(/\*(.*?)\*/g, '<b>$1</b>');    // *単一アスタリスク* も <b>太字</b> に
+        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+        .replace(/\*(.*?)\*/g, '<b>$1</b>');
 
-    // 行ごとに分解
+    // 💡 行ごとに完全に分解して処理
     const lines = cleanedText.split('\n');
     let htmlOutput = [];
     let isFirstLine = true;
 
     lines.forEach(line => {
         const trimmed = line.trim();
-        if (trimmed === '') return;
+        
+        // 💡 空白行、またはMarkdownの区切り線（---など）を見つけたら、HTMLの確実な空行・余白を作る
+        if (trimmed === '' || trimmed === '---' || trimmed === '***') {
+            htmlOutput.push(`<div class="h-4"></div>`); // 視覚的な「しっかりした空行」を挿入
+            return;
+        }
 
         // 1行目はメインキャッチコピーとして特別扱い
         if (isFirstLine) {
@@ -75,11 +80,14 @@ function formatAiResponseToHtml(text) {
             return;
         }
 
-        // すでにHTMLタグがある場合はそのまま採用
-        if (trimmed.startsWith('<')) {
+        // すでにAI自身が見出しタグ（h3等）で出力している場合は、余白クラスを強制注入してそのまま採用
+        if (trimmed.startsWith('<h3') || trimmed.startsWith('<h4')) {
+            htmlOutput.push(trimmed);
+        } else if (trimmed.startsWith('<p')) {
+            // すでにpタグがある場合もそのまま
             htmlOutput.push(trimmed);
         } else {
-            // 通常の段落
+            // 💡 タグがない普通の文章だった場合、下部にしっかり余白（mb-4）を持たせた段落タグで包む
             htmlOutput.push(`<p class="mb-4 text-slate-700 leading-relaxed">${trimmed}</p>`);
         }
     });
