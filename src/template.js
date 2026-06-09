@@ -343,7 +343,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
 
-			<div style="flex-shrink:0;width:60%;max-width:240px;aspect-ratio:3/4;">
+			<div style="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
 			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
