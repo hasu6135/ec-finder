@@ -426,6 +426,31 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
         `;
     }).join('\n');
 
+	// 🆕 3. 【新設】新着順ランキング（新しく追加された順・上位5件）
+    // DB（db.json）の仕様上、新しいものが配列の前方、またはdateプロパティを持っているので、降順でソート
+    const newRankingArticles = [...articles]
+        .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+        .slice(0, 5);
+    const newRankingCards = newRankingArticles.map((article, index) => {
+        let rawLurl = ''; try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
+        const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
+        const rankMedals = ['🆕', '✨', '⭐', '🔹', '🔸']; // 新着なのでメダルを新着風に
+        return `
+        <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
+            <span class="text-xs font-bold w-6 text-center">${rankMedals[index]}</span>
+            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+            </div>
+            <div class="min-w-0 flex-1">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
+                <div class="mt-1 flex justify-between items-center">
+                    <span class="text-[9px] text-slate-400">追加: ${new Date(article.date).toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'})}</span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-rose-600 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+                </div>
+            </div>
+        </div>`;
+    }).join('\n');
+
     const tagCloudLinks = allTags.map(tag => `
         <li>
             <a href="tags/${tag}.html" class="inline-block m-1 px-2.5 py-1 bg-rose-50 text-rose-700 hover:bg-rose-600 hover:text-white transition-all rounded-lg text-xs font-medium border border-rose-100">
@@ -475,8 +500,17 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </h2>
                 ${cards}
             </div>
-            
             <div class="lg:col-span-1 space-y-6">
+            	
+				<div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
+					<h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
+						<span>🆕 鮮度MAX！新着レビュー作品</span>
+					</h2>
+					<div class="space-y-2">
+				    	${newRankingCards}
+					</div>
+				</div>
+            	
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
                     <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
                         <span>🍑 読者が絶賛した神作品ランキング</span>
