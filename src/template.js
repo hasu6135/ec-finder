@@ -618,10 +618,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                     </div>
                 </div>
 
-                    <div class="space-y-2">
-                        ${paginationHtml}
-                    </div>
-
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
                     <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">タグ一覧</h2>
                     <ul class="flex flex-wrap -m-1">${tagCloudLinks.length > 0 ? tagCloudLinks : '<li class="text-xs text-slate-400 py-2">タグはまだありません。</li>'}</ul>
@@ -643,7 +639,11 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         }
     });
     </script>
-    	
+
+                    <div class="space-y-2">
+                        ${paginationHtml}
+                    </div>
+
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">
             <p class="text-slate-500 mb-2">Powered by <a href="https://affiliate.dmm.com/api/">DMM.com Webサービス</a></p>
