@@ -576,6 +576,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         </div>
     </header>
 
+	<div class="space-y-2">
+	    ${paginationHtml}
+	</div>
+
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
@@ -643,10 +647,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         }
     });
     </script>
-
-	<div class="space-y-2">
-	    ${paginationHtml}
-	</div>
 
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">
