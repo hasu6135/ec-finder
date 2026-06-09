@@ -186,8 +186,11 @@ async function main() {
                     category: detailData.category || 'コミック'
                 };
 
-                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, dbArticles);
-                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
+				// 💡 今読んでいる記事を除外した上で、最新の5件をおすすめに表示する
+                const recommendedArticles = dbArticles
+                    .filter(art => art.id !== articleId)
+                    .slice(0, 5);
+                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, recommendedArticles);
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
                 dbArticles.unshift(articleData);
