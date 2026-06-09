@@ -93,7 +93,7 @@ async function main() {
         // 1. FANZA（DMM）から最新商品の基本データを取得
         console.log(`\n[STEP 1/3] 🔄 最新情報を取得してAIレビュー執筆中...`);
         // 💡 FETCH_COUNT をそのままAPI関数に渡します（内部の仕様をこれでカバー）
-        const products = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE);
+        const products = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE, FETCH_COUNT);
 
         if (!products || products.length === 0) {
             console.log('📭 新着商品が見つかりませんでした。');

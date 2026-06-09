@@ -1,16 +1,18 @@
 /**
  * ===================================================
- * 📡 DMM API 通信モジュール（Node.js標準 fetch・データ構造完全一致版）
+ * 📡 DMM API 通信モジュール（引数連動・決定版）
  * ===================================================
  */
-async function fetchDmmProducts(apiId, affiliateId, siteTitle) {
+async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
     try {
         const finalAffiliateId = affiliateId.endsWith('-001') ? affiliateId.replace('-001', '-990') : affiliateId;
         console.log('📡 DMM APIへリクエストを送信中...');
         
         const searchKeyword = '羞恥'; 
-        // 💡 app.js側からFETCH_COUNT（数字）が渡ってきた場合はそれを使い、なければデフォルトで3件にする
-        const fetchCount = typeof siteTitle === 'number' ? siteTitle : 3; 
+        
+        // 💡 app.js から渡ってきた fetchCount（10）をそのまま使います。安全対策として未定義なら3にします。
+        const hitsCount = fetchCount || 3; 
+        console.log(`📊 設定を検知しました。DMMから新着を ${hitsCount} 件取得します。`);
 
         // URLとクエリパラメータの組み立て
         const url = new URL('https://api.dmm.com/affiliate/v3/ItemList');
@@ -20,7 +22,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle) {
         url.searchParams.append('service', 'ebook');
         url.searchParams.append('floor', 'comic');
         url.searchParams.append('keyword', searchKeyword);
-        url.searchParams.append('hits', fetchCount.toString());
+        url.searchParams.append('hits', hitsCount.toString());
         url.searchParams.append('sort', 'rank');
         url.searchParams.append('output', 'json');
 
@@ -34,27 +36,21 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle) {
             return [];
         }
 
-        // 💡 【重要】app.js の仕様（変数名）と完全に一致するようにマッピングし直します
         return data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${affiliateId}&ch=search_link&ch_id=link`;
-            
-            // ジャンル（タグ）の配列を抽出
             const officialKeywords = item.iteminfo?.keyword ? item.iteminfo.keyword.map(k => k.name) : [];
 
             return {
                 title: item.title,
                 url: perfectAffiliateUrl, 
-                // 💡 app.js の初期のオブジェクト（product.genre）がそのまま読めるように配列をシミュレート
                 genre: officialKeywords.map(name => ({ name })),
-                // 💡 DMM APIが返す公式あらすじ（pricesの上の階層にある、またはreview.comment等）を格納
                 description: item.description || item.review?.comment || '羞恥系おすすめの最新コミックです。',
                 date: item.date || new Date().toISOString(),
                 review: {
                     rating: item.review?.rating || '0.0',
                     count: item.review?.count || 0
                 },
-                // 💡 app.js側の「product.imagePath?.large」という古い設計の呼び出しにも耐えられるように二重構造で仕込む
                 imagePath: {
                     large: item.imageURL?.large || item.imageURL?.list || ''
                 }
