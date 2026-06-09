@@ -13,10 +13,10 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 1;       // 1回のリクエストでDMM APIから取得する件数
+const FETCH_COUNT = 1;       // 💡 日常運用モード：1回で1件の最新作を取得
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
-const DB_FILE = 'db.json';   // 💡 過去データを保存する簡易データベースファイル
+const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
 
 // 🌐【SEO・海外対策】
 const SITE_DOMAIN = 'ec-finder.pages.dev'; 
@@ -33,7 +33,7 @@ function generateSafeId(title) {
  */
 function loadDatabase() {
     if (!fs.existsSync(DB_FILE)) {
-        return []; // まだファイルがない場合は空の配列を返す
+        return [];
     }
     try {
         const rawData = fs.readFileSync(DB_FILE, 'utf-8');
@@ -45,19 +45,16 @@ function loadDatabase() {
 }
 
 function saveDatabase(data) {
-    // JSON文字列にした後、改行コード(\n)をWindows標準(\r\n)に強制置換して保存する
     const jsonString = JSON.stringify(data, null, 2).replace(/\r?\n/g, '\r\n');
     fs.writeFileSync(DB_FILE, jsonString, 'utf-8');
 }
 
 /**
- * ✨ [修正版] Googleサーチコンソール用の sitemap.xml を作成する関数
+ * ✨ Googleサーチコンソール用の sitemap.xml を作成する関数
  */
 function generateSitemap(articles, tags) {
     const today = new Date().toISOString().split('T')[0];
     let xmlUrls = [];
-    
-    // 💡【原因解決】先頭に https:// を強制的に追加して、Googleが認識できる絶対URLにします
     const baseUrl = `https://${SITE_DOMAIN}`;
     
     // 総合トップ
@@ -80,86 +77,104 @@ function generateSitemap(articles, tags) {
 
 /**
  * ===================================================
- * 🚀 メイン処理（過去データ復旧＆海外SEOハイブリッド版）
+ * 🚀 メイン処理（日常運用・新着自動追加モード）
  * ===================================================
  */
 async function main() {
     try {
-        // 必要なフォルダの自動作成
         if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
         if (!fs.existsSync('posts')) fs.mkdirSync('posts');
         if (!fs.existsSync(TAGS_DIR)) fs.mkdirSync(TAGS_DIR);
 
-        // 💡 1. 過去の記事データを読み込む
+        // 過去データの読み込み
         const dbArticles = loadDatabase();
-        console.log(`📦 データベース内の記事数: ${dbArticles.length} 件 のアップデートを開始します...`);
+        console.log(`📦 現在のデータベース内の記事数: ${dbArticles.length} 件`);
 
-        let updatedCount = 0;
+        // 1. FANZA（DMM）から最新商品の基本データを取得
+        console.log(`\n[STEP 1/3] 🔄 最新情報を取得してAIレビュー執筆中...`);
+        const products = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE);
 
-        // 💡 既存の全データをループして、不足しているメタデータを補完する
-        for (let i = 0; i < dbArticles.length; i++) {
-            const article = dbArticles[i];
-            
-            // 💡【海外ユーザー対策】過去の記事タイトルに [Manga Raw] がついていなければ自動で追加
-            if (article.originalTitle && !article.originalTitle.includes('[Manga Raw]')) {
-                article.originalTitle = `${article.originalTitle} [Manga Raw]`;
-                updatedCount++; // タイトル更新も変更対象とする
-            }
+        if (!products || products.length === 0) {
+            console.log('📭 新着商品が見つかりませんでした。');
+            return;
+        }
 
-            // すでに作家や出版社が取得できているデータはスキップ（効率化）
-            if (article.author && article.publisher && article.author !== '不明' && article.publisher !== '不明') {
-                // タイトルだけが更新された場合を考慮してHTMLは毎回上書き
-                const postHtml = generateSinglePostHTML(article, SITE_TITLE, []);
-                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
-                fs.writeFileSync(path.join('posts', `${article.id}.html`), postHtmlCrlf, 'utf-8');
+        let isDatabaseChanged = false;
+
+        // 2. 取得した新着商品を検証・処理
+        for (const product of products) {
+            const articleId = generateSafeId(product.title);
+
+            // 💡 重複チェック（すでに作成済みの記事ならスキップして高速化）
+            if (dbArticles.some(art => art.id === articleId)) {
+                console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
                 continue;
             }
 
-            console.log(`🔄 アップデート中 [${i + 1}/${dbArticles.length}]: ${article.originalTitle}`);
-            
+            console.log(`📝 新着記事を作成中: ${product.title}`);
+
             try {
-                // 💡 過去のURLから最新の詳細データをスクレイピングし直す
-                const detailData = await scrapeDmmProductDetail(article.link);
-                
-                // 💡 不足していたメタデータを既存のオブジェクトに上書き追加
-                article.series = detailData.series;
-                article.author = detailData.author;
-                article.label = detailData.label;
-                article.publisher = detailData.publisher;
-                article.category = detailData.category;
-                
-                // レビュー評価なども最新のものがあれば更新
-                article.reviewRating = detailData.reviewRating;
-                article.reviewCount = detailData.reviewCount;
-                article.reviews = detailData.userReviews;
+                // 💡 商品詳細ページをスクレイピング（作家・出版社・ユーザーレビューを取得）
+                const detailData = await scrapeDmmProductDetail(product.url);
 
-                // 個別HTMLを再生成・上書き保存
-                const postHtml = generateSinglePostHTML(article, SITE_TITLE, []);
+                // 💡 AIレビューの生成
+                const aiReviewMarkdown = await generateAiReview(product.title, product.description);
+                const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
+
+                // 公式タグ（ジャンル）の整理
+                const officialTags = product.genre ? product.genre.map(g => g.name) : [];
+
+                // データの格納（海外対策キーワード [Manga Raw] を自動付与）
+                const articleData = {
+                    id: articleId,
+                    originalTitle: `${product.title} [Manga Raw]`, 
+                    link: product.url,
+                    image: product.imagePath?.large || product.imagePath?.list || '',
+                    description: product.description || '',
+                    reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
+                    reviewCount: detailData.reviewCount || product.review?.count || 0,
+                    tags: officialTags,
+                    aiReview: aiReviewHtml,
+                    reviews: detailData.userReviews || [],
+                    createdAt: product.date || new Date().toISOString(),
+                    // スクレイピングで補完したメタデータ
+                    series: detailData.series || '単行本',
+                    author: detailData.author || '不明',
+                    label: detailData.label || '不明',
+                    publisher: detailData.publisher || '不明',
+                    category: detailData.category || 'コミック'
+                };
+
+                // 個別HTMLの生成と保存（引数バグ対策の [] を第3引数に指定）
+                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, []);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
-                fs.writeFileSync(path.join('posts', `${article.id}.html`), postHtmlCrlf, 'utf-8');
+                fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
-                updatedCount++;
-                console.log(`   ✅ 補完完了: 作家=${detailData.author} / 出版社=${detailData.publisher}`);
+                // データベース配列の先頭に追加
+                dbArticles.unshift(articleData);
+                isDatabaseChanged = true;
+                console.log(`   ✅ 記事生成が完了しました！ (作家: ${articleData.author})`);
+
             } catch (itemError) {
-                console.error(`   ⚠️ データの再取得に失敗しました:`, itemError.message);
+                console.error(`   ❌ この商品の処理中にエラーが発生しました:`, itemError.message);
             }
-            
-            await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
-        console.log(`\n📊 今回アップデートされた記事: ${updatedCount} 件`);
-
-        // 💡 1件でも更新があれば、db.json を上書き保存
-        if (updatedCount > 0) {
+        // 💡 変化があった場合のみ db.json を更新
+        if (isDatabaseChanged) {
             saveDatabase(dbArticles);
-            console.log(`💾 データベース(db.json)を正常に更新しました。`);
+            console.log(`💾 データベース(db.json)に新着データを保存しました。`);
+        } else {
+            console.log(`💤 新しい追加データはありませんでした。`);
         }
 
-        // 💡 4. 新しくなった全データを元に、フロント画面（トップとタグ）を再構築
+        // [STEP 2/3] フロント画面の再構築（記事一覧のソート）
+        console.log(`\n[STEP 2/3] 🌐 フロント画面（トップ・タグ別ページ）を再マージ中...`);
         const sortedArticles = [...dbArticles].sort((a, b) => {
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
 
+        // タグマップの作成
         const tagMap = new Map();
         sortedArticles.forEach(article => {
             article.tags.forEach(tag => {
@@ -171,28 +186,28 @@ async function main() {
         const todayObj = new Date();
         const displayDate = todayObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-        // 5. タグ別ページの書き出し
-        console.log(`📂 全${tagMap.size}個の公式タグページを再マージ中...`);
+        // タグ別ページの書き出し
         for (const [tagName, articles] of tagMap.entries()) {
             const tagHtml = generateTagPageHTML(tagName, articles);
             const tagHtmlCrlf = tagHtml.replace(/\r?\n/g, '\r\n');
             fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
 
-        // 6. 総合トップページの書き出し
+        // 総合トップページの書き出し
         const allAvailableTags = Array.from(tagMap.keys());
         const indexHtml = generateTopPageHTML(sortedArticles, displayDate, allAvailableTags, SITE_TITLE);
         const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
         fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
-        // ✨ [新設] 7. サイトマップの自動書き出し
+        // [STEP 3/3] サイトマップの強制書き出し
+        console.log(`\n[STEP 3/3] 🤖 検索エンジン対策を適用中...`);
         try {
             generateSitemap(dbArticles, allAvailableTags);
         } catch (sitemapErr) {
             console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
         }
 
-        console.log('✨ [データ復旧・海外対策完了] 正しい形式の sitemap.xml と海外ワードつきHTMLの出力が完了しました！');
+        console.log('\n✨ [すべての処理が正常終了] 日常追加モードで快適に自動生成されました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }
