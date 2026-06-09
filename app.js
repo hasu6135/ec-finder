@@ -76,6 +76,36 @@ function generateSitemap(articles, tags) {
 }
 
 /**
+ * ✨ Googleサーチコンソール用の sitemap.xml を作成する関数（分割トップ対応版）
+ */
+function generateSitemapWithPages(articles, tags, totalPages) {
+    const today = new Date().toISOString().split('T')[0];
+    let xmlUrls = [];
+    const baseUrl = `https://${SITE_DOMAIN}`;
+    
+    // 1. 分割されたすべてのトップページを登録
+    for (let i = 1; i <= totalPages; i++) {
+        const pageName = i === 1 ? 'index.html' : `index${i}.html`;
+        const priority = i === 1 ? '1.0' : '0.9'; // 2ページ目以降も重要なので0.9
+        xmlUrls.push(`  <url>\n    <loc>${baseUrl}/${pageName}</loc>\n    <lastmod>${today}</lastmod>\n    <priority>${priority}</priority>\n  </url>`);
+    }
+    
+    // 2. 全レビュー詳細ページを登録
+    articles.forEach(art => {
+        xmlUrls.push(`  <url>\n    <loc>${baseUrl}/posts/${art.id}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`);
+    });
+    
+    // 3. 全タグ別一覧ページを登録（URLエンコード適用）
+    tags.forEach(tag => {
+        xmlUrls.push(`  <url>\n    <loc>${baseUrl}/tags/${encodeURIComponent(tag)}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.6</priority>\n  </url>`);
+    });
+
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
+    fs.writeFileSync('sitemap.xml', sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+    console.log(`🤖 [SEO対策] 最新の sitemap.xml をルートに自動書き出ししました（合計: ${xmlUrls.length} 件のURL）`);
+}
+
+/**
  * ===================================================
  * 🚀 メイン処理（FETCH_COUNT回数ループ運用モード）
  * ===================================================
@@ -239,7 +269,7 @@ async function main() {
             fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
 
-// ② 【20件ずつ】の総合トップページ量産ロジック
+		// ② 【20件ずつ】の総合トップページ量産ロジック
         const COUNT_PER_PAGE = 20; // 1ページあたりの件数
         const totalPages = Math.ceil(sortedArticles.length / COUNT_PER_PAGE) || 1; // 記事0件対策で最低1
         const allAvailableTags = Array.from(tagMap.keys());
@@ -270,7 +300,8 @@ async function main() {
         // [STEP 3/3] サイトマップの強制書き出し
         console.log(`\n[STEP 3/3] 🤖 検索エンジン対策を適用中...`);
         try {
-            generateSitemap(dbArticles, allAvailableTags);
+			// 元々の関数だと index.html しか登録されないため、分割されたトップページ数（totalPages）も一緒に引き渡します
+            generateSitemapWithPages(dbArticles, allAvailableTags, totalPages);
         } catch (sitemapErr) {
             console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
         }
