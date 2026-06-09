@@ -191,6 +191,7 @@ async function main() {
                     .filter(art => art.id !== articleId)
                     .slice(0, 5);
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, recommendedArticles);
+                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
                 dbArticles.unshift(articleData);
