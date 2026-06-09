@@ -17,6 +17,7 @@ const FETCH_COUNT = 1;       // 1回のリクエストでDMM APIから取得す�
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 💡 過去データを保存する簡易データベースファイル
+const SITE_DOMAIN = 'https://yourdomain.com'; // 💡【SEO対策】あなたのサイトの実際のURL(ドメイン)に書き換えてください
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
 const DMM_AFFILIATE_ID = '132815-001'; 
@@ -48,8 +49,33 @@ function saveDatabase(data) {
 }
 
 /**
+ * ✨ [新設] Googleサーチコンソール用の sitemap.xml を全自動で作成する関数
+ */
+function generateSitemap(articles, tags) {
+    const today = new Date().toISOString().split('T')[0];
+    let xmlUrls = [];
+    
+    // 総合トップ
+    xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/index.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>1.0</priority>\n  </url>`);
+    
+    // 全レビュー詳細
+    articles.forEach(art => {
+        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/posts/${art.id}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`);
+    });
+    
+    // 全タグ別一覧
+    tags.forEach(tag => {
+        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/tags/${encodeURIComponent(tag)}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.6</priority>\n  </url>`);
+    });
+
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
+    fs.writeFileSync('sitemap.xml', sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+    console.log(`🤖 [SEO対策] 最新の sitemap.xml をルートに自動書き出ししました（合計: ${xmlUrls.length} 件のURL）`);
+}
+
+/**
  * ===================================================
- * 🚀 メイン処理（全自動蓄積エンジン）
+ * 🚀 メイン処理（フルスペック集客自動化エンジン）
  * ===================================================
  */
 async function main() {
@@ -90,22 +116,21 @@ async function main() {
             // 詳細ページから実際の「生タグ」や「評価」を取得
             const detailData = await scrapeDmmProductDetail(product.url);
             
-			// 💡【追加】取得した口コミが空でないかログに出力して確認する
+            // 💡 取得した口コミが空でないかログに出力して確認する
             console.log(`---------------------------------------------------`);
             console.log(`💬 [口コミ取得チェック]`);
             if (detailData.userReviews && detailData.userReviews !== '（ネタバレなしレビューなし）') {
                 const count = detailData.userReviews.split('---').filter(Boolean).length;
                 console.log(`   ✅ 口コミの取得に成功しました！（合計: ${count} 件）`);
-                // 最初の1件の冒頭部分だけをチラ見せでログに出す
                 console.log(`   📝 サンプル: ${detailData.userReviews.substring(0, 100).replace(/\n/g, ' ')}...`);
             } else {
                 console.log(`   ⚠️ 口コミが空っぽ、または「なし」のテキストになっています。`);
             }
             console.log(`---------------------------------------------------`);
             
-			try {
-    			// AIレビュー執筆（aiReviewer.js側で完璧に成形されたHTML文字列が直接返ってきます）
-   				const formattedSummary = await generateAiReview(product, detailData);
+            try {
+                // AIレビュー執筆
+                const formattedSummary = await generateAiReview(product, detailData);
 
                 let perfectSampleReadLink = detailData.tachiyomiUrl 
                     ? `https://al.fanza.co.jp/?lurl=${encodeURIComponent(detailData.tachiyomiUrl)}&af_id=${DMM_AFFILIATE_ID}&ch=search_link&ch_id=link`
@@ -116,32 +141,35 @@ async function main() {
                     ? detailData.pageGenres 
                     : ["羞恥系"];
 
-const articleData = {
-    id: articleId,
-    originalTitle: product.title,
-    link: product.url,
-    imgUrl: product.imageUrl,
-    summary: formattedSummary,
-    sampleReadLink: perfectSampleReadLink,
-    tags: finalTags,
-    pageGenres: finalTags,
-    reviewRating: detailData.reviewRating,
-    reviewCount: detailData.reviewCount,
-    reviews: detailData.userReviews,     // 💡 template側が使いやすいように「reviews」で渡す
-    createdAt: new Date().toISOString()
-};
-
-				// 個別HTMLの保存
-                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE);
-                // 💡 改行コードをWindowsのCRLFに置換して保存
-                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
-                fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
+                // 💡【復活・最重要】元のメタ情報（作家・出版社・シリーズ等）を漏れなく格納
+                const articleData = {
+                    id: articleId,
+                    originalTitle: product.title,
+                    link: product.url,
+                    imgUrl: product.imageUrl,
+                    summary: formattedSummary,
+                    sampleReadLink: perfectSampleReadLink,
+                    tags: finalTags,
+                    pageGenres: finalTags,
+                    
+                    // スクリプトから引き継いだ詳細メタデータ
+                    series: detailData.series,
+                    author: detailData.author,
+                    label: detailData.label,
+                    publisher: detailData.publisher,
+                    category: detailData.category,
+                    
+                    reviewRating: detailData.reviewRating,
+                    reviewCount: detailData.reviewCount,
+                    reviews: detailData.userReviews,     // 💡 template側が使いやすいように「reviews」で渡す
+                    createdAt: new Date().toISOString()
+                };
 
                 // 💡 データベース（配列）に新しく作った記事データを追加
                 dbArticles.push(articleData);
                 existingIds.add(articleId); // ループ内での重複防止用
 
-                console.log(`✅ 記事生成完了: ⭐${detailData.reviewRating}`);
+                console.log(`✅ データ追加完了: ⭐${detailData.reviewRating}`);
             } catch (itemError) {
                 console.error(`⚠️ アイテム処理エラー:`, itemError.message);
             }
@@ -155,9 +183,26 @@ const articleData = {
             console.log(`💾 データベース(db.json)を更新しました。`);
         }
 
-        // 💡 4. 【最重要】「過去の全データ ＋ 今回のデータ」を元に、フロント画面を再構築する
+        // 💡 4. 【新設・レコメンド】「過去の全データ ＋ 今回のデータ」を元に、関連記事を計算して全個別ページをビルド・再書き出し
+        console.log(`💖 全個別レビューの関連記事（レコメンド）を再計算して最適化中...`);
+        dbArticles.forEach(currentArticle => {
+            const recommends = dbArticles
+                .filter(other => other.id !== currentArticle.id)
+                .map(other => {
+                    const commonTags = (currentArticle.tags || []).filter(t => (other.tags || []).includes(t));
+                    return { article: other, score: commonTags.length };
+                })
+                .filter(item => item.score > 0) 
+                .sort((a, b) => b.score - a.score || new Date(b.article.createdAt) - new Date(a.article.createdAt))
+                .slice(0, 3) 
+                .map(item => item.article);
+
+            const postHtml = generateSinglePostHTML(currentArticle, SITE_TITLE, recommends);
+            const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
+            fs.writeFileSync(path.join('posts', `${currentArticle.id}.html`), postHtmlCrlf, 'utf-8');
+        });
+
         // 最新の投稿が上にくるように並び替える（新着順にする場合）
-        // ※今回はcreatedAtプロパティを基準にソート。なければそのままの順。
         const sortedArticles = [...dbArticles].sort((a, b) => {
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
@@ -173,11 +218,10 @@ const articleData = {
         const todayObj = new Date();
         const displayDate = todayObj.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
 
-		// 5. タグ別ページの書き出し
+        // 5. タグ別ページの書き出し
         console.log(`📂 全${tagMap.size}個の公式タグページを再マージ中...`);
         for (const [tagName, articles] of tagMap.entries()) {
             const tagHtml = generateTagPageHTML(tagName, articles);
-            // 💡 改行コードをWindowsのCRLFに置換して保存
             const tagHtmlCrlf = tagHtml.replace(/\r?\n/g, '\r\n');
             fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
@@ -185,11 +229,13 @@ const articleData = {
         // 6. 総合トップページの書き出し
         const allAvailableTags = Array.from(tagMap.keys());
         const indexHtml = generateTopPageHTML(sortedArticles, displayDate, allAvailableTags, SITE_TITLE);
-        // 💡 改行コードをWindowsのCRLFに置換して保存
         const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
         fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
-        console.log('✨ [全自動蓄積完了] 既存の記事を破壊せず、新しい記事だけが美しく積み上がりました！');
+        // ✨ [新設] 7. サイトマップの自動書き出し
+        generateSitemap(dbArticles, allAvailableTags);
+
+        console.log('✨ [全自動蓄積完了] 作家・出版社データを1つも失うことなく、すべての集客機能が最新にアップデートされました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }

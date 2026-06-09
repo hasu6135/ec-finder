@@ -72,9 +72,9 @@ function makeStarString(rating) {
 }
 
 /**
- * 📖 個別レビュー詳細ページの生成
+ * 📖 個別レビュー詳細ページの生成（レコメンド ＆ OGP強化版）
  */
-function generateSinglePostHTML(article, siteTitle) {
+function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     const allTags = article.pageGenres || [];
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
         `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
@@ -84,9 +84,8 @@ function generateSinglePostHTML(article, siteTitle) {
         ? allTags.map(g => `<a href="../tags/${g}.html" class="bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded text-xs font-medium hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors">#${g}</a>`).join(' ')
         : '<span class="text-xs text-slate-400">なし</span>';
 
-    // 👤 購入者の口コミを「人アイコン＋吹き出し風」に変換するロジック
+    // 👤 購入者の口コミを吹き出し風に変換
     let reviewsHtml = '';
-    // 💡 article.userReviews から article.reviews に修正します
     if (article.reviews && article.reviews !== '（ネタバレなしレビューなし）') {
         const reviewList = article.reviews.split('---');
         reviewsHtml = reviewList.map((rev, idx) => {
@@ -99,7 +98,7 @@ function generateSinglePostHTML(article, siteTitle) {
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z"/>
                     </svg>
                 </div>
-                <div class="relative bg-rose-50/60 border border-rose-100/70 rounded-2xl p-3 text.xs sm:text-sm text-slate-700 leading-relaxed max-w-[85%] shadow-sm">
+                <div class="relative bg-rose-50/60 border border-rose-100/70 rounded-2xl p-3 text-xs sm:text-sm text-slate-700 leading-relaxed max-w-[85%] shadow-sm">
                     <div class="absolute top-3 -left-1.5 w-3 h-3 bg-rose-50 border-l border-b border-rose-100/70 rotate-45"></div>
                     ${cleanRev}
                 </div>
@@ -108,6 +107,36 @@ function generateSinglePostHTML(article, siteTitle) {
         }).join('\n');
     } else {
         reviewsHtml = '<p class="text-xs text-slate-400 italic pl-1">現在、この作品に購入者レビューはありません。</p>';
+    }
+
+    // 💖 関連記事（レコメンド）の組み立て
+    let recommendHtml = '';
+    if (recommendArticles.length > 0) {
+        const recCards = recommendArticles.map(rec => {
+            const encRecImg = encryptStr(rec.imgUrl);
+            return `
+            <a href="${rec.id}.html" class="group bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex gap-3 items-center hover:bg-rose-50/30 hover:border-rose-100 transition-all">
+                <div class="w-14 h-20 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                    <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encRecImg}" alt="関連表紙">
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">${rec.originalTitle}</h4>
+                    <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rec.reviewRating || '4.0'}</div>
+                </div>
+            </a>
+            `;
+        }).join('\n');
+
+        recommendHtml = `
+        <div class="mt-8 pt-6 border-t border-dashed border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <span>🍑 こちらの羞恥作品も絶対にオススメ！</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                ${recCards}
+            </div>
+        </div>
+        `;
     }
 
     const starIcons = makeStarString(article.reviewRating);
@@ -132,6 +161,17 @@ function generateSinglePostHTML(article, siteTitle) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
+    
+    <meta property="og:site_name" content="${siteTitle}">
+    <meta property="og:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} の狂おしい魅力を徹底レビュー！">
+    <meta property="og:description" content="言葉責め・公開羞恥の興奮ポイントをエロ同人ソムリエが熱量MAXで解説。購入者のリアルな口コミも掲載中！">
+    <meta property="og:image" content="${article.imgUrl}">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} のレビュー">
+    <meta name="twitter:description" content="エロ同人ソムリエによるガチ執筆レビュー。サクサク読めるスマホ最適化済み！">
+    <meta name="twitter:image" content="${article.imgUrl}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
@@ -196,7 +236,9 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
+                ${recommendHtml}
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100 mt-6">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                         <span>公式タグ一覧 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
@@ -283,7 +325,7 @@ function generateTagPageHTML(tagName, articles) {
 }
 
 /**
- * 🏠 総合トップページの生成
+ * 🏠 総合トップページの生成（読者絶賛ランキング搭載版）
  */
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const cards = articles.map(article => {
@@ -295,7 +337,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
 
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
-            <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
+            <div style="flex-shrink:0;width:50%;max-width:140px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
                 </a>
@@ -327,6 +369,36 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 </div>
             </div>
         </article>
+        `;
+    }).join('\n');
+
+    // ✨ [新設] 評価が高い順ランキング（上位5件）のカードアセンブリ
+    const rankingArticles = [...articles]
+        .sort((a, b) => parseFloat(b.reviewRating || 0) - parseFloat(a.reviewRating || 0))
+        .slice(0, 5);
+
+    const rankingCards = rankingArticles.map((article, index) => {
+        let rawLurl = '';
+        try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
+        const encLurl = encryptStr(rawLurl);
+        const encImg = encryptStr(article.imgUrl);
+        
+        const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+        return `
+        <div class="flex items-center gap-3 p-2 bg-rose-50/30 rounded-xl border border-rose-100/50 hover:bg-rose-50 transition-all">
+            <span class="text-lg font-bold w-6 text-center">${rankMedals[index]}</span>
+            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+            </div>
+            <div class="min-w-0 flex-1">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
+                <div class="flex justify-between items-center mt-1">
+                    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+                </div>
+            </div>
+        </div>
         `;
     }).join('\n');
 
@@ -374,10 +446,22 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">最新のレビュー一覧</h2>
+                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="w-2 h-5 bg-rose-500 rounded-full"></span>🔥 最新のガチレビュー一覧
+                </h2>
                 ${cards}
             </div>
-            <div class="lg:col-span-1">
+            
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
+                    <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
+                        <span>🍑 読者が絶賛した神作品ランキング</span>
+                    </h2>
+                    <div class="space-y-2">
+                        ${rankingCards}
+                    </div>
+                </div>
+
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
                     <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">タグ一覧</h2>
                     <ul class="flex flex-wrap -m-1">${tagCloudLinks.length > 0 ? tagCloudLinks : '<li class="text-xs text-slate-400 py-2">タグはまだありません。</li>'}</ul>
