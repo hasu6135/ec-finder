@@ -72,9 +72,9 @@ function makeStarString(rating) {
 }
 
 /**
- * 📖 個別レビュー詳細ページの生成
+ * 📖 個別レビュー詳細ページの生成（関連記事レコメンド対応版）
  */
-function generateSinglePostHTML(article, siteTitle) {
+function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     const allTags = article.pageGenres || [];
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
         `<a href="../tags/${t}.html" class="bg-rose-600 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-sm hover:bg-rose-700 transition-all"># ${t}</a>`
@@ -86,7 +86,6 @@ function generateSinglePostHTML(article, siteTitle) {
 
     // 👤 購入者の口コミを「人アイコン＋吹き出し風」に変換するロジック
     let reviewsHtml = '';
-    // 💡 article.userReviews から article.reviews に修正します
     if (article.reviews && article.reviews !== '（ネタバレなしレビューなし）') {
         const reviewList = article.reviews.split('---');
         reviewsHtml = reviewList.map((rev, idx) => {
@@ -99,7 +98,7 @@ function generateSinglePostHTML(article, siteTitle) {
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z"/>
                     </svg>
                 </div>
-                <div class="relative bg-rose-50/60 border border-rose-100/70 rounded-2xl p-3 text.xs sm:text-sm text-slate-700 leading-relaxed max-w-[85%] shadow-sm">
+                <div class="relative bg-rose-50/60 border border-rose-100/70 rounded-2xl p-3 text-xs sm:text-sm text-slate-700 leading-relaxed max-w-[85%] shadow-sm">
                     <div class="absolute top-3 -left-1.5 w-3 h-3 bg-rose-50 border-l border-b border-rose-100/70 rotate-45"></div>
                     ${cleanRev}
                 </div>
@@ -108,6 +107,36 @@ function generateSinglePostHTML(article, siteTitle) {
         }).join('\n');
     } else {
         reviewsHtml = '<p class="text-xs text-slate-400 italic pl-1">現在、この作品に購入者レビューはありません。</p>';
+    }
+
+    // 💖【新設】関連記事（レコメンド）のHTML組み立て
+    let recommendHtml = '';
+    if (recommendArticles.length > 0) {
+        const recCards = recommendArticles.map(rec => {
+            const encRecImg = encryptStr(rec.imgUrl);
+            return `
+            <a href="${rec.id}.html" class="group bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex gap-3 items-center hover:bg-rose-50/30 hover:border-rose-100 transition-all">
+                <div class="w-16 h-20 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                    <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encRecImg}" alt="関連表紙">
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">${rec.originalTitle}</h4>
+                    <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rec.reviewRating || '4.0'}</div>
+                </div>
+            </a>
+            `;
+        }).join('\n');
+
+        recommendHtml = `
+        <div class="mt-8 pt-6 border-t border-dashed border-slate-200">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
+                <span>🍑 こちらの羞恥作品も絶対にオススメ！</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                ${recCards}
+            </div>
+        </div>
+        `;
     }
 
     const starIcons = makeStarString(article.reviewRating);
@@ -196,7 +225,9 @@ function generateSinglePostHTML(article, siteTitle) {
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100">
+                ${recommendHtml}
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 group cursor-pointer transition-all duration-300 hover:bg-rose-50/20 hover:border-rose-100 mt-6">
                     <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex justify-between items-center">
                         <span>公式タグ一覧 (${allTags.length}個)</span>
                         <span class="text-[10px] text-rose-500 font-semibold group-hover:hidden">⏳ タップ・ホバーで全表示</span>
