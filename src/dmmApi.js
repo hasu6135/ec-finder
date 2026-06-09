@@ -1,6 +1,6 @@
 /**
  * ===================================================
- * 📡 DMM API 通信モジュール（引数連動・決定版）
+ * 📡 DMM API 通信モジュール（引数4つ・app.jsの初期設計に完全一致版）
  * ===================================================
  */
 async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
@@ -10,8 +10,8 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
         
         const searchKeyword = '羞恥'; 
         
-        // 💡 app.js から渡ってきた fetchCount（10）をそのまま使います。安全対策として未定義なら3にします。
-        const hitsCount = fetchCount || 3; 
+        // 💡 4番目の引数（fetchCount）を最優先で使い、文字が来たり未定義なら10件にします
+        const hitsCount = typeof fetchCount === 'number' ? fetchCount : 10; 
         console.log(`📊 設定を検知しました。DMMから新着を ${hitsCount} 件取得します。`);
 
         // URLとクエリパラメータの組み立て
@@ -36,24 +36,32 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
             return [];
         }
 
+        // 💡 【超重要】初期の app.js が1文字のズレもなく読める構造に完全にマッピングします
         return data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${affiliateId}&ch=search_link&ch_id=link`;
+            
+            // ジャンル（タグ）の配列を抽出
             const officialKeywords = item.iteminfo?.keyword ? item.iteminfo.keyword.map(k => k.name) : [];
 
             return {
                 title: item.title,
                 url: perfectAffiliateUrl, 
+                // 💡 元の app.js の「product.genre」がそのまま読める構造
                 genre: officialKeywords.map(name => ({ name })),
+                // 💡 元の app.js の「product.description」にDMMの紹介文、なければレビューを直撃
                 description: item.description || item.review?.comment || '羞恥系おすすめの最新コミックです。',
                 date: item.date || new Date().toISOString(),
                 review: {
                     rating: item.review?.rating || '0.0',
                     count: item.review?.count || 0
                 },
+                // 💡 元の app.js の「product.imagePath?.large」に100%ヒットする二重構造
                 imagePath: {
                     large: item.imageURL?.large || item.imageURL?.list || ''
-                }
+                },
+                // 保険としてダイレクトな名前も残す
+                imageUrl: item.imageURL?.large || item.imageURL?.list || ''
             };
         });
     } catch (error) {
