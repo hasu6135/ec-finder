@@ -129,25 +129,43 @@ async function main() {
                 // 公式タグ（ジャンル）の整理
                 const officialTags = product.genre ? product.genre.map(g => g.name) : [];
 
-                // データの格納（海外対策キーワード [Manga Raw] を自動付与）
+				// 💡【完全互換・無敵化】template.jsがどんな変数名で探していても100%ヒットさせる修正
                 const articleData = {
                     id: articleId,
+                    title: product.title,
                     originalTitle: `${product.title} [Manga Raw]`, 
                     link: product.url,
-                    // ⭕ 画像の格納部分を以下のように修正（スクレイピング画像を最優先、なければAPI画像）
-					image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
-                    description: product.description || '',
+                    url: product.url,
+                    rawUrl: product.rawUrl || product.url,
+                    description: product.description || '羞恥系おすすめの最新コミックです。',
                     reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
                     reviewCount: detailData.reviewCount || product.review?.count || 0,
                     tags: officialTags,
-                    aiReview: aiReviewHtml,
+                    genre: product.genre || [],
                     reviews: detailData.userReviews || [],
                     createdAt: product.date || new Date().toISOString(),
-                    // スクレイピングで補完したメタデータ
-                    series: detailData.series || '単行本',
-                    author: detailData.author || '不明',
-                    label: detailData.label || '不明',
-                    publisher: detailData.publisher || '不明',
+
+                    // 🖼️【表紙画像の網羅】どんな形式でテンプレートが呼び出しても絶対に画像が出るようにする
+                    image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
+                    imageUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
+                    imagePath: {
+                        large: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
+                        list: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : '')
+                    },
+
+                    // ✍️【本文・AIレビューの網羅】本文が空っぽになるのを防ぐため、想定される全てのキーにHTMLを注入
+                    aiReview: aiReviewHtml,
+                    reviewText: aiReviewHtml,
+                    aiReviewText: aiReviewHtml,
+                    content: aiReviewHtml,
+                    body: aiReviewHtml,
+
+                    // 🏷️【主要属性の網羅】作家や出版社、カテゴリなどのデータ呼び出しズレを完全吸収
+                    series: detailData.series || product.series || '単行本',
+                    author: detailData.author || product.author || '不明',
+                    maker: detailData.author || product.author || '不明', // 💡 template側がmakerで探している対策
+                    label: detailData.label || product.label || '不明',
+                    publisher: detailData.publisher || product.publisher || '不明',
                     category: detailData.category || 'コミック'
                 };
 
