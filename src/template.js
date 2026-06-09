@@ -333,7 +333,7 @@ function generateTagPageHTML(tagName, articles) {
  * @param {Number} currentPage - 現在のページ番号（1から始まる）
  * @param {Number} totalPages - 全体のページ数
  */
-function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1) {
+function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 10) {
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
