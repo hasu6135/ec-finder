@@ -172,6 +172,13 @@ async function main() {
         const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
         fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
+        // ✨ [新設] 7. サイトマップの自動書き出し
+		try {
+            generateSitemap(dbArticles, allAvailableTags);
+        } catch (sitemapErr) {
+            console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
+        }
+
         console.log('✨ [データ復旧完了] 過去の資産を消さずに、作家・出版社情報だけを美しく補完しました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
