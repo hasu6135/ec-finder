@@ -11,8 +11,9 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle) {
         
         // 💡 検索キーワードはサイトタイトル（siteTitle）をそのまま再利用するか、固定の「羞恥」にするか選べます
         // ここでは、元々のコードにあった「羞恥」で確実に検索できるように固定指定しています
-        const searchKeyword = '羞恥'; 
-        const fetchCount = 1; // 日常モードなので1件取得
+		const searchKeyword = '羞恥'; 
+        // 💡 3つ目の引数（siteTitle）の代わりにFETCH_COUNT分の数字が渡ってくる挙動に対応
+        const fetchCount = typeof siteTitle === 'number' ? siteTitle : 10;
 
         // URLとクエリパラメータの組み立て
         const url = new URL('https://api.dmm.com/affiliate/v3/ItemList');

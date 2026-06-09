@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 10;       // 💡 日常運用モード：1回で1件の最新作を取得
+const FETCH_COUNT = 3;       // 💡 ここで指定した件数分、新着を一気にループ処理します！
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -77,7 +77,7 @@ function generateSitemap(articles, tags) {
 
 /**
  * ===================================================
- * 🚀 メイン処理（日常運用・新着自動追加モード）
+ * 🚀 メイン処理（FETCH_COUNT回数ループ運用モード）
  * ===================================================
  */
 async function main() {
@@ -92,6 +92,7 @@ async function main() {
 
         // 1. FANZA（DMM）から最新商品の基本データを取得
         console.log(`\n[STEP 1/3] 🔄 最新情報を取得してAIレビュー執筆中...`);
+        // 💡 FETCH_COUNT をそのままAPI関数に渡します（内部の仕様をこれでカバー）
         const products = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE);
 
         if (!products || products.length === 0) {
@@ -99,13 +100,17 @@ async function main() {
             return;
         }
 
+        // 💡 設定された FETCH_COUNT の件数だけ切り出してループを回す（安全対策）
+        const targetProducts = products.slice(0, FETCH_COUNT);
+        console.log(`📡 取得した新着候補の中から、最新の ${targetProducts.length} 件を処理します。`);
+
         let isDatabaseChanged = false;
 
-        // 2. 取得した新着商品を検証・処理
-        for (const product of products) {
+        // 2. 取得した新着商品を検証・ループ処理
+        for (const product of targetProducts) {
             const articleId = generateSafeId(product.title);
 
-            // 💡 重複チェック（すでに作成済みの記事ならスキップして高速化）
+            // 重複チェック（すでに作成済みの記事ならスキップして高速化）
             if (dbArticles.some(art => art.id === articleId)) {
                 console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
                 continue;
@@ -114,10 +119,10 @@ async function main() {
             console.log(`📝 新着記事を作成中: ${product.title}`);
 
             try {
-                // 💡 商品詳細ページをスクレイピング（作家・出版社・ユーザーレビューを取得）
+                // 商品詳細ページをスクレイピング（作家・出版社・ユーザーレビューを取得）
                 const detailData = await scrapeDmmProductDetail(product.url);
 
-                // 💡 AIレビューの生成
+                // AIレビューの生成
                 const aiReviewMarkdown = await generateAiReview(product.title, product.description);
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
 
@@ -145,8 +150,8 @@ async function main() {
                     category: detailData.category || 'コミック'
                 };
 
-				// 💡 過去の全データ（dbArticles）を渡して、関連作品を自動抽出できるようにする
-				const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, dbArticles);
+                // 💡【修正】第3引数に dbArticles を渡し、関連作品がしっかり表示されるように復活！
+                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, dbArticles);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
@@ -158,6 +163,9 @@ async function main() {
             } catch (itemError) {
                 console.error(`   ❌ この商品の処理中にエラーが発生しました:`, itemError.message);
             }
+
+            // 連続アクセス対策として、複数件処理時は1秒待機
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         // 💡 変化があった場合のみ db.json を更新
@@ -207,7 +215,7 @@ async function main() {
             console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
         }
 
-        console.log('\n✨ [すべての処理が正常終了] 日常追加モードで快適に自動生成されました！');
+        console.log('\n✨ [すべての処理が正常終了] 指定件数分のループ処理が完了しました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }
