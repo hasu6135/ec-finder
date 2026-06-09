@@ -252,6 +252,14 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
             </div>
         </article>
     </main>
+    			
+	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="text-slate-500 mb-2">Supported by DMMアフィリエイト</p>
+            <p>&copy; 2026 ${siteTitle}. All Rights Reserved.</p>
+        </div>
+    </footer>
+    			
     ${bypassScript}
 </body>
 </html>`;
