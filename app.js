@@ -197,9 +197,12 @@ const articleData = {
                 .slice(0, 3) 
                 .map(item => item.article);
 
-            const postHtml = generateSinglePostHTML(currentArticle, SITE_TITLE, recommends);
-            const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
-            fs.writeFileSync(path.join('posts', `${currentArticle.id}.html`), postHtmlCrlf, 'utf-8');
+// 個別HTMLの保存
+// 💡【重要】第3引数に空の配列 [] を追加します（template.jsのレコメンド機能とのミスマッチを防ぐため）
+const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, []);
+// 💡 改行コードをWindowsのCRLFに置換して保存
+const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
+fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
         });
 
         // 最新の投稿が上にくるように並び替える（新着順にする場合）
