@@ -548,7 +548,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${siteTitle} - 羞恥専門成人向けレビューまとめ</title>
+    <title>${siteTitle} - 羞恥専門成人向けレビューまとめ(ページ ${currentPage}/${totalPages})</title>
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
