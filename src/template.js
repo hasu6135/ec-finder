@@ -325,9 +325,15 @@ function generateTagPageHTML(tagName, articles) {
 }
 
 /**
- * 🏠 総合トップページの生成（読者絶賛ランキング搭載版）
+ * 🏠 総合トップページの生成（読者絶賛ランキング＆ページネーション搭載版）
+ * @param {Array} articles - そのページに表示する20件の記事
+ * @param {String} displayDate - 最終更新日
+ * @param {Array} allTags - 全タグの配列
+ * @param {String} siteTitle - サイトタイトル
+ * @param {Number} currentPage - 現在のページ番号（1から始まる）
+ * @param {Number} totalPages - 全体のページ数
  */
-function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
+function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1) {
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
