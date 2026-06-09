@@ -145,8 +145,8 @@ async function main() {
                     category: detailData.category || 'コミック'
                 };
 
-                // 個別HTMLの生成と保存（引数バグ対策の [] を第3引数に指定）
-                const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, []);
+				// 💡 過去の全データ（dbArticles）を渡して、関連作品を自動抽出できるようにする
+				const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, dbArticles);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
