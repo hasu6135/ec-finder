@@ -37,30 +37,25 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
         }
 
         // 💡 【超重要】初期の app.js が1文字のズレもなく読める構造に完全にマッピングします
-        return data.result.items.map(item => {
+		return data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${affiliateId}&ch=search_link&ch_id=link`;
-            
-            // ジャンル（タグ）の配列を抽出
             const officialKeywords = item.iteminfo?.keyword ? item.iteminfo.keyword.map(k => k.name) : [];
 
             return {
                 title: item.title,
-                url: perfectAffiliateUrl, 
-                // 💡 元の app.js の「product.genre」がそのまま読める構造
+                url: perfectAffiliateUrl,         // 💡ボタンなどのリンク用（アフィURL）
+                rawUrl: item.URL,                  // 💡【追加】スクレイピング用（純粋なURL）
                 genre: officialKeywords.map(name => ({ name })),
-                // 💡 元の app.js の「product.description」にDMMの紹介文、なければレビューを直撃
                 description: item.description || item.review?.comment || '羞恥系おすすめの最新コミックです。',
                 date: item.date || new Date().toISOString(),
                 review: {
                     rating: item.review?.rating || '0.0',
                     count: item.review?.count || 0
                 },
-                // 💡 元の app.js の「product.imagePath?.large」に100%ヒットする二重構造
                 imagePath: {
                     large: item.imageURL?.large || item.imageURL?.list || ''
                 },
-                // 保険としてダイレクトな名前も残す
                 imageUrl: item.imageURL?.large || item.imageURL?.list || ''
             };
         });

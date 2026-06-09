@@ -120,7 +120,7 @@ async function main() {
 
             try {
                 // 商品詳細ページをスクレイピング（作家・出版社・ユーザーレビューを取得）
-                const detailData = await scrapeDmmProductDetail(product.url);
+                const detailData = await scrapeDmmProductDetail(product.rawUrl || product.url);
 
                 // AIレビューの生成
                 const aiReviewMarkdown = await generateAiReview(product.title, product.description);
@@ -134,7 +134,8 @@ async function main() {
                     id: articleId,
                     originalTitle: `${product.title} [Manga Raw]`, 
                     link: product.url,
-                    image: product.imageUrl || '',
+                    // ⭕ 画像の格納部分を以下のように修正（スクレイピング画像を最優先、なければAPI画像）
+					image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     description: product.description || '',
                     reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
                     reviewCount: detailData.reviewCount || product.review?.count || 0,
