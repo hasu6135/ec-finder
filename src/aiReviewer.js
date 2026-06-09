@@ -50,7 +50,7 @@ async function generateAiReview(product, detailData) {
 function formatAiResponseToHtml(text) {
     if (!text) return '';
     
-    // 💡【修正】太字(b)やハイライト(mark)部分に、インラインで文字を少し大きく(105%)、さらに読みやすくするスタイルを適用
+    // 💡太字(b)やハイライト(mark)部分に、インラインで文字を少し大きく(105%)、さらに読みやすくするスタイルを適用
     let cleanedText = text
         .replace(/\*\*(.*?)\*\*/g, '<b class="inline-block text-[106%] font-extrabold text-slate-950 px-0.5">$1</b>')
         .replace(/\*(.*?)\*/g, '<b class="inline-block text-[106%] font-extrabold text-slate-950 px-0.5">$1</b>')
@@ -132,4 +132,13 @@ function formatAiResponseToHtml(text) {
     return htmlOutput.join('\n');
 }
 
-module.exports = { generateAiReview };
+// 💡 app.js側でエラーにならないよう、ダミー関数としてエラーを回避させます
+function parseMarkdownTableToHtml(text) {
+    return text; // すでにHTML化されているか不要なため、そのまま右から左へ流すだけ
+}
+
+// 外部へ公開する関数一覧
+module.exports = { 
+    generateAiReview, 
+    parseMarkdownTableToHtml 
+};
