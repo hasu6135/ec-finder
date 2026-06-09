@@ -122,24 +122,28 @@ async function main() {
                 // 商品詳細ページをスクレイピング
                 const detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
 
-                // 🏷️【修正】公式タグ（ジャンル）の配列抽出を100%確実に成功させるロジック
+                // 🏷️【最重要修正】scraper.jsが取得した pageGenres を最優先で100%確実に抽出する
                 let officialTags = [];
-                if (product.genre && Array.isArray(product.genre)) {
+                if (detailData.pageGenres && Array.isArray(detailData.pageGenres) && detailData.pageGenres.length > 0) {
+                    // scraper.jsが取ってきた極上のハッシュタグを最優先で適用！
+                    officialTags = detailData.pageGenres;
+                } else if (product.genre && Array.isArray(product.genre)) {
                     officialTags = product.genre.map(g => typeof g === 'object' ? (g.name || g.tagName) : g).filter(Boolean);
-                } else if (product.tags && Array.isArray(product.tags)) {
-                    officialTags = product.tags;
                 }
                 
-                // タグが万が一空なら「羞恥系コミック」をデフォルトで入れておく
+                // 万が一タグが1つも取れなかった場合のセーフティ
                 if (officialTags.length === 0) {
                     officialTags = ['羞恥系', 'おすすめコミック'];
                 }
 
-                // 🧠【最重要修正】aiReviewer.jsの要求通り、オブジェクトを丸ごと2つ渡す！これでundefinedが絶対直ります
+                // 🧠【AIバグ修正】AIに「タグを正しく格納したdetailData」を引き渡す
+                detailData.pageGenres = officialTags; 
+
+                // AIへオブジェクトごと丸々バトンパス！これでundefined警告が完全に消え去ります
                 const aiReviewMarkdown = await generateAiReview(product, detailData);
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
 
-                // 💡【template.jsの要求名に完全合致】名前のズレを完璧に解消する修正
+                // 💡【完全マッピング】template.jsとdb.jsonの全ての要求プロパティを100%満たす
                 const articleData = {
                     id: articleId,
                     title: product.title,
@@ -150,12 +154,12 @@ async function main() {
                     description: product.description || '羞恥系おすすめの最新コミックです。',
                     reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
                     reviewCount: detailData.reviewCount || product.review?.count || 0,
-                    tags: officialTags,
+                    tags: officialTags,         // db.jsonや内部管理用
                     genre: product.genre || [],
                     reviews: detailData.userReviews || [],
                     createdAt: product.date || new Date().toISOString(),
 
-                    // 🖼️【表紙画像】template.jsが要求する「imgUrl」
+                    // 🖼️【表紙画像】
                     imgUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     imageUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
@@ -164,7 +168,7 @@ async function main() {
                         list: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : '')
                     },
 
-                    // ✍️【本文・AIレビュー】template.jsが要求する「summary」にAIのHTMLを注入
+                    // ✍️【本文・AIレビュー】template.jsの ${article.summary} 対策
                     summary: aiReviewHtml,
                     aiReview: aiReviewHtml,
                     reviewText: aiReviewHtml,
@@ -172,7 +176,7 @@ async function main() {
                     content: aiReviewHtml,
                     body: aiReviewHtml,
 
-                    // 🏷️【主要属性】template.jsがバッジ生成に要求する「pageGenres」
+                    // 🏷️【主要属性バッジ】template.jsの ${article.pageGenres} 呼び出しに100%適合
                     pageGenres: officialTags, 
                     series: detailData.series || product.series || '単行本',
                     author: detailData.author || product.author || '不明',
@@ -188,7 +192,7 @@ async function main() {
 
                 dbArticles.unshift(articleData);
                 isDatabaseChanged = true;
-                console.log(`   ✅ 記事生成が完了しました！ (作家: ${articleData.author})`);
+                console.log(`   ✅ 記事生成が完了しました！ (取得タグ: [${officialTags.join(', ')}])`);
 
             } catch (itemError) {
                 console.error(`   ❌ この商品の処理中にエラーが発生しました:`, itemError.message);
