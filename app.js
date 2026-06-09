@@ -129,7 +129,7 @@ async function main() {
                 // 公式タグ（ジャンル）の整理
                 const officialTags = product.genre ? product.genre.map(g => g.name) : [];
 
-				// 💡【完全互換・無敵化】template.jsがどんな変数名で探していても100%ヒットさせる修正
+				// 💡【template.jsの要求名に完全合致】名前のズレを完璧に解消する修正
                 const articleData = {
                     id: articleId,
                     title: product.title,
@@ -145,7 +145,8 @@ async function main() {
                     reviews: detailData.userReviews || [],
                     createdAt: product.date || new Date().toISOString(),
 
-                    // 🖼️【表紙画像の網羅】どんな形式でテンプレートが呼び出しても絶対に画像が出るようにする
+                    // 🖼️【表紙画像】template.jsがピンポイントで要求する「imgUrl」を完全網羅
+                    imgUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     imageUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     imagePath: {
@@ -153,17 +154,19 @@ async function main() {
                         list: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : '')
                     },
 
-                    // ✍️【本文・AIレビューの網羅】本文が空っぽになるのを防ぐため、想定される全てのキーにHTMLを注入
+                    // ✍️【本文・AIレビュー】template.jsが要求する「summary」にAIのHTMLを注入
+                    summary: aiReviewHtml,
                     aiReview: aiReviewHtml,
                     reviewText: aiReviewHtml,
                     aiReviewText: aiReviewHtml,
                     content: aiReviewHtml,
                     body: aiReviewHtml,
 
-                    // 🏷️【主要属性の網羅】作家や出版社、カテゴリなどのデータ呼び出しズレを完全吸収
+                    // 🏷️【主要属性】template.jsがバッジ生成に要求する「pageGenres」を配置
+                    pageGenres: officialTags, // officialTagsは [ 'タグA', 'タグB' ] の形式の配列
                     series: detailData.series || product.series || '単行本',
                     author: detailData.author || product.author || '不明',
-                    maker: detailData.author || product.author || '不明', // 💡 template側がmakerで探している対策
+                    maker: detailData.author || product.author || '不明', 
                     label: detailData.label || product.label || '不明',
                     publisher: detailData.publisher || product.publisher || '不明',
                     category: detailData.category || 'コミック'
