@@ -17,7 +17,6 @@ const FETCH_COUNT = 1;       // 1回のリクエストでDMM APIから取得す�
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   
-const SITE_DOMAIN = 'https://yourdomain.com'; // 💡【重要】あなたのサイトの実際のURL(ドメイン)に書き換えてください
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
 const DMM_AFFILIATE_ID = '132815-001'; 
@@ -45,35 +44,8 @@ function saveDatabase(data) {
 }
 
 /**
- * ✨ [新設] Googleサーチコンソール用の sitemap.xml を全自動で生成する関数
- */
-function generateSitemap(articles, tags) {
-    const today = new Date().toISOString().split('T')[0];
-    
-    let xmlUrls = [];
-    
-    // トップページ
-    xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/index.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>1.0</priority>\n  </url>`);
-    
-    // 全個別レビューページ
-    articles.forEach(art => {
-        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/posts/${art.id}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`);
-    });
-    
-    // 全タグページ
-    tags.forEach(tag => {
-        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/tags/${encodeURIComponent(tag)}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.6</priority>\n  </url>`);
-    });
-
-    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
-    
-    fs.writeFileSync('sitemap.xml', sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
-    console.log(`🤖 [SEO対策] 最新の sitemap.xml をルートに自動書き出ししました（合計: ${xmlUrls.length}のURL）`);
-}
-
-/**
  * ===================================================
- * 🚀 メイン処理（フルスペック集客自動化エンジン）
+ * 🚀 メイン処理（全自動蓄積・レコメンド対応エンジン）
  * ===================================================
  */
 async function main() {
@@ -129,7 +101,7 @@ async function main() {
                     pageGenres: finalTags,
                     reviewRating: detailData.reviewRating,
                     reviewCount: detailData.reviewCount,
-                    reviews: detailData.userReviews,
+                    reviews: detailData.userReviews, // reviews という名前で統一
                     createdAt: new Date().toISOString()
                 };
 
@@ -149,26 +121,28 @@ async function main() {
             console.log(`💾 データベース(db.json)を更新しました。`);
         }
 
-        // 全個別ページへ「関連記事（レコメンド）」を計算して書き出す
+        // 💡 4. 【新設】全個別ページへ「関連記事（レコメンド）」を計算して書き出す
         console.log(`💖 全個別レビューの関連記事を最適化中...`);
         dbArticles.forEach(currentArticle => {
+            // 自分以外の記事を抽出し、同じタグを多く持っている順番にソート
             const recommends = dbArticles
                 .filter(other => other.id !== currentArticle.id)
                 .map(other => {
                     const commonTags = currentArticle.tags.filter(t => other.tags.includes(t));
                     return { article: other, score: commonTags.length };
                 })
-                .filter(item => item.score > 0) 
+                .filter(item => item.score > 0) // 最低1つは共通タグがあるもの
                 .sort((a, b) => b.score - a.score || new Date(b.article.createdAt) - new Date(a.article.createdAt))
-                .slice(0, 3) 
+                .slice(0, 3) // 最大3件
                 .map(item => item.article);
 
+            // 関連記事データを含めてHTMLを書き出す
             const postHtml = generateSinglePostHTML(currentArticle, SITE_TITLE, recommends);
             const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
             fs.writeFileSync(path.join('posts', `${currentArticle.id}.html`), postHtmlCrlf, 'utf-8');
         });
 
-        // 過去データを含めた新着並び替え
+        // 過去データを含めた並び替え
         const sortedArticles = [...dbArticles].sort((a, b) => {
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
@@ -198,10 +172,7 @@ async function main() {
         const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
         fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
-        // ✨ [新設] 7. サイトマップの自動生成をキック
-        generateSitemap(dbArticles, allAvailableTags);
-
-        console.log('✨ [全自動蓄積完了] サイトマップ・高評価順ランキング・OGP対応カード、すべて完了しました！');
+        console.log('✨ [全自動蓄積完了] 関連記事を含めてすべてのページが最新にアップデートされました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }
