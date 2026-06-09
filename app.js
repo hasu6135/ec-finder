@@ -134,7 +134,7 @@ async function main() {
                     id: articleId,
                     originalTitle: `${product.title} [Manga Raw]`, 
                     link: product.url,
-                    image: product.imagePath?.large || product.imagePath?.list || '',
+                    image: product.imageUrl || '',
                     description: product.description || '',
                     reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
                     reviewCount: detailData.reviewCount || product.review?.count || 0,
