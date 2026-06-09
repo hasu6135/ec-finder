@@ -584,10 +584,9 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                 </h2>
                 ${cards}
                 
-                
-                	<div class="space-y-2">
-	    ${paginationHtml}
-	</div>
+                <div class="space-y-2">
+	    			${paginationHtml}
+				</div>
             </div>
             	
             <div class="lg:col-span-1 space-y-6">
