@@ -376,15 +376,12 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const rankingArticles = [...articles]
         .sort((a, b) => parseFloat(b.reviewRating || 0) - parseFloat(a.reviewRating || 0))
         .slice(0, 5);
-
     const rankingCards = rankingArticles.map((article, index) => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
-        
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-
         return `
         <div class="flex items-center gap-3 p-2 bg-rose-50/30 rounded-xl border border-rose-100/50 hover:bg-rose-50 transition-all">
             <span class="text-lg font-bold w-6 text-center">${rankMedals[index]}</span>
@@ -396,6 +393,33 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                 <div class="flex justify-between items-center mt-1">
                     <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
                     <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+                </div>
+            </div>
+        </div>
+        `;
+    }).join('\n');
+
+	// 🔥 【追加】レビュー件数が多い順ランキング（上位5件）のカードアセンブリ
+    const commentRankingArticles = [...articles]
+        .sort((a, b) => parseInt(b.reviewCount || 0) - parseInt(a.reviewCount || 0))
+        .slice(0, 5);
+    const commentRankingCards = commentRankingArticles.map((article, index) => {
+        let rawLurl = '';
+        try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
+        const encLurl = encryptStr(rawLurl);
+        const encImg = encryptStr(article.imgUrl);
+        const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+        return `
+        <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
+            <span class="text-lg font-bold w-6 text-center">${rankMedals[index]}</span>
+            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+            </div>
+            <div class="min-w-0 flex-1">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
+                <div class="flex justify-between items-center mt-1">
+                    <span class="text-[10px] text-slate-500">💬 口コミ <span class="font-bold text-rose-600">${article.reviewCount || '0'}</span> 件</span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
         </div>
@@ -459,6 +483,15 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
                     </h2>
                     <div class="space-y-2">
                         ${rankingCards}
+                    </div>
+                </div>
+
+				<div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
+                    <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
+                        <span>💬 みんなが注目！口コミ話題作ランキング</span>
+                    </h2>
+                    <div class="space-y-2">
+                        ${commentRankingCards}
                     </div>
                 </div>
 
