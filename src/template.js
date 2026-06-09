@@ -332,8 +332,12 @@ function generateTagPageHTML(tagName, articles) {
  * @param {String} siteTitle - サイトタイトル
  * @param {Number} currentPage - 現在のページ番号（1から始まる）
  * @param {Number} totalPages - 全体のページ数
+				allArticles 全ページ
  */
-function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1) {
+function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1, allArticles = []) {
+	// 💡 もし古い呼び出し方で全データが送られてこなかった時のために、セーフティを貼る
+    const baseArticlesForRanking = allArticles.length > 0 ? allArticles : articles;
+    
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
@@ -379,7 +383,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     }).join('\n');
 
     // ✨ [新設] 評価が高い順ランキング（上位5件）のカードアセンブリ
-    const rankingArticles = [...articles]
+    const rankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => parseFloat(b.reviewRating || 0) - parseFloat(a.reviewRating || 0))
         .slice(0, 5);
     const rankingCards = rankingArticles.map((article, index) => {
@@ -406,7 +410,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     }).join('\n');
 
 	// 🔥 【追加】レビュー件数が多い順ランキング（上位5件）のカードアセンブリ
-    const commentRankingArticles = [...articles]
+    const commentRankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => parseInt(b.reviewCount || 0) - parseInt(a.reviewCount || 0))
         .slice(0, 5);
     const commentRankingCards = commentRankingArticles.map((article, index) => {
@@ -434,7 +438,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 
 	// 🆕 3. 【新設】新着順ランキング（新しく追加された順・上位5件）
     // DB（db.json）の仕様上、新しいものが配列の前方、またはdateプロパティを持っているので、降順でソート
-    const newRankingArticles = [...articles]
+    const newRankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
         .slice(0, 5);
     const newRankingCards = newRankingArticles.map((article, index) => {
@@ -458,7 +462,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     }).join('\n');
 
 	// 🔥 【新設】今週の超大作ランキング（紹介文の文字数＝熱量順・上位5件）
-    const megaArticles = [...articles]
+    const megaArticles = [...baseArticlesForRanking]
         .sort((a, b) => parseInt(b.summary ? b.summary.length : 0) - parseInt(a.summary ? a.summary.length : 0))
         .slice(0, 5);
     const megaCards = megaArticles.map((article, index) => {
@@ -640,9 +644,9 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     });
     </script>
 
-                    <div class="space-y-2">
-                        ${paginationHtml}
-                    </div>
+	<div class="space-y-2">
+	    ${paginationHtml}
+	</div>
 
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">

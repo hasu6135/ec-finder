@@ -287,7 +287,8 @@ async function main() {
                 allAvailableTags, 
                 SITE_TITLE, 
                 page, 
-                totalPages
+                totalPages,
+                sortedArticles
             );
             const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
 
