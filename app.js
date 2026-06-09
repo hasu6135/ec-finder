@@ -110,7 +110,7 @@ async function main() {
         for (const product of targetProducts) {
             const articleId = generateSafeId(product.title);
 
-            // 重複チェック（すでに作成済みの記事ならスキップして高速化）
+            // 重複チェック
             if (dbArticles.some(art => art.id === articleId)) {
                 console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
                 continue;
@@ -119,17 +119,27 @@ async function main() {
             console.log(`📝 新着記事を作成中: ${product.title}`);
 
             try {
-                // 商品詳細ページをスクレイピング（作家・出版社・ユーザーレビューを取得）
-                const detailData = await scrapeDmmProductDetail(product.rawUrl || product.url);
+                // 商品詳細ページをスクレイピング
+                const detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
 
-                // AIレビューの生成
-                const aiReviewMarkdown = await generateAiReview(product.title, product.description);
+                // 🏷️【修正】公式タグ（ジャンル）の配列抽出を100%確実に成功させるロジック
+                let officialTags = [];
+                if (product.genre && Array.isArray(product.genre)) {
+                    officialTags = product.genre.map(g => typeof g === 'object' ? (g.name || g.tagName) : g).filter(Boolean);
+                } else if (product.tags && Array.isArray(product.tags)) {
+                    officialTags = product.tags;
+                }
+                
+                // タグが万が一空なら「羞恥系コミック」をデフォルトで入れておく
+                if (officialTags.length === 0) {
+                    officialTags = ['羞恥系', 'おすすめコミック'];
+                }
+
+                // 🧠【最重要修正】aiReviewer.jsの要求通り、オブジェクトを丸ごと2つ渡す！これでundefinedが絶対直ります
+                const aiReviewMarkdown = await generateAiReview(product, detailData);
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
 
-                // 公式タグ（ジャンル）の整理
-                const officialTags = product.genre ? product.genre.map(g => g.name) : [];
-
-				// 💡【template.jsの要求名に完全合致】名前のズレを完璧に解消する修正
+                // 💡【template.jsの要求名に完全合致】名前のズレを完璧に解消する修正
                 const articleData = {
                     id: articleId,
                     title: product.title,
@@ -145,7 +155,7 @@ async function main() {
                     reviews: detailData.userReviews || [],
                     createdAt: product.date || new Date().toISOString(),
 
-                    // 🖼️【表紙画像】template.jsがピンポイントで要求する「imgUrl」を完全網羅
+                    // 🖼️【表紙画像】template.jsが要求する「imgUrl」
                     imgUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     image: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
                     imageUrl: detailData.imageUrl || product.imageUrl || (product.imagePath ? product.imagePath.large : ''),
@@ -162,8 +172,8 @@ async function main() {
                     content: aiReviewHtml,
                     body: aiReviewHtml,
 
-                    // 🏷️【主要属性】template.jsがバッジ生成に要求する「pageGenres」を配置
-                    pageGenres: officialTags, // officialTagsは [ 'タグA', 'タグB' ] の形式の配列
+                    // 🏷️【主要属性】template.jsがバッジ生成に要求する「pageGenres」
+                    pageGenres: officialTags, 
                     series: detailData.series || product.series || '単行本',
                     author: detailData.author || product.author || '不明',
                     maker: detailData.author || product.author || '不明', 
@@ -172,12 +182,10 @@ async function main() {
                     category: detailData.category || 'コミック'
                 };
 
-                // 💡【修正】第3引数に dbArticles を渡し、関連作品がしっかり表示されるように復活！
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, dbArticles);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
-                // データベース配列の先頭に追加
                 dbArticles.unshift(articleData);
                 isDatabaseChanged = true;
                 console.log(`   ✅ 記事生成が完了しました！ (作家: ${articleData.author})`);
@@ -186,7 +194,6 @@ async function main() {
                 console.error(`   ❌ この商品の処理中にエラーが発生しました:`, itemError.message);
             }
 
-            // 連続アクセス対策として、複数件処理時は1秒待機
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
