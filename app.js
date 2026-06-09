@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 1;       // 💡 日常運用モード：1回で1件の最新作を取得
+const FETCH_COUNT = 10;       // 💡 日常運用モード：1回で1件の最新作を取得
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
