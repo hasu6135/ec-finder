@@ -326,11 +326,6 @@ function generateTagPageHTML(tagName, articles) {
 
 /**
  * 🏠 総合トップページの生成（読者絶賛ランキング搭載版）
-             <div style="flex-shrink:0;width:50%;max-width:140px;aspect-ratio:3/4;">
-                <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
-                    <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
-                </a>
-            </div>
  */
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     const cards = articles.map(article => {
@@ -342,16 +337,14 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
 
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
-
 			<div style="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
 			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
 			</div>
-            
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="space-y-1.5">
-                    <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     <div class="text-[11px] text-slate-500 flex items-center gap-1">
                         <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
                         <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
