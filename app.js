@@ -142,28 +142,28 @@ async function main() {
                     : ["羞恥系"];
 
                 // 💡【復活・最重要】元のメタ情報（作家・出版社・シリーズ等）を漏れなく格納
-                const articleData = {
-                    id: articleId,
-                    originalTitle: product.title,
-                    link: product.url,
-                    imgUrl: product.imageUrl,
-                    summary: formattedSummary,
-                    sampleReadLink: perfectSampleReadLink,
-                    tags: finalTags,
-                    pageGenres: finalTags,
-                    
-                    // スクリプトから引き継いだ詳細メタデータ
-                    series: detailData.series,
-                    author: detailData.author,
-                    label: detailData.label,
-                    publisher: detailData.publisher,
-                    category: detailData.category,
-                    
-                    reviewRating: detailData.reviewRating,
-                    reviewCount: detailData.reviewCount,
-                    reviews: detailData.userReviews,     // 💡 template側が使いやすいように「reviews」で渡す
-                    createdAt: new Date().toISOString()
-                };
+const articleData = {
+    id: articleId,
+    originalTitle: product.title,
+    link: product.url,
+    imgUrl: product.imageUrl,
+    summary: formattedSummary,
+    sampleReadLink: perfectSampleReadLink,
+    tags: finalTags,
+    pageGenres: finalTags,
+    
+    // 👇【対策】スクレイピングした作家・出版社などのメタデータをここに追加して保持する
+    series: detailData.series,
+    author: detailData.author,
+    label: detailData.label,
+    publisher: detailData.publisher,
+    category: detailData.category,
+    
+    reviewRating: detailData.reviewRating,
+    reviewCount: detailData.reviewCount,
+    reviews: detailData.userReviews,     // 💡 template側が使いやすいように「reviews」で渡す
+    createdAt: new Date().toISOString()
+};
 
                 // 💡 データベース（配列）に新しく作った記事データを追加
                 dbArticles.push(articleData);
