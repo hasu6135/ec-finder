@@ -577,12 +577,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     </header>
 
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        	<div class="space-y-2">
+    		<div class="space-y-2">
 	    ${paginationHtml}
 	</div>
-        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
                 <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <span class="w-2 h-5 bg-rose-500 rounded-full"></span>🔥 最新のガチレビュー一覧 (ページ ${currentPage}/${totalPages})
