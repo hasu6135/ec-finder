@@ -157,10 +157,22 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     return `
 <!DOCTYPE html>
 <html lang="ja">
+// 💡 template.js の head 部分をこれに差し替え
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
+    <title>${article.originalTitle} - ガチレビュー | ${siteTitle}</title>
+    
+    <meta property="og:site_name" content="${siteTitle}">
+    <meta property="og:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} の狂おしい魅力を徹底レビュー！">
+    <meta property="og:description" content="言葉責め・公開羞恥の興奮ポイントをエロ同人ソムリエが熱量MAXで解説。購入者のリアルな口コミも掲載中！">
+    <meta property="og:image" content="${article.imgUrl}">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} のレビュー">
+    <meta name="twitter:description" content="エロ同人ソムリエによるガチ執筆レビュー。サクサク読めるスマホ最適化済み！">
+    <meta name="twitter:image" content="${article.imgUrl}">
+
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
@@ -314,50 +326,70 @@ function generateTagPageHTML(tagName, articles) {
 }
 
 /**
- * 🏠 総合トップページの生成
+ * 🏠 総合トップページの生成（ソムリエ厳選・評価順ランキング対応版）
  */
 function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
+    // 💡 新着順のカード
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
 
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
-            <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
+            <div style="flex-shrink:0;width:50%;max-width:140px;aspect-ratio:3/4;">
                 <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
                     <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:4px;border:none;">
                 </a>
             </div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
-                <div class="space-y-1.5">
+                <div class="space-y-1">
                     <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     <div class="text-[11px] text-slate-500 flex items-center gap-1">
                         <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
-                        <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
+                        <span>(${article.reviewCount || '0'}件)</span>
                     </div>
-                    <div class="flex flex-wrap gap-0.5">
-                        <span class="sm:hidden flex flex-wrap gap-0.5">
-                            ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
-                        </span>
-                        <span class="hidden sm:flex flex-wrap gap-0.5">
-                            ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
-                        </span>
-                    </div>
-                    <div class="text-[11px] sm:text-xs text-slate-500 space-y-0.5 pt-0.5 leading-normal border-l-2 border-rose-100 pl-1.5">
-                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                    <div class="text-[11px] text-slate-500 space-y-0.5 leading-normal border-l-2 border-rose-100 pl-1.5 truncate">
+                        <div><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full pt-2">
-                    <a href="posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 12px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;line-height:16px;cursor:pointer;" class="flex-1">FANZAで見る</a>
+                <div class="flex gap-1.5 items-stretch w-full pt-1">
+                    <a href="posts/${article.id}.html" class="py-1 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:4px 8px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;cursor:pointer;" class="flex-1">FANZA</a>
                 </div>
             </div>
         </article>
+        `;
+    }).join('\n');
+
+    // ✨ [新設] 評価が高い順ランキング（上位5件）のカードを組み立て
+    const rankingArticles = [...articles]
+        .sort((a, b) => parseFloat(b.reviewRating || 0) - parseFloat(a.reviewRating || 0))
+        .slice(0, 5);
+
+    const rankingCards = rankingArticles.map((article, index) => {
+        let rawLurl = '';
+        try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
+        const encLurl = encryptStr(rawLurl);
+        const encImg = encryptStr(article.imgUrl);
+        
+        const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+        return `
+        <div class="flex items-center gap-3 p-2 bg-rose-50/30 rounded-xl border border-rose-100/50 hover:bg-rose-50 transition-all">
+            <span class="text-lg font-bold w-6 text-center">${rankMedals[index]}</span>
+            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+            </div>
+            <div class="min-w-0 flex-1">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
+                <div class="flex justify-between items-center mt-1">
+                    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+                </div>
+            </div>
+        </div>
         `;
     }).join('\n');
 
@@ -405,12 +437,26 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle) {
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
-                <h2 class="text-lg font-bold text-slate-900 mb-4">最新のレビュー一覧</h2>
-                ${cards}
+                <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="w-2 h-5 bg-rose-500 rounded-full"></span>🔥 最新のガチレビュー一覧
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    ${cards}
+                </div>
             </div>
-            <div class="lg:col-span-1">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
-                    <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">タグ一覧</h2>
+            
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
+                    <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
+                        <span>🍑 読者が絶賛した神作品ランキング</span>
+                    </h2>
+                    <div class="space-y-2">
+                        ${rankingCards}
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-rose-50 sticky top-6">
+                    <h2 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-rose-100">性癖タグ一覧</h2>
                     <ul class="flex flex-wrap -m-1">${tagCloudLinks.length > 0 ? tagCloudLinks : '<li class="text-xs text-slate-400 py-2">タグはまだありません。</li>'}</ul>
                 </div>
             </div>
