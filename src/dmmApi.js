@@ -1,35 +1,63 @@
-const axios = require('axios');
-
-async function fetchDmmProducts(apiId, affiliateId, fetchCount) {
+/**
+ * ===================================================
+ * 📡 DMM API 通信モジュール（Node.js標準 fetch 版）
+ * ===================================================
+ */
+async function fetchDmmProducts(apiId, affiliateId, siteTitle) {
     try {
+        // 💡 アフィリエイトIDの末尾を適切に調整するロジックはそのまま維持
         const finalAffiliateId = affiliateId.endsWith('-001') ? affiliateId.replace('-001', '-990') : affiliateId;
         console.log('📡 DMM APIへリクエストを送信中...');
         
-        const response = await axios.get('https://api.dmm.com/affiliate/v3/ItemList', {
-            params: {
-                api_id: apiId,
-                affiliate_id: finalAffiliateId,
-                site: 'FANZA',  
-                service: 'ebook',
-                floor: 'comic',
-                keyword: '羞恥', 
-                hits: fetchCount,       
-                sort: 'rank'             
-            }
-        });
+        // 💡 検索キーワードはサイトタイトル（siteTitle）をそのまま再利用するか、固定の「羞恥」にするか選べます
+        // ここでは、元々のコードにあった「羞恥」で確実に検索できるように固定指定しています
+        const searchKeyword = '羞恥'; 
+        const fetchCount = 1; // 日常モードなので1件取得
 
-        if (!response.data.result || !response.data.result.items) return [];
+        // URLとクエリパラメータの組み立て
+        const url = new URL('https://api.dmm.com/affiliate/v3/ItemList');
+        url.searchParams.append('api_id', apiId);
+        url.searchParams.append('affiliate_id', finalAffiliateId);
+        url.searchParams.append('site', 'FANZA');
+        url.searchParams.append('service', 'ebook');
+        url.searchParams.append('floor', 'comic');
+        url.searchParams.append('keyword', searchKeyword);
+        url.searchParams.append('hits', fetchCount.toString());
+        url.searchParams.append('sort', 'rank');
+        url.searchParams.append('output', 'json');
 
-        return response.data.result.items.map(item => {
+        // 💡 Node.js標準の fetch を使用（axiosは不要）
+        const response = await fetch(url.toString());
+        
+        if (!response.ok) {
+            throw new Error(`HTTPエラー! ステータス: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.result || !data.result.items) {
+            return [];
+        }
+
+        // 💡 app.js が期待するデータ構造（オブジェクトのキー名）に変換して返却
+        return data.result.items.map(item => {
             const encodedRawUrl = encodeURIComponent(item.URL);
+            // 成果発生用の完璧なアフィリエイトURLを生成
             const perfectAffiliateUrl = `https://al.fanza.co.jp/?lurl=${encodedRawUrl}&af_id=${affiliateId}&ch=search_link&ch_id=link`;
+            
+            // ジャンル（タグ）の配列を抽出
             const officialKeywords = item.iteminfo?.keyword ? item.iteminfo.keyword.map(k => k.name) : [];
 
             return {
                 title: item.title,
                 url: perfectAffiliateUrl, 
-                imageUrl: item.imageURL?.large || item.imageURL?.list,
-                officialKeywords: officialKeywords
+                // 💡 app.js の「product.imagePath?.large」に合わせるため、構造をシミュレート
+                imagePath: {
+                    large: item.imageURL?.large || item.imageURL?.list || ''
+                },
+                // 💡 app.js の「product.genre」に合わせるため、構造をシミュレート
+                genre: officialKeywords.map(name => ({ name })),
+                description: item.review?.comment || '' // 💡説明文のフォールバック
             };
         });
     } catch (error) {
