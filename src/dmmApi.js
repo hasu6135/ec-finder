@@ -47,7 +47,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
                 url: perfectAffiliateUrl,         // 💡ボタンなどのリンク用（アフィURL）
                 rawUrl: item.URL,                  // 💡【追加】スクレイピング用（純粋なURL）
                 // 💡【追加】APIが返してきた生の試し読みURLを、そのまま壊さずに保持する
-                sampleUrl: item.sampleURL || '',
+                //sampleUrl: item.sampleURL || '',
                 genre: officialKeywords.map(name => ({ name })),
                 description: item.description || item.review?.comment || '羞恥系おすすめの最新コミックです。',
                 date: item.date || new Date().toISOString(),

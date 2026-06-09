@@ -153,8 +153,8 @@ async function main() {
                     rawUrl: product.rawUrl || product.url,
                     	
                     // 💡【追加】テンプレート側で試し読みリンクが壊れないよう、生のURLをそのまま引き渡す
-                    sampleUrl: product.sampleUrl || '',
-                    sampleLink: product.sampleUrl || '',
+                    //sampleUrl: product.sampleUrl || '',
+                    //sampleLink: product.sampleUrl || '',
                     	
                     description: product.description || '羞恥系おすすめの最新コミックです。',
                     reviewRating: detailData.reviewRating || product.review?.rating || '0.0',
