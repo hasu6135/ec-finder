@@ -239,11 +239,33 @@ async function main() {
             fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
 
-        // 総合トップページの書き出し
+// ② 【20件ずつ】の総合トップページ量産ロジック
+        const COUNT_PER_PAGE = 20; // 1ページあたりの件数
+        const totalPages = Math.ceil(sortedArticles.length / COUNT_PER_PAGE) || 1; // 記事0件対策で最低1
         const allAvailableTags = Array.from(tagMap.keys());
-        const indexHtml = generateTopPageHTML(sortedArticles, displayDate, allAvailableTags, SITE_TITLE);
-        const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
-        fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
+
+        for (let page = 1; page <= totalPages; page++) {
+            // そのページに表示する20件を正確にスライス
+            const start = (page - 1) * COUNT_PER_PAGE;
+            const end = start + COUNT_PER_PAGE;
+            const slicedArticles = sortedArticles.slice(start, end);
+
+            // 拡張した template.js の関数を呼び出し（page と totalPages を渡す）
+            const indexHtml = generateTopPageHTML(
+                slicedArticles, 
+                displayDate, 
+                allAvailableTags, 
+                SITE_TITLE, 
+                page, 
+                totalPages
+            );
+            const indexHtmlCrlf = indexHtml.replace(/\r?\n/g, '\r\n');
+
+            // ファイル名の割り当て（1ページ目は index.html、2ページ目以降は index2.html, index3.html...）
+            const fileName = page === 1 ? 'index.html' : `index${page}.html`;
+            fs.writeFileSync(fileName, indexHtmlCrlf, 'utf-8');
+            console.log(` 🏠 トップページ生成完了: ${fileName} (${page}/${totalPages} ページ)`);
+        }
 
         // [STEP 3/3] サイトマップの強制書き出し
         console.log(`\n[STEP 3/3] 🤖 検索エンジン対策を適用中...`);
