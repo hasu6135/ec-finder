@@ -17,7 +17,9 @@ const FETCH_COUNT = 1;       // 1回のリクエストでDMM APIから取得す�
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 💡 過去データを保存する簡易データベースファイル
-const SITE_DOMAIN = 'ec-finder.pages.dev'; // 💡【SEO対策】あなたのサイトの実際のURL(ドメイン)に書き換えてください
+
+// 🌐【SEO・海外対策】
+const SITE_DOMAIN = 'ec-finder.pages.dev'; 
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
 const DMM_AFFILIATE_ID = '132815-001'; 
@@ -43,29 +45,32 @@ function loadDatabase() {
 }
 
 function saveDatabase(data) {
-    // 💡JSON文字列にした後、改行コード(\n)をWindows標準(\r\n)に強制置換して保存する
+    // JSON文字列にした後、改行コード(\n)をWindows標準(\r\n)に強制置換して保存する
     const jsonString = JSON.stringify(data, null, 2).replace(/\r?\n/g, '\r\n');
     fs.writeFileSync(DB_FILE, jsonString, 'utf-8');
 }
 
 /**
- * ✨ [新設] Googleサーチコンソール用の sitemap.xml を全自動で作成する関数
+ * ✨ [修正版] Googleサーチコンソール用の sitemap.xml を作成する関数
  */
 function generateSitemap(articles, tags) {
     const today = new Date().toISOString().split('T')[0];
     let xmlUrls = [];
     
+    // 💡【原因解決】先頭に https:// を強制的に追加して、Googleが認識できる絶対URLにします
+    const baseUrl = `https://${SITE_DOMAIN}`;
+    
     // 総合トップ
-    xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/index.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>1.0</priority>\n  </url>`);
+    xmlUrls.push(`  <url>\n    <loc>${baseUrl}/index.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>1.0</priority>\n  </url>`);
     
     // 全レビュー詳細
     articles.forEach(art => {
-        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/posts/${art.id}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`);
+        xmlUrls.push(`  <url>\n    <loc>${baseUrl}/posts/${art.id}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.8</priority>\n  </url>`);
     });
     
     // 全タグ別一覧
     tags.forEach(tag => {
-        xmlUrls.push(`  <url>\n    <loc>${SITE_DOMAIN}/tags/${encodeURIComponent(tag)}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.6</priority>\n  </url>`);
+        xmlUrls.push(`  <url>\n    <loc>${baseUrl}/tags/${encodeURIComponent(tag)}.html</loc>\n    <lastmod>${today}</lastmod>\n    <priority>0.6</priority>\n  </url>`);
     });
 
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
@@ -75,7 +80,7 @@ function generateSitemap(articles, tags) {
 
 /**
  * ===================================================
- * 🚀 メイン処理（データ一括アップデート版）
+ * 🚀 メイン処理（過去データ復旧＆海外SEOハイブリッド版）
  * ===================================================
  */
 async function main() {
@@ -85,7 +90,7 @@ async function main() {
         if (!fs.existsSync('posts')) fs.mkdirSync('posts');
         if (!fs.existsSync(TAGS_DIR)) fs.mkdirSync(TAGS_DIR);
 
-        // 💡 1. 過去の記事データを読み込む（削除せずにそのまま使います）
+        // 💡 1. 過去の記事データを読み込む
         const dbArticles = loadDatabase();
         console.log(`📦 データベース内の記事数: ${dbArticles.length} 件 のアップデートを開始します...`);
 
@@ -95,9 +100,18 @@ async function main() {
         for (let i = 0; i < dbArticles.length; i++) {
             const article = dbArticles[i];
             
+            // 💡【海外ユーザー対策】過去の記事タイトルに [Manga Raw] がついていなければ自動で追加
+            if (article.originalTitle && !article.originalTitle.includes('[Manga Raw]')) {
+                article.originalTitle = `${article.originalTitle} [Manga Raw]`;
+                updatedCount++; // タイトル更新も変更対象とする
+            }
+
             // すでに作家や出版社が取得できているデータはスキップ（効率化）
             if (article.author && article.publisher && article.author !== '不明' && article.publisher !== '不明') {
-                console.log(`⏭️ スキップ [${i + 1}/${dbArticles.length}]: 「${article.originalTitle}」はデータ取得済みです。`);
+                // タイトルだけが更新された場合を考慮してHTMLは毎回上書き
+                const postHtml = generateSinglePostHTML(article, SITE_TITLE, []);
+                const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
+                fs.writeFileSync(path.join('posts', `${article.id}.html`), postHtmlCrlf, 'utf-8');
                 continue;
             }
 
@@ -119,7 +133,7 @@ async function main() {
                 article.reviewCount = detailData.reviewCount;
                 article.reviews = detailData.userReviews;
 
-                // 💡 前回の引数バグの対策を含めて個別HTMLを再生成・上書き保存
+                // 個別HTMLを再生成・上書き保存
                 const postHtml = generateSinglePostHTML(article, SITE_TITLE, []);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${article.id}.html`), postHtmlCrlf, 'utf-8');
@@ -130,7 +144,6 @@ async function main() {
                 console.error(`   ⚠️ データの再取得に失敗しました:`, itemError.message);
             }
             
-            // APIへの負荷軽減のため、少しだけ待機（必要に応じて）
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
@@ -142,7 +155,7 @@ async function main() {
             console.log(`💾 データベース(db.json)を正常に更新しました。`);
         }
 
-        // 💡 4. 【最重要】新しくなった全データを元に、フロント画面（トップとタグ）を再構築
+        // 💡 4. 新しくなった全データを元に、フロント画面（トップとタグ）を再構築
         const sortedArticles = [...dbArticles].sort((a, b) => {
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
@@ -173,13 +186,13 @@ async function main() {
         fs.writeFileSync('index.html', indexHtmlCrlf, 'utf-8');
 
         // ✨ [新設] 7. サイトマップの自動書き出し
-		try {
+        try {
             generateSitemap(dbArticles, allAvailableTags);
         } catch (sitemapErr) {
             console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
         }
 
-        console.log('✨ [データ復旧完了] 過去の資産を消さずに、作家・出版社情報だけを美しく補完しました！');
+        console.log('✨ [データ復旧・海外対策完了] 正しい形式の sitemap.xml と海外ワードつきHTMLの出力が完了しました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
     }
