@@ -8,7 +8,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
         const finalAffiliateId = affiliateId.endsWith('-001') ? affiliateId.replace('-001', '-990') : affiliateId;
         console.log('📡 DMM APIへリクエストを送信中...');
         
-        const searchKeyword = '羞恥'; 
+        const searchKeyword = '羞恥|催眠'; 
         
         // 💡 4番目の引数（fetchCount）を最優先で使い、文字が来たり未定義なら10件にします
         const hitsCount = typeof fetchCount === 'number' ? fetchCount : 10; 
