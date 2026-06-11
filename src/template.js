@@ -438,10 +438,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             <div class="min-w-0 flex-1">
                 <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
                 <div class="flex justify-between items-center mt-1">
-<div class="flex items-center gap-1 mt-0.5">
-    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
-    <span class="text-[10px] text-slate-400 font-medium">(${article.reviewCount || 0}件)</span>
-</div>
+					<div class="flex items-center gap-1 mt-0.5">
+					    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
+					    <span class="text-[10px] text-slate-400 font-medium">(${article.reviewCount || 0}件)</span>
+					</div>
                     <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
@@ -653,8 +653,18 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 </head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-10 px-4 text-center relative border-b border-rose-950/40">
-        <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">${siteTitle}</h1>
-        <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した大容量データベース型レビューメディア。</p>
+<p class="text-xs font-bold text-rose-500 tracking-widest uppercase mb-1">
+        ーー その羞恥は、最高の快楽へ。
+    </p>
+
+    <h1 class="text-3xl font-black text-slate-950 tracking-tight mb-3">
+        羞恥系コミック専門メディア <span class="text-rose-600">EC-Finder</span>
+    </h1>
+
+    <p class="max-w-xl mx-auto text-xs text-slate-600 leading-relaxed px-4">
+        言葉責め・公開羞恥・露出・調教シチュエーションに特化し、
+        ソムリエが厳選した <span class="font-bold text-slate-900 border-b-2 border-rose-400">${dbArticles.length}作以上</span> のガチレビューを詰め込んだ大容量データベース型メディア。
+    </p>
         <div class="mt-1 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
         <div class="mt-5 max-w-md mx-auto px-4">
             <button id="toggle-header-tags" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-rose-950/50 transition-all flex items-center justify-center gap-1.5 border border-rose-500/20">

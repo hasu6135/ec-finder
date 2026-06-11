@@ -12,7 +12,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ⚙️ 各種設定・定数管理
  * ===================================================
  */
-const SITE_TITLE = '羞恥系コミック';
+const SITE_TITLE = '羞恥系コミック専門メディア';
 const FETCH_COUNT = 1;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
