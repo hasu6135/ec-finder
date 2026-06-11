@@ -354,10 +354,21 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
-
+		const rawDateStr = article.createdAt || '不明';
+    	let formattedDate = '不明';
+    	if (rawDateStr !== '不明') {
+    	    // 🔍 正規表現で日本語や余計な時間を無視し、「数字4桁-2桁-2桁」だけを抜き出す
+    	    const match = String(rawDateStr).match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+    	    if (match) {
+    	        // 「2024/11/11」の形に綺麗に整形！
+    	        formattedDate = `${match[1]}/${match[2]}/${match[3]}`;
+    	    } else {
+    	        // 万が一パースできなかった時の安全策
+    	        formattedDate = rawDateStr;
+    	    }
+    	}
         return `
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
 			<div style="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
@@ -384,7 +395,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                         <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${article.createdAt || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${formattedDate}</div>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full pt-2">
