@@ -452,30 +452,19 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         } catch(e) { 
             rawLurl = article.link; 
         }
-        
         const encLurl = encryptStr(rawLurl); 
         const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['⭐', '⭐', '⭐', '⭐', '⭐'];
-
-        // 💡 【超重要】Invalid Date 対策の徹底
-        // a.createdAt または a.date、それすら無ければ今日のISO文字列を確保
         const rawDateStr = article.date || new Date().toISOString();
-        
-        // DMM特有の "2026-06-12 00:00:00" などのスペース区切りを、Node.jsが誤認しないようにハイフン/T区切りに変換を試みる
         const safeDateStr = typeof rawDateStr === 'string' ? rawDateStr.replace(/\s+/, 'T') : rawDateStr;
-        
         let d = new Date(safeDateStr);
-        // 万が一、それでも解析できず Invalid Date になった場合は「今この瞬間」の日付を代入して救済
         if (isNaN(d.getTime())) {
             d = new Date();
         }
-
-        // 確実に「2026/06/12」の形にする0埋めロジック
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const formattedDate = `${yyyy}/${mm}/${dd}`;
-
         return `
         <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
             <span class="text-xs font-bold w-6 text-center">${rankMedals[index]}</span>
@@ -485,7 +474,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             <div class="min-w-0 flex-1">
                 <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
                 <div class="mt-1 flex justify-between items-center">
-                    <span class="text-[9px] text-slate-400">追加: ${formattedDate}</span>
+                    <span class="text-[9px] text-slate-400">レビュー日: ${formattedDate}</span>
                     <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
