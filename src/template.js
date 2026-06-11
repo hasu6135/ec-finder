@@ -507,7 +507,11 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         const rankMedals = ['⭐', '⭐', '⭐', '⭐', '⭐'];
         // 💡 セーフティ：表示用データ（date か createdAt のあるほうを使う。最悪現在時刻）
         const displayDateStr = article.createdAt || article.date || new Date().toISOString();
-        const formattedDate = new Date(displayDateStr).toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'});
+		const d = new Date(displayDateStr);
+		const yyyy = d.getFullYear();
+		const mm = String(d.getMonth() + 1).padStart(2, '0'); // 月は0スタートなので+1して、2桁0埋め
+		const dd = String(d.getDate()).padStart(2, '0');     // 日を2桁0埋め
+		const formattedDate = `${yyyy}/${mm}/${dd}`; // 確実に「2026/06/12」になる
         return `
         <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
             <span class="text-xs font-bold w-6 text-center">${rankMedals[index]}</span>
@@ -517,7 +521,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             <div class="min-w-0 flex-1">
                 <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
                 <div class="mt-1 flex justify-between items-center">
-                    <span class="text-[9px] text-slate-400">追加: ${formattedDate}</span>
+                    <span class="text-[9px] text-slate-400">配信日: ${formattedDate}</span>
                     <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
