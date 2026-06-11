@@ -254,10 +254,15 @@ async function main() {
 
         // [STEP 2/3] フロント画面の再構築（記事一覧のソート）
         console.log(`\n[STEP 2/3] 🌐 フロント画面（トップ・タグ別ページ）を再マージ中...`);
+        /*
+        // これは配信日順
         const sortedArticles = [...dbArticles].sort((a, b) => {
             return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
         });
-
+        */
+        // 記事作成日順
+		const sortedArticles = [...dbArticles];
+		
         // タグマップの作成
         const tagMap = new Map();
         sortedArticles.forEach(article => {
