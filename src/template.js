@@ -439,7 +439,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         `;
     }).join('\n');
 
-	// 🆕 3. 【新設】新着順ランキング（新しく追加された順・上位5件）
+	// 🆕 3. 【新設】新着レビュー順ランキング（新しく追加された順・上位5件）
     // DB（db.json）の仕様上、新しいものが配列の前方、またはdateプロパティを持っているので、降順でソート
     const newRankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
@@ -485,6 +485,40 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                 <div class="mt-1 flex justify-between items-center">
                     <span class="text-[9px] text-rose-700 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100/70 animate-pulse">熱量 🔥 ${textCount}文字</span>
                     <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+                </div>
+            </div>
+        </div>`;
+    }).join('\n');
+
+	// 💡 作品新着順！
+    const newRankingArticlesForCreatedAt = [...baseArticlesForRanking]
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+        .slice(0, 5);
+    const newRankingCardsForCreatedAt = newRankingArticlesForCreatedAt.map((article, index) => {
+        let rawLurl = ''; 
+        try { 
+            const u = new URL(article.link); 
+            rawLurl = u.searchParams.get('lurl') || article.link; 
+        } catch(e) { 
+            rawLurl = article.link; 
+        }
+        const encLurl = encryptStr(rawLurl); 
+        const encImg = encryptStr(article.imgUrl);
+        const rankMedals = ['⭐', '⭐', '⭐', '⭐', '⭐'];
+        // 💡 セーフティ：表示用データ（date か createdAt のあるほうを使う。最悪現在時刻）
+        const displayDateStr = article.createdAt || article.date || new Date().toISOString();
+        const formattedDate = new Date(displayDateStr).toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'});
+        return `
+        <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
+            <span class="text-xs font-bold w-6 text-center">${rankMedals[index]}</span>
+            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+            </div>
+            <div class="min-w-0 flex-1">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
+                <div class="mt-1 flex justify-between items-center">
+                    <span class="text-[9px] text-slate-400">追加: ${formattedDate}</span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
         </div>`;
@@ -561,7 +595,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 </head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-10 px-4 text-center relative border-b border-rose-950/40">
-        <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">🔞 ${siteTitle}</h1>
+        <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-pink-300">${siteTitle}</h1>
         <p class="mt-2 text-xs text-rose-300 font-light">言葉責め・公開羞恥に特化した大容量データベース型レビューメディア。</p>
         <div class="mt-1 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
         <div class="mt-5 max-w-md mx-auto px-4">
@@ -596,7 +630,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             	
 				<div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
 					<h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
-						<span>🆕 鮮度MAX！新着レビュー作品</span>
+						<span>⚡️ 鮮度MAX！新着レビュー作品</span>
 					</h2>
 					<div class="space-y-2">
 				    	${newRankingCards}
@@ -605,7 +639,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             	
                 <div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
                     <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
-                        <span>🍑 読者が絶賛した神作品ランキング</span>
+                        <span>🌟 読者が絶賛した神作品ランキング</span>
                     </h2>
                     <div class="space-y-2">
                         ${rankingCards}
@@ -623,10 +657,19 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 
 				<div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
                     <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
-                        <span>🌋 ソムリエ激推し！今週の超大作ランキング</span>
+                        <span>🔥 ソムリエ激推し！今週の超大作ランキング</span>
                     </h2>
                     <div class="space-y-2">
                         ${megaCards}
+                    </div>
+                </div>
+
+				<div class="bg-white p-4 rounded-2xl shadow-sm border border-rose-100 shadow-rose-100/40">
+                    <h2 class="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-rose-100 flex items-center gap-1.5">
+                        <span>📢 業界最前線！今月の最新入荷作</span>
+                    </h2>
+                    <div class="space-y-2">
+                        ${newRankingCardsForCreatedAt}
                     </div>
                 </div>
 
