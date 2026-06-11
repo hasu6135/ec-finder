@@ -653,6 +653,8 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 </head>
 <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
     <header class="bg-slate-950 text-white py-10 px-4 text-center relative border-b border-rose-950/40">
+    
+    
 <p class="text-xs font-bold text-rose-500 tracking-widest uppercase mb-1">
         ーー その羞恥は、最高の快楽へ。
     </p>
@@ -662,9 +664,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     </h1>
 
     <p class="max-w-xl mx-auto text-xs text-slate-600 leading-relaxed px-4">
-        言葉責め・公開羞恥・露出・調教シチュエーションに特化し、
-        ソムリエが厳選した <span class="font-bold text-slate-900 border-b-2 border-rose-400">${dbArticles.length}作以上</span> のガチレビューを詰め込んだ大容量データベース型メディア。
+        言葉責め・公開羞恥・露出・調教シチュエーションに特化し、ガチレビューを詰め込んだ大容量データベース型メディア。
     </p>
+    
+    
         <div class="mt-1 text-[10px] text-rose-400">最終更新: ${displayDate}</div>
         <div class="mt-5 max-w-md mx-auto px-4">
             <button id="toggle-header-tags" class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg shadow-rose-950/50 transition-all flex items-center justify-center gap-1.5 border border-rose-500/20">
