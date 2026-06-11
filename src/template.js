@@ -438,8 +438,10 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             <div class="min-w-0 flex-1">
                 <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
                 <div class="flex justify-between items-center mt-1">
-                    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
-            		<span class="text-xs">(${article.reviewCount || 0}件)</span>
+<div class="flex items-center gap-1 mt-0.5">
+    <span class="text-[10px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
+    <span class="text-[10px] text-slate-400 font-medium">(${article.reviewCount || 0}件)</span>
+</div>
                     <a class="er-safe-lnk text-[10px] text-white bg-rose-500 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
