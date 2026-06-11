@@ -459,7 +459,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 
         // 💡 【超重要】Invalid Date 対策の徹底
         // a.createdAt または a.date、それすら無ければ今日のISO文字列を確保
-        const rawDateStr = article.createdAt || article.date || new Date().toISOString();
+        const rawDateStr = article.date || new Date().toISOString();
         
         // DMM特有の "2026-06-12 00:00:00" などのスペース区切りを、Node.jsが誤認しないようにハイフン/T区切りに変換を試みる
         const safeDateStr = typeof rawDateStr === 'string' ? rawDateStr.replace(/\s+/, 'T') : rawDateStr;
