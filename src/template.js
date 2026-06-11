@@ -286,6 +286,7 @@ function generateTagPageHTML(tagName, articles) {
                         <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${article.createdAt || '不明'}</div>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-1 w-full pt-2">
@@ -371,6 +372,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                         <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
                         <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${article.createdAt || '不明'}</div>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full pt-2">
