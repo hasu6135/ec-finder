@@ -441,8 +441,15 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 
 	// 🆕 3. 【新設】新着レビュー順ランキング（新しく追加された順・上位5件）
     // DB（db.json）の仕様上、新しいものが配列の前方、またはdateプロパティを持っているので、降順でソート
-    const newRankingArticles = [...baseArticlesForRanking]
-        .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+	const newRankingArticles = [...baseArticlesForRanking]
+        .sort((a, b) => {
+            // 💡 確実にパースできるかチェックし、ダメならタイムスタンプ0（1970年）にして一番後ろに追いやる
+            const dateA = new Date(a.createdAt || a.date || 0);
+            const dateB = new Date(b.createdAt || b.date || 0);
+            const timeA = isNaN(dateA.getTime()) ? 0 : dateA.getTime();
+            const timeB = isNaN(dateB.getTime()) ? 0 : dateB.getTime();
+            return timeB - timeA;
+        })
         .slice(0, 5);
     const newRankingCards = newRankingArticles.map((article, index) => {
         let rawLurl = ''; try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
@@ -457,7 +464,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             <div class="min-w-0 flex-1">
                 <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
                 <div class="mt-1 flex justify-between items-center">
-                    <span class="text-[9px] text-slate-400">追加: ${new Date(article.date).toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'})}</span>
+                    <span class="text-[9px] text-slate-400">レビュー日: ${new Date(article.date).toLocaleDateString('ja-JP', {month:'numeric', day:'numeric'})}</span>
                     <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
                 </div>
             </div>
