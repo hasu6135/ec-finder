@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック';
-const FETCH_COUNT = 300;       // 💡 ここで指定した件数分、新着を一気にループ処理します！
+const FETCH_COUNT = 200;       // 💡 ここで指定した件数分、新着を一気にループ処理します！
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -135,10 +135,18 @@ async function main() {
         console.log(`📡 取得した新着候補の中から、最新の ${targetProducts.length} 件を処理します。`);
 
         let isDatabaseChanged = false;
-
+		const totalTargets = targetProducts.length; // 処理する総件数（FETCH_COUNT）
         // 2. 取得した新着商品を検証・ループ処理
-        for (const product of targetProducts) {
-            const articleId = generateSafeId(product.title);
+		for (let i = 0; i < totalTargets; i++) {
+            const product = targetProducts[i];
+            const currentCount = i + 1; // 現在何件目か（1スタート）
+
+			// 進捗バー的な見出しをコンソールに出力
+            console.log(`\n--------------------------------------------------`);
+            console.log(`⏳ [進捗: ${currentCount} / ${totalTargets} 件目]`);
+            console.log(`--------------------------------------------------`);
+
+			const articleId = generateSafeId(product.title);
 
             // 重複チェック
             if (dbArticles.some(art => art.id === articleId)) {
