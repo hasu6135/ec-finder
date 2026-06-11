@@ -218,6 +218,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                     ${article.label ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">レーベル</span>${article.label}</div>` : ''}
                     <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">出版社</span>${article.publisher || '不明'}</div>
                     <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">カテゴリー</span>${article.category || 'アダルトマンガ'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">配信日</span>${article.createdAt || '不明'}</div>
                 </div>
 
                 <div class="mb-4">
