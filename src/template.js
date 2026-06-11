@@ -153,7 +153,19 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
 
     const encLurl = encryptStr(rawLurl);
     const encImg = encryptStr(article.imgUrl);
-
+	const rawDateStr = article.createdAt || '不明';
+    let formattedDate = '不明';
+    if (rawDateStr !== '不明') {
+        // 🔍 正規表現で日本語や余計な時間を無視し、「数字4桁-2桁-2桁」だけを抜き出す
+        const match = String(rawDateStr).match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+        if (match) {
+            // 「2024/11/11」の形に綺麗に整形！
+            formattedDate = `${match[1]}/${match[2]}/${match[3]}`;
+        } else {
+            // 万が一パースできなかった時の安全策
+            formattedDate = rawDateStr;
+        }
+    }
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -218,7 +230,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                     ${article.label ? `<div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">レーベル</span>${article.label}</div>` : ''}
                     <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">出版社</span>${article.publisher || '不明'}</div>
                     <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">カテゴリー</span>${article.category || 'アダルトマンガ'}</div>
-                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">配信日</span>${article.createdAt || '不明'}</div>
+                    <div class="text-slate-500"><span class="font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded mr-1.5">配信日</span>${formattedDate}</div>
                 </div>
 
                 <div class="mb-4">
