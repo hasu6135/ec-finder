@@ -1,9 +1,14 @@
 /**
  * ===================================================
- * 📡 DMM API 通信モジュール（引数4つ・app.jsの初期設計に完全一致版）
+ * 📡 DMM API 通信モジュール（3種のソート順・マルチ対応版）
  * ===================================================
+ * @param {string} apiId - DMM API ID
+ * @param {string} affiliateId - アフィリエイトID
+ * @param {string} siteTitle - サイトタイトル
+ * @param {number} fetchCount - 取得件数
+ * @param {string} sortType - ソート順 ('rank' | 'review' | 'date') ※デフォルトは 'rank'
  */
-async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
+async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount, sortType = 'rank') {
     try {
         const finalAffiliateId = affiliateId.endsWith('-001') ? affiliateId.replace('-001', '-990') : affiliateId;
         console.log('📡 DMM APIへリクエストを送信中...');
@@ -14,6 +19,11 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
         const hitsCount = typeof fetchCount === 'number' ? fetchCount : 10; 
         console.log(`📊 設定を検知しました。DMMから新着を ${hitsCount} 件取得します。`);
 
+		// 💡 ソート順のバリデーション（指定以外の文字が来たら安全のために 'rank' にフォールバック）
+        const validSortTypes = ['rank', 'review', 'date']; //rank:売上順、review:評価順、date:新着順
+        const finalSort = validSortTypes.includes(sortType) ? sortType : 'rank';
+		console.log(`📊 設定を検知しました。DMMから【${finalSort}順】でデータを ${hitsCount} 件取得します。`);
+
         // URLとクエリパラメータの組み立て
         const url = new URL('https://api.dmm.com/affiliate/v3/ItemList');
         url.searchParams.append('api_id', apiId);
@@ -23,8 +33,8 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount) {
         url.searchParams.append('floor', 'comic');
         url.searchParams.append('keyword', searchKeyword);
         url.searchParams.append('hits', hitsCount.toString());
-        url.searchParams.append('sort', 'rank'); //rank:売上順、review:評価順、date:新着順
-        url.searchParams.append('offset', 152);　   //ずらして検索（1以上を指定）
+        url.searchParams.append('sort', finalSort);
+        url.searchParams.append('offset', 1);　   //ずらして検索（1以上を指定）
         url.searchParams.append('output', 'json');
 
         const response = await fetch(url.toString());

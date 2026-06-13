@@ -121,18 +121,31 @@ async function main() {
         console.log(`📦 現在のデータベース内の記事数: ${dbArticles.length} 件`);
 
         // 1. FANZA（DMM）から最新商品の基本データを取得
-        console.log(`\n[STEP 1/3] 🔄 最新情報を取得してAIレビュー執筆中...`);
+        console.log(`\n[STEP 1/3] 🔄 DMMから3つのソート順で新着候補を収穫中...`);
         // 💡 FETCH_COUNT をそのままAPI関数に渡します（内部の仕様をこれでカバー）
-        const products = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE, FETCH_COUNT);
-
-        if (!products || products.length === 0) {
-            console.log('📭 新着商品が見つかりませんでした。');
+        // 💡 3つのソート順でそれぞれAPIを叩く
+        const rawDateProducts   = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE, FETCH_COUNT, 'date');
+        const rawReviewProducts = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE, FETCH_COUNT, 'review');
+        const rawRankProducts   = await fetchDmmProducts(DMM_API_ID, DMM_AFFILIATE_ID, SITE_TITLE, FETCH_COUNT, 'rank');
+        
+        // 💡 取得した全リストを一つの配列にマージ
+        const allProducts = [...rawDateProducts, ...rawReviewProducts, ...rawRankProducts];
+        
+        if (allProducts.length === 0) {
+            console.log('📭 全てのソート順で新着商品が見つかりませんでした。');
             return;
         }
-
-        // 💡 設定された FETCH_COUNT の件数だけ切り出してループを回す（安全対策）
-        const targetProducts = products.slice(0, FETCH_COUNT);
-        console.log(`📡 取得した新着候補の中から、最新の ${targetProducts.length} 件を処理します。`);
+        
+        // タイトルの重複を排除して、ユニークなターゲットリストを作成
+        const seenUrls = new Set();
+        const targetProducts = [];
+        for (const p of allProducts) {
+            if (!seenUrls.has(p.rawUrl)) {
+                seenUrls.add(p.rawUrl);
+                targetProducts.push(p);
+            }
+        }
+		console.log(`📡 重複を排除し、合計 ${targetProducts.length} 件のユニーク作品をAIレビュー処理します。`);
 
         let isDatabaseChanged = false;
 		const totalTargets = targetProducts.length; // 処理する総件数（FETCH_COUNT）
