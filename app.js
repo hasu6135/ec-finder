@@ -19,7 +19,7 @@ const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
 
 // 🌐【SEO・海外対策】
-const SITE_DOMAIN = 'ec-finder.pages.dev'; 
+const SITE_DOMAIN = 'ec-finder-comic.com'; 
 
 const DMM_API_ID = 'w3pxtk1rrTgpNCQ7JzcU'; 
 const DMM_AFFILIATE_ID = '132815-001'; 
