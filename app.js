@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 1;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 10;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -115,6 +115,25 @@ async function main() {
         if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
         if (!fs.existsSync('posts')) fs.mkdirSync('posts');
         if (!fs.existsSync(TAGS_DIR)) fs.mkdirSync(TAGS_DIR);
+
+		// --------------------------------------------------
+        // 🖥️ 【追加】LM Studio の起動確認（ヘルスチェック）
+        // --------------------------------------------------
+        console.log('🤖 [ヘルスチェック] LM Studio が起動しているか確認中...');
+        try {
+            // LM Studio の標準的なローカルモデル一覧エンドポイントにリクエスト
+            const lmCheck = await fetch('http://localhost:1234/v1/models', { method: 'GET' });
+            if (!lmCheck.ok) {
+                throw new Error(`ステータスコード: ${lmCheck.status}`);
+            }
+            console.log('✅ LM Studio の起動を確認しました。処理を続行します。');
+        } catch (lmError) {
+            console.error('\n❌ 【警告】LM Studio が起動していない、またはポート番号(1234)が異なります！');
+            console.error('💡 対策: LM Studio を起動し、「Local Server」タブからサーバーを開始（Start Server）してください。');
+            console.error(`詳細エラー: ${lmError.message}\n`);
+            return; // 🛑 ここで安全にプログラムを終了（DMM APIを無駄に叩かない）
+        }
+        // --------------------------------------------------
 
         // 過去データの読み込み
         const dbArticles = loadDatabase();
