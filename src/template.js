@@ -419,9 +419,13 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         `;
     }).join('\n');
 
-    // ✨ [新設] 評価が高い順ランキング（上位5件）のカードアセンブリ
+	// ✨ [新設] 点数×件数の総合スコアが高い順ランキング（上位5件）
     const rankingArticles = [...baseArticlesForRanking]
-        .sort((a, b) => parseFloat(b.reviewRating || 0) - parseFloat(a.reviewRating || 0))
+        .sort((a, b) => {
+            const scoreA = parseFloat(a.reviewRating || 0) * parseInt(a.reviewCount || 0, 10);
+            const scoreB = parseFloat(b.reviewRating || 0) * parseInt(b.reviewCount || 0, 10);
+            return scoreB - scoreA; // スコアが高い順
+        })
         .slice(0, 5);
     const rankingCards = rankingArticles.map((article, index) => {
         let rawLurl = '';
