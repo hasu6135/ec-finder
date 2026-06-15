@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 10;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 30;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
