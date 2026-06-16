@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 30;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 10;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -181,14 +181,55 @@ async function main() {
 			const articleId = generateSafeId(product.title);
 
             // 重複チェック
-            if (dbArticles.some(art => art.id === articleId)) {
-                console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
-                continue;
-            }
+            //if (dbArticles.some(art => art.id === articleId)) {
+                //console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
+              //  continue;
+    //}
+            
+			// --------------------------------------------------
+            // 🔄 重複チェック ＆ レビュー件数の自動更新ロジック
+            // --------------------------------------------------
+            const existingIndex = dbArticles.findIndex(art => art.id === articleId);
+            if (existingIndex !== -1) {
+                // すでにDBに存在するが、レビュー件数（または点数）に変動があるかチェック
+                const existingArticle = dbArticles[existingIndex];
+                const latestRating = detailData.reviewRating || product.review?.rating || '0.0';
+                const latestCount = detailData.reviewCount || product.review?.count || 0;
 
-            console.log(`📝 新着記事を作成中: ${product.title}`);
+                // 文字列や数値の揺れを考慮して比較
+                const isRatingChanged = parseFloat(existingArticle.reviewRating) !== parseFloat(latestRating);
+                const isCountChanged = parseInt(existingArticle.reviewCount, 10) !== parseInt(latestCount, 10);
+
+                if (isRatingChanged || isCountChanged) {
+                    console.log(`🔄 【データ更新】「${product.title}」のレビューが変動しました！`);
+                    console.log(`   └ ⭐: ${existingArticle.reviewRating} -> ${latestRating} | 💬: ${existingArticle.reviewCount}件 -> ${latestCount}件`);
+                    
+                    // 1. DB内の該当データを最新情報にアップデート
+                    dbArticles[existingIndex].reviewRating = latestRating;
+                    dbArticles[existingIndex].reviewCount = latestCount;
+                    
+                    // ※もし画像やタイトルなども最新に追従させたい場合は、ここで既存データを上書きしてもOKです
+                    
+                    // 2. 記事のHTMLを最新の件数で再生成する
+                    const recommendedArticles = dbArticles.filter(art => art.id !== articleId).slice(0, 5);
+                    const postHtml = generateSinglePostHTML(dbArticles[existingIndex], SITE_TITLE, recommendedArticles);
+                    fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+
+                    isDatabaseChanged = true;
+                    console.log(`   ✅ 記事HTMLを最新のレビュー数で再書き出ししました。`);
+                } else {
+                    // 点数も件数も全く同じなら、何もせずスキップ
+                    console.log(`skip スキップ: 「${product.title}」はすでに最新データで存在します。`);
+                }
+                continue; // 🛑 次の商品へ
+            }
+            // --------------------------------------------------
+            
+            console.log(`📝 新着記事を作成開始！: ${product.title}`);
 
             try {
+            	console.log(`📝 スクレイピング中・・・`);
+            	
                 // 商品詳細ページをスクレイピング
                 const detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
 
@@ -205,6 +246,8 @@ async function main() {
                 if (officialTags.length === 0) {
                     officialTags = ['羞恥系', 'おすすめコミック'];
                 }
+
+				console.log(`📝 AI生成中・・・`);
 
                 // 🧠【AIバグ修正】AIに「タグを正しく格納したdetailData」を引き渡す
                 detailData.pageGenres = officialTags; 
