@@ -187,31 +187,39 @@ async function main() {
                 continue;
             }
             */
+            
 			// --------------------------------------------------
-            // 🔄 重複チェック ＆ レビュー件数の自動更新ロジック
+            // 🔄 【爆速版】重複チェック ＆ レビュー件数の自動更新ロジック
             // --------------------------------------------------
             const existingIndex = dbArticles.findIndex(art => art.id === articleId);
             if (existingIndex !== -1) {
-                // すでにDBに存在するが、レビュー件数（または点数）に変動があるかチェック
+                // 💡 スクレイピングする前に、まずはDMM APIから取れた最新データと比較する！
                 const existingArticle = dbArticles[existingIndex];
-                const latestRating = detailData.reviewRating || product.review?.rating || '0.0';
-                const latestCount = detailData.reviewCount || product.review?.count || 0;
-
-                // 文字列や数値の揺れを考慮して比較
+                const latestRating = product.review?.rating || '0.0';
+                const latestCount = product.review?.count || 0;
                 const isRatingChanged = parseFloat(existingArticle.reviewRating) !== parseFloat(latestRating);
                 const isCountChanged = parseInt(existingArticle.reviewCount, 10) !== parseInt(latestCount, 10);
-
                 if (isRatingChanged || isCountChanged) {
-                    console.log(`🔄 【データ更新】「${product.title}」のレビューが変動しました！`);
+                    console.log(`🔄 【データ更新】「${product.title}」のレビューが変動しました！(API検知)`);
                     console.log(`   └ ⭐: ${existingArticle.reviewRating} -> ${latestRating} | 💬: ${existingArticle.reviewCount}件 -> ${latestCount}件`);
                     
-                    // 1. DB内の該当データを最新情報にアップデート
-                    dbArticles[existingIndex].reviewRating = latestRating;
-                    dbArticles[existingIndex].reviewCount = latestCount;
+                    // 💡 変動があった場合のみ、ここで初めて詳細情報をスクレイピングして裏付けを取る
+                    let detailData = {};
+                    try {
+                        detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
+                    } catch (scrapingError) {
+                        console.error(`⚠️ 更新用スクレイピングでエラーが発生しました:`, scrapingError.message);
+                    }
+
+                    // スクレイピング側でより正確な数値が取れていればそれを採用、なければAPIの値を採用
+                    const finalRating = detailData.reviewRating || latestRating;
+                    const finalCount = detailData.reviewCount || latestCount;
+
+                    // DB内の該当データを最新情報にアップデート
+                    dbArticles[existingIndex].reviewRating = finalRating;
+                    dbArticles[existingIndex].reviewCount = finalCount;
                     
-                    // ※もし画像やタイトルなども最新に追従させたい場合は、ここで既存データを上書きしてもOKです
-                    
-                    // 2. 記事のHTMLを最新の件数で再生成する
+                    // 記事のHTMLを最新の件数で再生成する
                     const recommendedArticles = dbArticles.filter(art => art.id !== articleId).slice(0, 5);
                     const postHtml = generateSinglePostHTML(dbArticles[existingIndex], SITE_TITLE, recommendedArticles);
                     fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
@@ -219,7 +227,7 @@ async function main() {
                     isDatabaseChanged = true;
                     console.log(`   ✅ 記事HTMLを最新のレビュー数で再書き出ししました。`);
                 } else {
-                    // 点数も件数も全く同じなら、何もせずスキップ
+                    // APIの数値とDBの数値が完全一致なら、1ミリも通信せずに即スキップ！
                     console.log(`skip スキップ: 「${product.title}」はすでに最新データで存在します。`);
                 }
                 continue; // 🛑 次の商品へ
