@@ -387,18 +387,17 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
-			</div>
-<div class="article-card p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
-        
+    		
+  	<div class="article-card p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
         <h2 class="search-title text-sm font-bold text-slate-900 mb-1">
             ${article.title}
         </h2>
-        
         <div class="search-tags flex flex-wrap gap-1">
             ${article.tags.map(t => `<span class="text-[10px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded">${t}</span>`).join('')}
         </div>
-        
-    </div>
+    </div>  		
+    		
+			</div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="space-y-1.5">
                     <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
@@ -832,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        searchCount.textContent = "該当件数: \${visibleCount}件";
+        searchCount.textContent = '該当件数: ${visibleCount}件';
     });
 
     // クリアボタンの処理
