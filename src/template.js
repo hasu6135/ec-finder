@@ -387,8 +387,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
-		
-    		
 			</div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="article-card space-y-1.5">
@@ -647,6 +645,26 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     }
     // ─────────────────────────────────────────────────────────────────
 
+	/* 検索ウィンドウ作成中
+		<div class="max-w-md mx-auto my-6 px-4">
+	    <div class="relative flex items-center">
+	        <input 
+	            type="text" 
+	            id="site-search-input" 
+	            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
+	            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
+	        />
+	        <span class="absolute right-3 text-slate-400 pointer-events-none">
+	            🔍
+	        </span>
+	    </div>
+	    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
+	        <span id="search-count">該当件数: 0件</span>
+	        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
+	    </div>
+	</div>
+	*/
+	
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -685,24 +703,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             </div>
         </div>
     </header>
-
-	<div class="max-w-md mx-auto my-6 px-4">
-	    <div class="relative flex items-center">
-	        <input 
-	            type="text" 
-	            id="site-search-input" 
-	            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
-	            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
-	        />
-	        <span class="absolute right-3 text-slate-400 pointer-events-none">
-	            🔍
-	        </span>
-	    </div>
-	    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
-	        <span id="search-count">該当件数: 0件</span>
-	        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
-	    </div>
-	</div>
 
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
