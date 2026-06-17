@@ -388,14 +388,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
     		
-  	<div class="article-card p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
-        <h2 class="search-title text-sm font-bold text-slate-900 mb-1">
-            ${article.title}
-        </h2>
-        <div class="search-tags flex flex-wrap gap-1">
-            ${article.tags.map(t => `<span class="text-[10px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded">${t}</span>`).join('')}
-        </div>
-    </div>  		
+
     		
 			</div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
