@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        searchCount.textContent = '該当件数: ${visibleCount}件';
+        searchCount.textContent = '該当件数: ' + visibleCount + '件';
     });
 
     // クリアボタンの処理
