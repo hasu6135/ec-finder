@@ -388,6 +388,17 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
     			</a>
 			</div>
+<div class="article-card p-4 bg-white border border-slate-100 rounded-2xl shadow-sm">
+        
+        <h2 class="search-title text-sm font-bold text-slate-900 mb-1">
+            ${article.title}
+        </h2>
+        
+        <div class="search-tags flex flex-wrap gap-1">
+            ${article.tags.map(t => `<span class="text-[10px] bg-slate-50 text-slate-600 px-1.5 py-0.5 rounded">${t}</span>`).join('')}
+        </div>
+        
+    </div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="space-y-1.5">
                     <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
@@ -684,23 +695,23 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         </div>
     </header>
 
-<div class="max-w-md mx-auto my-6 px-4">
-    <div class="relative flex items-center">
-        <input 
-            type="text" 
-            id="site-search-input" 
-            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
-            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
-        />
-        <span class="absolute right-3 text-slate-400 pointer-events-none">
-            🔍
-        </span>
-    </div>
-    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
-        <span id="search-count">該当件数: 0件</span>
-        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
-    </div>
-</div>
+	<div class="max-w-md mx-auto my-6 px-4">
+	    <div class="relative flex items-center">
+	        <input 
+	            type="text" 
+	            id="site-search-input" 
+	            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
+	            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
+	        />
+	        <span class="absolute right-3 text-slate-400 pointer-events-none">
+	            🔍
+	        </span>
+	    </div>
+	    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
+	        <span id="search-count">該当件数: 0件</span>
+	        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
+	    </div>
+	</div>
 
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -783,6 +794,56 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         }
     });
     </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('site-search-input');
+    const searchMeta = document.getElementById('search-meta');
+    const searchCount = document.getElementById('search-count');
+    const clearBtn = document.getElementById('search-clear-btn');
+    const articleCards = document.querySelectorAll('.article-card');
+
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        const keyword = e.target.value.toLowerCase().trim();
+        
+        if (keyword === '') {
+            // 空文字ならすべて表示
+            articleCards.forEach(card => card.style.display = '');
+            searchMeta.classList.add('hidden');
+            return;
+        }
+
+        let visibleCount = 0;
+        searchMeta.classList.remove('hidden');
+
+        articleCards.forEach(card => {
+            // カード内のタイトルとタグのテキストを取得
+            const titleText = card.querySelector('.search-title')?.textContent.toLowerCase() || '';
+            const tagsText = card.querySelector('.search-tags')?.textContent.toLowerCase() || '';
+
+            // キーワードが含まれているか判定
+            if (titleText.includes(keyword) || tagsText.includes(keyword)) {
+                card.style.display = ''; // 表示
+                visibleCount++;
+            } else {
+                card.style.display = 'none'; // 非表示
+            }
+        });
+
+        searchCount.textContent = "該当件数: \${visibleCount}件";
+    });
+
+    // クリアボタンの処理
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        articleCards.forEach(card => card.style.display = '');
+        searchMeta.classList.add('hidden');
+        searchInput.focus();
+    });
+});
+</script>
 
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">
