@@ -187,48 +187,57 @@ async function main() {
                 continue;
             }
             */
-            
 			// --------------------------------------------------
-            // 🔄 【爆速版】重複チェック ＆ レビュー件数の自動更新ロジック
+            // 🔄 【時間基準】重複チェック ＆ 1ヶ月以上経過で自動再更新
             // --------------------------------------------------
             const existingIndex = dbArticles.findIndex(art => art.id === articleId);
             if (existingIndex !== -1) {
-                // 💡 スクレイピングする前に、まずはDMM APIから取れた最新データと比較する！
                 const existingArticle = dbArticles[existingIndex];
-                const latestRating = product.review?.rating || '0.0';
-                const latestCount = product.review?.count || 0;
-                const isRatingChanged = parseFloat(existingArticle.reviewRating) !== parseFloat(latestRating);
-                const isCountChanged = parseInt(existingArticle.reviewCount, 10) !== parseInt(latestCount, 10);
-                if (isRatingChanged || isCountChanged) {
-                    console.log(`🔄 【データ更新】「${product.title}」のレビューが変動しました！(API検知)`);
-                    console.log(`   └ ⭐: ${existingArticle.reviewRating} -> ${latestRating} | 💬: ${existingArticle.reviewCount}件 -> ${latestCount}件`);
+                
+                // 💡 最後にチェックした日時（なければ作成日時、それもなければ古い日時をセット）
+                const lastCheckedStr = existingArticle.lastCheckedAt || existingArticle.createdAt || "2000-01-01T00:00:00.000Z";
+                const lastCheckedDate = new Date(lastCheckedStr);
+                const now = new Date();
+
+                // 💡 前回チェックからの経過日数を計算
+                const msDiff = now.getTime() - lastCheckedDate.getTime();
+                const daysDiff = msDiff / (1000 * 60 * 60 * 24); // ミリ秒を「日」に変換
+
+                // 💡 30日（約1ヶ月）以上経過しているか判定
+                const isNeedUpdate = daysDiff >= 30;
+
+                if (isNeedUpdate) {
+                    console.log(`🔄 【定期メンテナンス】「${product.title}」は前回の確認から ${Math.floor(daysDiff)} 日が経過しています。最新情報を再取得します...`);
                     
-                    // 💡 変動があった場合のみ、ここで初めて詳細情報をスクレイピングして裏付けを取る
                     let detailData = {};
                     try {
+                        // 1ヶ月経っているので、ここで確実にスクレイピングを走らせて最新のレビュー数を掴みに行く
                         detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
                     } catch (scrapingError) {
-                        console.error(`⚠️ 更新用スクレイピングでエラーが発生しました:`, scrapingError.message);
+                        console.error(`⚠️ メンテナンス用スクレイピングでエラーが発生しました:`, scrapingError.message);
                     }
 
-                    // スクレイピング側でより正確な数値が取れていればそれを採用、なければAPIの値を採用
-                    const finalRating = detailData.reviewRating || latestRating;
-                    const finalCount = detailData.reviewCount || latestCount;
+                    // スクレイピングで取れた最新のレビュー情報を反映（なければ既存の値を維持）
+                    const finalRating = detailData.reviewRating || existingArticle.reviewRating || '0.0';
+                    const finalCount = detailData.reviewCount !== undefined ? detailData.reviewCount : (existingArticle.reviewCount || 0);
 
-                    // DB内の該当データを最新情報にアップデート
-                    dbArticles[existingIndex].reviewRating = finalRating;
-                    dbArticles[existingIndex].reviewCount = finalCount;
+                    // 💡 DBのデータを最新情報にアップデート
+                    dbArticles[existingIndex].reviewRating = finalRating.toString();
+                    dbArticles[existingIndex].reviewCount = parseInt(finalCount, 10);
                     
-                    // 記事のHTMLを最新の件数で再生成する
+                    // 💡 重要！チェックした日を「今日」に更新して、また1ヶ月間はスキップされるようにする
+                    dbArticles[existingIndex].lastCheckedAt = now.toISOString();
+                    
+                    // 記事のHTMLを最新の評価・レビュー件数で再生成
                     const recommendedArticles = dbArticles.filter(art => art.id !== articleId).slice(0, 5);
                     const postHtml = generateSinglePostHTML(dbArticles[existingIndex], SITE_TITLE, recommendedArticles);
                     fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
 
                     isDatabaseChanged = true;
-                    console.log(`   ✅ 記事HTMLを最新のレビュー数で再書き出ししました。`);
+                    console.log(`   ✅ 記事HTMLを最新の状態に更新し、確認日時をアップデートしました。`);
                 } else {
-                    // APIの数値とDBの数値が完全一致なら、1ミリも通信せずに即スキップ！
-                    console.log(`skip スキップ: 「${product.title}」はすでに最新データで存在します。`);
+                    // 30日未満であれば、1ミリも通信せずに爆速スキップ！
+                    console.log(`skip スキップ: 「${product.title}」は確認から30日以内のためスキップします。（残り約 ${Math.ceil(30 - daysDiff)} 日）`);
                 }
                 continue; // 🛑 次の商品へ
             }
