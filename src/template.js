@@ -684,6 +684,24 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         </div>
     </header>
 
+<div class="max-w-md mx-auto my-6 px-4">
+    <div class="relative flex items-center">
+        <input 
+            type="text" 
+            id="site-search-input" 
+            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
+            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
+        />
+        <span class="absolute right-3 text-slate-400 pointer-events-none">
+            🔍
+        </span>
+    </div>
+    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
+        <span id="search-count">該当件数: 0件</span>
+        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
+    </div>
+</div>
+
     <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
