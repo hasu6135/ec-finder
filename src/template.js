@@ -393,12 +393,12 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
 			</div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="space-y-1.5">
-                    <h3 class="text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    <h3 class="search-title text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     <div class="text-[11px] text-slate-500 flex items-center gap-1">
                         <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
                         <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
                     </div>
-                    <div class="flex flex-wrap gap-0.5">
+                    <div class="search-tags flex flex-wrap gap-0.5">
                         <span class="sm:hidden flex flex-wrap gap-0.5">
                             ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
                         </span>
