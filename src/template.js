@@ -597,53 +597,45 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     const googleAnalyticsCode = getAnalyticsTag();
     const bypassScript = getBypassScript();
 
-	// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
-    let paginationHtml = '';
-    if (totalPages > 1) {
-        let itemsHtml = [];
+// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
+        let paginationHtml = '';
+        if (totalPages > 1) {
+            let itemsHtml = [];
 
-        // 【前へ】ボタン
-        if (currentPage > 1) {
-            const prevLink = currentPage === 2 ? 'index.html' : `index${currentPage - 1}.html`;
-            itemsHtml.push(`<a href="${currentPage === 2 ? '' : '../'}${prevLink}" class="px-3 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 text-xs sm:text-sm transition-all">← 前へ</a>`);
-        }
-
-        // 【ページ番号】ボタン (例: 1 2 3 ...)
-        for (let i = 1; i <= totalPages; i++) {
-            const isCurrent = i === currentPage;
-            let link = '';
-            if (i === 1) {
-                link = currentPage === 1 ? 'index.html' : '../index.html'; // 2ページ目以降から1ページ目に戻るパス考慮
-            } else {
-                link = currentPage === 1 ? `index${i}.html` : (i === currentPage ? `index${i}.html` : `../index${i}.html`);
-                // 階層構造に応じてパスを調整（もし posts/ 内から呼ばないなら単に `index${i}.html` でOK。ルート直下に量産する場合を想定）
-                link = i === 1 ? 'index.html' : `index${i}.html`;
+            // 【前へ】ボタン
+            if (currentPage > 1) {
+                const prevLink = currentPage === 2 ? 'index.html' : `index${currentPage - 1}.html`;
+                // 💡 px-2 sm:px-3 にしてスマホ時は横幅をコンパクトに
+                itemsHtml.push(`<a href="${currentPage === 2 ? '' : '../'}${prevLink}" class="px-2 sm:px-3 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 text-xs sm:text-sm transition-all shrink-0">← 前へ</a>`);
             }
 
-            // ルート直下に index.html, index2.html ... と並べる場合のシンプルなパス判定
-            let finalLink = i === 1 ? 'index.html' : `index${i}.html`;
-            // もし現在のページが2ページ目以降なら、トップ（index.html）や他のindexN.htmlへのパスは相対的に同じ階層
-            
-            if (isCurrent) {
-                itemsHtml.push(`<span class="px-3.5 py-2 rounded-xl bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-200">${i}</span>`);
-            } else {
-                itemsHtml.push(`<a href="${finalLink}" class="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-slate-700 font-medium hover:bg-rose-50 hover:text-rose-600 text-xs sm:text-sm transition-all">${i}</a>`);
+            // 【ページ番号】ボタン (例: 1 2 3 ...)
+            for (let i = 1; i <= totalPages; i++) {
+                const isCurrent = i === currentPage;
+                let finalLink = i === 1 ? 'index.html' : `index${i}.html`;
+                
+                // 💡 px-2.5 sm:px-3.5 にしてスマホ時のボタンの膨らみを抑える
+                if (isCurrent) {
+                    itemsHtml.push(`<span class="px-2.5 sm:px-3.5 py-2 rounded-xl bg-rose-600 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-rose-200 shrink-0">${i}</span>`);
+                } else {
+                    itemsHtml.push(`<a href="${finalLink}" class="px-2.5 sm:px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-slate-700 font-medium hover:bg-rose-50 hover:text-rose-600 text-xs sm:text-sm transition-all shrink-0">${i}</a>`);
+                }
             }
-        }
 
-        // 【次へ】ボタン
-        if (currentPage < totalPages) {
-            const nextLink = `index${currentPage + 1}.html`;
-            itemsHtml.push(`<a href="${nextLink}" class="px-3 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 text-xs sm:text-sm transition-all">次へ →</a>`);
-        }
+            // 【次へ】ボタン
+            if (currentPage < totalPages) {
+                const nextLink = `index${currentPage + 1}.html`;
+                // 💡 px-2 sm:px-3 に修正
+                itemsHtml.push(`<a href="${nextLink}" class="px-2 sm:px-3 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 text-xs sm:text-sm transition-all shrink-0">次へ →</a>`);
+            }
 
-        paginationHtml = `
-        <div class="flex justify-center items-center gap-1.5 mt-12 pt-6 border-t border-dashed border-rose-100 w-full">
-            ${itemsHtml.join('\n')}
-        </div>
-        `;
-    }
-    // ─────────────────────────────────────────────────────────────────
+            // ⭕ 外枠の div クラスを大修正！
+            paginationHtml = `
+            <div class="flex flex-wrap justify-center items-center gap-1 sm:gap-1.5 max-w-full px-4 mt-12 pt-6 border-t border-dashed border-rose-100 mx-auto">
+                ${itemsHtml.join('\n')}
+            </div>
+            `;
+        }
 
 	/* 検索ウィンドウ作成中
 		<div class="max-w-md mx-auto my-6 px-4">
