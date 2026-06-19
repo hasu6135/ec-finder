@@ -463,17 +463,26 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         const encLurl = encryptStr(rawLurl);
         const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-        return `
-        <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
-            <span class="text-lg font-bold w-6 text-center">${rankMedals[index]}</span>
-            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
-                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+		return `
+        <div class="flex items-center gap-3 p-2.5 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
+            <span class="text-lg font-bold w-6 text-center shrink-0">${rankMedals[index]}</span>
+            
+            <div class="w-14 h-20 bg-white border border-slate-200 rounded-lg overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                <img class="er-safe-img w-full h-full object-cover p-0.5" data-enc-src="${encImg}" alt="順位表紙">
             </div>
-            <div class="min-w-0 flex-1">
-                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
-                <div class="flex justify-between items-center mt-1">
-                    <span class="text-[10px] text-slate-500">💬 口コミ <span class="font-bold text-rose-600">${article.reviewCount || '0'}</span> 件</span>
-                    <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+            
+            <div class="min-w-0 flex-1 h-full flex flex-col justify-between py-0.5">
+                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1">${article.originalTitle}</a>
+                
+                <div class="flex flex-col gap-1.5 items-start sm:flex-row sm:justify-between sm:items-center mt-auto w-full min-w-0">
+                    <span class="text-[10px] text-slate-500 whitespace-nowrap">
+                        💬 口コミ <span class="font-bold text-rose-600">${article.reviewCount || '0'}</span> 件
+                    </span>
+                    <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2.5 py-1 sm:py-0.5 rounded-full font-bold shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95" 
+                       data-enc-lurl="${encLurl}" 
+                       data-enc-af="132815-990" 
+                       rel="nofollow noopener" 
+                       target="_blank">詳細へ</a>
                 </div>
             </div>
         </div>
@@ -597,7 +606,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     const googleAnalyticsCode = getAnalyticsTag();
     const bypassScript = getBypassScript();
 
-// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
+		// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
         let paginationHtml = '';
         if (totalPages > 1) {
             let itemsHtml = [];
@@ -636,7 +645,8 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             </div>
             `;
         }
-
+		// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
+		
 	/* 検索ウィンドウ作成中
 		<div class="max-w-md mx-auto my-6 px-4">
 	    <div class="relative flex items-center">
