@@ -187,7 +187,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
-<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
+<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen overflow-x-hidden">
     <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
             <a href="../index.html" class="text-sm font-bold text-rose-400 hover:text-rose-300">← ${siteTitle} トップへ</a>
@@ -335,7 +335,7 @@ function generateTagPageHTML(tagName, articles) {
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
-<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
+<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen overflow-x-hidden">
     <main class="max-w-3xl mx-auto px-4 py-12">
         <a href="../index.html" class="text-xs font-bold text-rose-500 hover:underline">← 総合トップに戻る</a>
         <h1 class="text-xl font-extrabold text-slate-900 mt-4 mb-8 flex items-center gap-2">
@@ -675,7 +675,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
-<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
+<body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen overflow-x-hidden">
     <header class="bg-slate-950 text-white py-10 px-4 text-center relative border-b border-rose-950/40">
     
 		<p class="text-xs font-bold text-rose-500 tracking-widest uppercase mb-1">
