@@ -527,20 +527,33 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const formattedDate = `${yyyy}/${mm}/${dd}`;
-        return `
-        <div class="flex items-center gap-3 p-2 bg-slate-50/50 rounded-xl border border-slate-100 hover:bg-rose-50/20 transition-all">
-            <span class="text-xs font-bold w-6 text-center">${rankMedals[index]}</span>
-            <div class="w-10 h-14 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
-                <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encImg}" alt="順位表紙">
+		return `
+        <div class="flex items-center gap-3.5 p-3 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+            <span class="text-xl font-black w-6 text-center shrink-0">${rankMedals[index]}</span>
+            
+            <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                <img class="er-safe-img w-full h-full object-cover" data-enc-src="${encImg}" alt="順位表紙">
             </div>
-            <div class="min-w-0 flex-1">
-                <a href="posts/${article.id}.html" class="text-xs font-bold text-slate-800 hover:text-rose-600 line-clamp-1 block transition-colors">${article.originalTitle}</a>
-                <div class="mt-1 flex justify-between items-center">
-                    <span class="text-[9px] text-slate-400">レビュー日: ${formattedDate}</span>
-                    <a class="er-safe-lnk text-[10px] text-white bg-slate-800 px-2 py-0.5 rounded-full font-bold shadow-sm" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">詳細へ</a>
+            
+            <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
+                <div>
+                    <a href="posts/${article.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">${article.originalTitle}</a>
+                </div>
+                
+                <div class="flex flex-col gap-2 items-start sm:flex-row sm:justify-between sm:items-center mt-auto w-full min-w-0">
+                    <span class="text-[11px] text-slate-400 whitespace-nowrap">
+                        レビュー日: ${formattedDate}
+                    </span>
+                    
+                    <a class="er-safe-lnk text-[11px] text-white bg-slate-800 px-3 py-1.5 sm:py-1 rounded-full font-bold shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95" 
+                       data-enc-lurl="${encLurl}" 
+                       data-enc-af="132815-990" 
+                       rel="nofollow noopener" 
+                       target="_blank">詳細へ</a>
                 </div>
             </div>
-        </div>`;
+        </div>
+        `;
     }).join('\n');
 
 	// 🔥 【新設】今週の超大作ランキング（紹介文の文字数＝熱量順・上位5件）
