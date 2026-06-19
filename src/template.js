@@ -121,7 +121,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                 </div>
                 <div class="min-w-0 flex-1">
                     <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">${rec.originalTitle}</h4>
-                    <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rec.reviewRating || '4.0'}</div>
+                    <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rec.reviewRating || '4.0'}(${rec.reviewCount || '0'}件)</div>
                 </div>
             </a>
             `;
@@ -302,7 +302,7 @@ function generateTagPageHTML(tagName, articles) {
             <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
                 <div class="space-y-1.5">
                     <h3 class="text-[13px] sm:text-sm font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
-                    <div class="text-[11px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.0'}</div>
+                    <div class="text-[11px] text-amber-500 font-bold">⭐ ${article.reviewRating || '4.0'}(${article.reviewCount || '0'}件)</div>
                     <div class="flex flex-wrap gap-0.5">
                         ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
                     </div>
@@ -393,7 +393,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                     <h3 class="search-title text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
                     <div class="text-[11px] text-slate-500 flex items-center gap-1">
                         <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
-                        <span class="hidden sm:inline">(${article.reviewCount || '0'}件)</span>
+                        <span class="inline">(${article.reviewCount || '0'}件)</span>
                     </div>
                     <div class="search-tags flex flex-wrap gap-0.5">
                         <span class="sm:hidden flex flex-wrap gap-0.5">
