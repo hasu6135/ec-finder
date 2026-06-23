@@ -58,18 +58,23 @@
 
                     // ③ キーワード絞り込み（【重要】あなたのdb.jsonの構造「originalTitle」「pageGenres」に100%最適化）
                     const filtered = articles.filter(art => {
-                        // タイトルで検索 (originalTitle を参照)
-                        const title = art.originalTitle ? art.originalTitle.toLowerCase() : '';
-                        
-                        // タグで検索 (pageGenres と tags の両方を安全に文字列結合してチェック)
-                        const genresStr = art.pageGenres && Array.isArray(art.pageGenres) ? art.pageGenres.join(' ').toLowerCase() : '';
-                        const tagsStr = art.tags && Array.isArray(art.tags) ? art.tags.join(' ').toLowerCase() : '';
-                        const allTagsStr = genresStr + ' ' + tagsStr;
-                        
-                        // 作家名でも検索できるようにサポート
-                        const author = art.author ? art.author.toLowerCase() : '';
-                        
-                        return title.includes(query) || allTagsStr.includes(query) || author.includes(query);
+// 1. タイトルから検索 (title)
+  const matchTitle = item.title && item.title.toLowerCase().includes(searchQuery);
+
+  // 2. タグ配列から検索 (tags)
+  // item.tags が存在し、配列の中にキーワードが含まれるかチェック
+  const matchTags = item.tags && item.tags.some(tag => 
+    tag.toLowerCase().includes(searchQuery)
+  );
+
+  // 3. レビュー内容から検索 (reviews)
+  const matchReviews = item.reviews && item.reviews.toLowerCase().includes(searchQuery);
+
+  // 4. 商品説明から検索 (description)
+  const matchDescription = item.description && item.description.toLowerCase().includes(searchQuery);
+
+  // いずれかにヒットすれば抽出
+  return matchTitle || matchTags || matchReviews || matchDescription;
                     });
 
                     // ④ 画面に描画
