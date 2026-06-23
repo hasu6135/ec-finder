@@ -28,24 +28,27 @@
         </main>
 
         <script>
-            // Base64暗号化（アドブロック回避用）
+            // 🔒 アドブロック回避用の暗号化・復元関数
             function encryptStr(str) {
                 if (!str) return '';
                 return btoa(unescape(encodeURIComponent(str)));
             }
 
-            // Base64復元（アドブロック回避用）
             function decode(b64) {
                 try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
             }
 
             document.addEventListener('DOMContentLoaded', async () => {
+                // 先に画面の描画先（ターゲット要素）を確実に取得
+                const targetEl = document.getElementById('search-results-target');
+
                 // ① URLから「?q=キーワード」を取得
                 const params = new URLSearchParams(window.location.search);
                 const query = params.get('q')?.trim().toLowerCase() || '';
                 
                 if (!query) {
                     document.getElementById('target-keyword').textContent = '未入力';
+                    if (targetEl) targetEl.innerHTML = '<p class="text-xs text-slate-400 py-12 text-center">検索キーワードを入力してください。</p>';
                     return;
                 }
                 
@@ -54,47 +57,50 @@
                 try {
                     // ② データベース「db.json」を読み込む
                     const response = await fetch('db.json');
+                    if (!response.ok) throw new Error('db.json の読み込みに失敗しました');
                     const articles = await response.json();
 
-                    // ③ キーワード絞り込み（【重要】あなたのdb.jsonの構造「originalTitle」「pageGenres」に100%最適化）
-                    const filtered = articles.filter(item => {
-						// 1. タイトルから検索 (title)
-						const matchTitle = item.title && item.title.toLowerCase().includes(searchQuery);
-						
-						// 2. タグ配列から検索 (tags)
-						// item.tags が存在し、配列の中にキーワードが含まれるかチェック
-						const matchTags = item.tags && item.tags.some(tag => 
-						  tag.toLowerCase().includes(searchQuery)
-						);
-						
-						// 3. レビュー内容から検索 (reviews)
-						const matchReviews = item.reviews && item.reviews.toLowerCase().includes(searchQuery);
-						
-						// 4. 商品説明から検索 (description)
-						const matchDescription = item.description && item.description.toLowerCase().includes(searchQuery);
-						
-						// いずれかにヒットすれば抽出
-						return matchTitle || matchTags || matchReviews || matchDescription;
+                    // ③ キーワード絞り込み（あなたのdb.jsonのプロパティ構造に100%適合）
+                    const filtered = articles.filter(art => {
+                        // タイトルで探す
+                        const title = art.title ? art.title.toLowerCase() : '';
+                        const originalTitle = art.originalTitle ? art.originalTitle.toLowerCase() : '';
+                        
+                        // タグ配列（tags, pageGenres）を結合して探す
+                        const tagsStr = art.tags && Array.isArray(art.tags) ? art.tags.join(' ').toLowerCase() : '';
+                        const genresStr = art.pageGenres && Array.isArray(art.pageGenres) ? art.pageGenres.join(' ').toLowerCase() : '';
+                        
+                        // 口コミ本文（reviews）や作家名（author）からも探せるように補強
+                        const reviewsStr = art.reviews ? art.reviews.toLowerCase() : '';
+                        const author = art.author ? art.author.toLowerCase() : '';
+
+                        return title.includes(query) || 
+                               originalTitle.includes(query) || 
+                               tagsStr.includes(query) || 
+                               genresStr.includes(query) || 
+                               reviewsStr.includes(query) ||
+                               author.includes(query);
                     });
 
-                    // ④ 画面に描画
+                    // ④ 画面に件数を描画
                     document.getElementById('search-count').textContent = filtered.length;
-                    const targetEl = document.getElementById('search-results-target');
+
+                    if (!targetEl) return;
 
                     if (filtered.length === 0) {
                         targetEl.innerHTML = '<p class="text-xs text-slate-400 py-12 text-center">一致する作品が見つかりませんでした。</p>';
                         return;
                     }
 
-                    // ⑤ ランキングと同じ超美麗UI（かつアドブロック完全回避仕様）で出力！
+                    // ⑤ ランキング等と同じ「大迫力の画像＆レスポンシブ対応カードUI」で出力
                     targetEl.innerHTML = filtered.map(art => {
-                        // 主要属性（pageGenres または tags）からバッジを作成
+                        // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];
                         const tagBadges = currentTags.slice(0, 3).map(t => 
                             `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#${t}</span>`
                         ).join(' ');
 
-                        // リンクと画像の暗号化処理（アドブロック対策）
+                        // アフィリエイトリンクの安全な暗号化
                         let rawLurl = '';
                         try {
                             const u = new URL(art.link);
@@ -107,7 +113,6 @@
 
                         return `
                         <div class="flex items-center gap-3.5 p-3 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-                            
                             <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                                 <a class="er-safe-lnk w-full h-full block" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">
                                     <img class="er-safe-img w-full h-full object-cover" data-enc-src="${encImg}" alt="表紙">
@@ -117,7 +122,7 @@
                             <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
                                 <div>
                                     <a href="posts/${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">
-                                        ${art.originalTitle}
+                                        ${art.title || art.originalTitle}
                                     </a>
                                     <div class="flex flex-wrap gap-1 overflow-hidden max-h-[34px]">
                                         ${tagBadges}
@@ -133,7 +138,7 @@
                         `;
                     }).join('\n');
 
-                    // 🚀 すり抜けスクリプトをその場で即時実行して暗号化画像を復元
+                    // 🚀 その場でアドブロック回避スクリプトを即時実行して画像を復元
                     document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
                         var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
                         var afId = el.getAttribute("data-enc-af") || "132815-990";
@@ -149,7 +154,7 @@
 
                 } catch (err) {
                     console.error('データ取得エラー:', err);
-                    targetEl.innerHTML = '<p class="text-xs text-rose-500 py-12 text-center">データの読み込みに失敗しました。</p>';
+                    if (targetEl) targetEl.innerHTML = '<p class="text-xs text-rose-500 py-12 text-center">データの読み込みに失敗しました。</p>';
                 }
             });
         </script>
