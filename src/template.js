@@ -411,7 +411,23 @@ function generateSearchPageHTML(SITE_TITLE) {
 
                     // ③ キーワード絞り込み（【重要】あなたのdb.jsonの構造「originalTitle」「pageGenres」に100%最適化）
                     const filtered = articles.filter(item => {
-			return true;
+						// 1. タイトルから検索 (title)
+						const matchTitle = item.title && item.title.toLowerCase().includes(searchQuery);
+						
+						// 2. タグ配列から検索 (tags)
+						// item.tags が存在し、配列の中にキーワードが含まれるかチェック
+						const matchTags = item.tags && item.tags.some(tag => 
+						  tag.toLowerCase().includes(searchQuery)
+						);
+						
+						// 3. レビュー内容から検索 (reviews)
+						const matchReviews = item.reviews && item.reviews.toLowerCase().includes(searchQuery);
+						
+						// 4. 商品説明から検索 (description)
+						const matchDescription = item.description && item.description.toLowerCase().includes(searchQuery);
+						
+						// いずれかにヒットすれば抽出
+						return matchTitle || matchTags || matchReviews || matchDescription;
                     });
 
                     // ④ 画面に描画
