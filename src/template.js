@@ -449,7 +449,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                     targetEl.innerHTML = filtered.map(art => {
                         // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];
-                        const tagBadges = currentTags.slice(0, 3).map(t => 
+                        const tagBadges = currentTags.slice(0, 4).map(t => 
                             \`<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#\${t}</span>\`
                         ).join(' ');
 
@@ -465,26 +465,26 @@ function generateSearchPageHTML(SITE_TITLE) {
                         const encImg = encryptStr(art.imgUrl);
 
                         return \`
-                        <div class="flex items-center gap-3.5 p-3 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-                            <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                        <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+                            <div class="w-28 h-40 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                                 <a class="er-safe-lnk w-full h-full block" data-enc-lurl="\${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">
                                     <img class="er-safe-img w-full h-full object-cover" data-enc-src="\${encImg}" alt="表紙">
                                 </a>
                             </div>
                             
-                            <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
+                            <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
                                 <div>
-                                    <a href="posts/\${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">
+                                    <a href="posts/\${art.id}.html" class="text-base font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
                                         \${art.title || art.originalTitle}
                                     </a>
-                                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[34px]">
+                                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[48px]">
                                         \${tagBadges}
                                     </div>
                                 </div>
                                 
                                 <div class="flex justify-between items-center mt-auto w-full min-w-0">
-                                    <span class="text-[11px] text-slate-400 whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
-                                    <a href="posts/\${art.id}.html" class="text-[11px] text-white bg-rose-500 px-4 py-1 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
+                                    <span class="text-xs text-slate-400 whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
+                                    <a href="posts/\${art.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
                                 </div>
                             </div>
                         </div>
