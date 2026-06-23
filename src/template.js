@@ -349,7 +349,7 @@ function generateTagPageHTML(tagName, articles) {
 </html>`;
 }
 
-// 💡検索結果ページ生成
+// 💡検索結果ページ生成（あなたのデータ構造に100%最適化 ＆ アドブロック完全回避版）
 function generateSearchPageHTML(SITE_TITLE) {
     return `
     <!DOCTYPE html>
@@ -362,6 +362,13 @@ function generateSearchPageHTML(SITE_TITLE) {
     </head>
     <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
         
+        <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <a href="index.html" class="text-sm font-bold text-rose-400 hover:text-rose-300">← ${SITE_TITLE} トップへ</a>
+                <span class="text-xs font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">18+ ONLY</span>
+            </div>
+        </header>
+
         <main class="max-w-4xl mx-auto px-4 py-8">
             <h1 class="text-base font-black border-l-4 border-rose-500 pl-2 mb-6 text-slate-800">
                 「<span id="target-keyword" class="text-rose-600">...</span>」の検索結果
@@ -370,10 +377,21 @@ function generateSearchPageHTML(SITE_TITLE) {
             <p id="search-meta" class="text-xs text-slate-400 mb-4">該当件数: <span id="search-count" class="font-bold text-slate-700">0</span>件</p>
 
             <div id="search-results-target" class="flex flex-col gap-3">
-                </div>
+            </div>
         </main>
 
         <script>
+            // Base64暗号化（アドブロック回避用）
+            function encryptStr(str) {
+                if (!str) return '';
+                return btoa(unescape(encodeURIComponent(str)));
+            }
+
+            // Base64復元（アドブロック回避用）
+            function decode(b64) {
+                try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
+            }
+
             document.addEventListener('DOMContentLoaded', async () => {
                 // ① URLから「?q=キーワード」を取得
                 const params = new URLSearchParams(window.location.search);
@@ -387,19 +405,24 @@ function generateSearchPageHTML(SITE_TITLE) {
                 document.getElementById('target-keyword').textContent = query;
 
                 try {
-                    // ② あなたのデータベース「db.json」を直接読み込む
+                    // ② データベース「db.json」を読み込む
                     const response = await fetch('db.json');
                     const articles = await response.json();
 
-                    // ③ キーワード絞り込み（あなたのdb.jsonの構造に100%最適化）
+                    // ③ キーワード絞り込み（【重要】あなたのdb.jsonの構造「originalTitle」「pageGenres」に100%最適化）
                     const filtered = articles.filter(art => {
-                        // タイトルで検索（art.title）
-                        const title = art.title ? art.title.toLowerCase() : '';
+                        // タイトルで検索 (originalTitle を参照)
+                        const title = art.originalTitle ? art.originalTitle.toLowerCase() : '';
                         
-                        // タグで検索（art.tags は配列なので、文字列に結合して検索）
+                        // タグで検索 (pageGenres と tags の両方を安全に文字列結合してチェック)
+                        const genresStr = art.pageGenres && Array.isArray(art.pageGenres) ? art.pageGenres.join(' ').toLowerCase() : '';
                         const tagsStr = art.tags && Array.isArray(art.tags) ? art.tags.join(' ').toLowerCase() : '';
+                        const allTagsStr = genresStr + ' ' + tagsStr;
                         
-                        return title.includes(query) || tagsStr.includes(query);
+                        // 作家名でも検索できるようにサポート
+                        const author = art.author ? art.author.toLowerCase() : '';
+                        
+                        return title.includes(query) || allTagsStr.includes(query) || author.includes(query);
                     });
 
                     // ④ 画面に描画
@@ -411,23 +434,38 @@ function generateSearchPageHTML(SITE_TITLE) {
                         return;
                     }
 
-                    // ⑤ 先ほど大型化したランキングカードと同じ「最高にリッチなカードUI」で出力！
+                    // ⑤ ランキングと同じ超美麗UI（かつアドブロック完全回避仕様）で出力！
                     targetEl.innerHTML = filtered.map(art => {
-                        // 配列のタグをバッジHTMLに変換
-                        const tagBadges = (art.tags || []).map(t => 
+                        // 主要属性（pageGenres または tags）からバッジを作成
+                        const currentTags = art.pageGenres || art.tags || [];
+                        const tagBadges = currentTags.slice(0, 3).map(t => 
                             \`<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#\${t}</span>\`
                         ).join(' ');
 
+                        // リンクと画像の暗号化処理（アドブロック対策）
+                        let rawLurl = '';
+                        try {
+                            const u = new URL(art.link);
+                            rawLurl = u.searchParams.get('lurl') || art.link;
+                        } catch(e) {
+                            rawLurl = art.link;
+                        }
+                        const encLurl = encryptStr(rawLurl);
+                        const encImg = encryptStr(art.imgUrl);
+
                         return \`
                         <div class="flex items-center gap-3.5 p-3 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+                            
                             <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                                <img class="w-full h-full object-cover" src="\${art.imgUrl || ''}" alt="表紙">
+                                <a class="er-safe-lnk w-full h-full block" data-enc-lurl="\${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank">
+                                    <img class="er-safe-img w-full h-full object-cover" data-enc-src="\${encImg}" alt="表紙">
+                                </a>
                             </div>
                             
                             <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
                                 <div>
                                     <a href="posts/\${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">
-                                        \${art.title}
+                                        \${art.originalTitle}
                                     </a>
                                     <div class="flex flex-wrap gap-1 overflow-hidden max-h-[34px]">
                                         \${tagBadges}
@@ -435,13 +473,27 @@ function generateSearchPageHTML(SITE_TITLE) {
                                 </div>
                                 
                                 <div class="flex justify-between items-center mt-auto w-full min-w-0">
-                                    <span class="text-[11px] text-slate-400">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
-                                    <a href="posts/\${art.id}.html" class="text-[11px] text-white bg-rose-500 px-4 py-1 rounded-full font-bold shadow-sm transition-transform active:scale-95">詳細を読む ➔</a>
+                                    <span class="text-[11px] text-slate-400 whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
+                                    <a href="posts/\${art.id}.html" class="text-[11px] text-white bg-rose-500 px-4 py-1 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
                                 </div>
                             </div>
                         </div>
                         \`;
                     }).join('\\n');
+
+                    // 🚀 すり抜けスクリプトをその場で即時実行して暗号化画像を復元
+                    document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
+                        var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
+                        var afId = el.getAttribute("data-enc-af") || "132815-990";
+                        if (rawLurl) {
+                            var perfectUrl = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
+                            el.setAttribute("href", perfectUrl);
+                        }
+                    });
+                    document.querySelectorAll(".er-safe-img").forEach(function(el) {
+                        var srcUrl = decode(el.getAttribute("data-enc-src") || "");
+                        if (srcUrl) { el.setAttribute("src", srcUrl); }
+                    });
 
                 } catch (err) {
                     console.error('データ取得エラー:', err);
