@@ -994,4 +994,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </html>`;
 }
 
-module.exports = { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML };
+module.exports = { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML, generateSearchPageHTML};

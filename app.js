@@ -5,7 +5,7 @@ const path = require('path');
 const { fetchDmmProducts } = require('./src/dmmApi');
 const { scrapeDmmProductDetail } = require('./src/scraper');
 const { generateAiReview, parseMarkdownTableToHtml } = require('./src/aiReviewer');
-const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = require('./src/template');
+const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML, generateSearchPageHTML } = require('./src/template');
 
 /**
  * ===================================================
@@ -393,6 +393,17 @@ async function main() {
             fs.writeFileSync(fileName, indexHtmlCrlf, 'utf-8');
             console.log(` 🏠 トップページ生成完了: ${fileName} (${page}/${totalPages} ページ)`);
         }
+
+		// ===================================================
+        // 🔍 【ここを追加！】検索専用ページ (search.html) の自動書き出し
+        // ===================================================
+        console.log('\n🔍 [STEP 2.5] 検索専用ページ（search.html）を生成中...');
+        const searchHtml = generateSearchPageHTML(SITE_TITLE);
+        const searchHtmlCrlf = searchHtml.replace(/\r?\n/g, '\r\n');
+        // ルート直下（index.html と同じ階層）に書き出します
+        fs.writeFileSync('search.html', searchHtmlCrlf, 'utf-8');
+        console.log(' ✅ 検索専用ページ（search.html）の生成が完了しました！');
+        // ===================================================
 
         // [STEP 3/3] サイトマップの強制書き出し
         console.log(`\n[STEP 3/3] 🤖 検索エンジン対策を適用中...`);
