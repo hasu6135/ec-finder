@@ -239,7 +239,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                 </div>
 
                 <div class="text-slate-700 text-sm border-t border-rose-50 pt-4 mb-6">
-                    ${article.summary}
+                    ${article.summary ? article.summary.replace(/<\/b([^>])/g, '</b>$1') : ''}
                 </div>
 
                 <div class="mb-6 border-t border-dashed border-slate-100 pt-4">
