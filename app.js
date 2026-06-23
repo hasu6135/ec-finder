@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML } = req
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 20;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 1;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -180,64 +180,54 @@ async function main() {
 
 			const articleId = generateSafeId(product.title);
 
-            // 重複チェック
-            /*
-            if (dbArticles.some(art => art.id === articleId)) {
-                console.log(`⏭️ スキップ: 「${product.title}」はすでに記事が存在します。`);
-                continue;
-            }
-            */
 			// --------------------------------------------------
-            // 🔄 【時間基準】重複チェック ＆ 1ヶ月以上経過で自動再更新
+            // 🔄 【DMM API レビュー数基準】変更検知 ＆ 差分自動再更新
             // --------------------------------------------------
             const existingIndex = dbArticles.findIndex(art => art.id === articleId);
             if (existingIndex !== -1) {
                 const existingArticle = dbArticles[existingIndex];
                 
-                // 💡 最後にチェックした日時（なければ作成日時、それもなければ古い日時をセット）
-                const lastCheckedStr = existingArticle.lastCheckedAt || existingArticle.createdAt || "2000-01-01T00:00:00.000Z";
-                const lastCheckedDate = new Date(lastCheckedStr);
-                const now = new Date();
+                // 💡 DMM API側から届いた最新のレビュー件数を取得 (APIの構造に合わせて適宜調整してください)
+                const apiReviewCount = product.review && product.review.count !== undefined ? parseInt(product.review.count, 10) : 0;
+                // 💡 手元（DB）に保存されている現在のレビュー件数
+                const dbReviewCount = parseInt(existingArticle.reviewCount || 0, 10);
 
-                // 💡 前回チェックからの経過日数を計算
-                const msDiff = now.getTime() - lastCheckedDate.getTime();
-                const daysDiff = msDiff / (1000 * 60 * 60 * 24); // ミリ秒を「日」に変換
-
-                // 💡 30日（約1ヶ月）以上経過しているか判定
-                const isNeedUpdate = daysDiff >= 30;
+                // 💡 APIの値が手元のデータより大きい（レビューが増えた）場合のみ更新フラグをONにする
+                // ※ もし減るケースや、評価（rate）の変化も検知したい場合は `apiReviewCount !== dbReviewCount` にしてもOKです
+                const isNeedUpdate = apiReviewCount > dbReviewCount;
 
                 if (isNeedUpdate) {
-                    console.log(`🔄 【定期メンテナンス】「${product.title}」は前回の確認から ${Math.floor(daysDiff)} 日が経過しています。最新情報を再取得します...`);
+                    console.log(`🔥 【レビュー増加検知】「${product.title}」のレビュー件数が ${dbReviewCount}件 ➔ ${apiReviewCount}件 に増加しました。スクレイピングで中身を再更新します...`);
                     
                     let detailData = {};
                     try {
-                        // 1ヶ月経っているので、ここで確実にスクレイピングを走らせて最新のレビュー数を掴みに行く
+                        // レビュー数が増えているので、ここで確実にスクレイピングを走らせて最新のレビューテキストや情報を掴みに行く
                         detailData = await scrapeDmmProductDetail(product.rawUrl || product.url) || {};
                     } catch (scrapingError) {
-                        console.error(`⚠️ メンテナンス用スクレイピングでエラーが発生しました:`, scrapingError.message);
+                        console.error(`⚠️ 差分更新用スクレイピングでエラーが発生しました:`, scrapingError.message);
                     }
 
-                    // スクレイピングで取れた最新のレビュー情報を反映（なければ既存の値を維持）
-                    const finalRating = detailData.reviewRating || existingArticle.reviewRating || '0.0';
-                    const finalCount = detailData.reviewCount !== undefined ? detailData.reviewCount : (existingArticle.reviewCount || 0);
+                    // スクレイピングで取れた最新のレビュー情報を反映（なければAPIの値、それもなければ既存の値を維持）
+                    const finalRating = detailData.reviewRating || product.review?.rate || existingArticle.reviewRating || '0.0';
+                    const finalCount = detailData.reviewCount !== undefined ? detailData.reviewCount : apiReviewCount;
 
                     // 💡 DBのデータを最新情報にアップデート
                     dbArticles[existingIndex].reviewRating = finalRating.toString();
                     dbArticles[existingIndex].reviewCount = parseInt(finalCount, 10);
                     
-                    // 💡 重要！チェックした日を「今日」に更新して、また1ヶ月間はスキップされるようにする
-                    dbArticles[existingIndex].lastCheckedAt = now.toISOString();
+                    // 💡 念のため確認日時も今日の日付にセット
+                    dbArticles[existingIndex].lastCheckedAt = new Date().toISOString();
                     
-                    // 記事のHTMLを最新の評価・レビュー件数で再生成
+                    // 記事のHTMLを最新の評価・レビュー件数（熱量文字数など）で再生成
                     const recommendedArticles = dbArticles.filter(art => art.id !== articleId).slice(0, 5);
                     const postHtml = generateSinglePostHTML(dbArticles[existingIndex], SITE_TITLE, recommendedArticles);
                     fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
 
                     isDatabaseChanged = true;
-                    console.log(`   ✅ 記事HTMLを最新の状態に更新し、確認日時をアップデートしました。`);
+                    console.log(`   ✅ レビューが増えたため、記事HTMLを最新の状態に更新しました！`);
                 } else {
-                    // 30日未満であれば、1ミリも通信せずに爆速スキップ！
-                    console.log(`skip スキップ: 「${product.title}」は確認から30日以内のためスキップします。（残り約 ${Math.ceil(30 - daysDiff)} 日）`);
+                    // レビュー数に変化がなければ、1ミリも通信せずに爆速スキップ！
+                    console.log(`skip スキップ: 「${product.title}」はレビュー件数に変更がないためスキップします。（現在: ${dbReviewCount}件）`);
                 }
                 continue; // 🛑 次の商品へ
             }
