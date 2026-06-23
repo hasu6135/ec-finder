@@ -349,6 +349,81 @@ function generateTagPageHTML(tagName, articles) {
 </html>`;
 }
 
+// 💡検索結果ページ生成
+function generateSearchPageHTML(SITE_TITLE) {
+    return `
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <title>検索結果 | ${SITE_TITLE}</title>
+    </head>
+    <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+        
+        <main class="max-w-4xl mx-auto px-4 py-8">
+            <h1 class="text-base font-black border-l-4 border-rose-500 pl-2 mb-6 text-slate-800">
+                「<span id="target-keyword" class="text-rose-600">...</span>」の検索結果
+            </h1>
+            
+            <p id="search-meta" class="text-xs text-slate-400 mb-4">該当件数: <span id="search-count" class="font-bold text-slate-700">0</span>件</p>
+
+            <div id="search-results-target" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+        </main>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', async () => {
+                // ① URLから「?q=◯◯」のキーワードを抽出
+                const params = new URLSearchParams(window.location.search);
+                const query = params.get('q')?.trim().toLowerCase() || '';
+                
+                if (!query) {
+                    document.getElementById('target-keyword').textContent = '未入力';
+                    return;
+                }
+                
+                document.getElementById('target-keyword').textContent = query;
+
+                // ② 全記事のデータを保持しているJSONファイル（例: articles.json）を非同期で読み込む
+                // ※ app.js側でビルド時に全記事リストのJSONを出力しておく必要があります
+                try {
+                    const response = await fetch('data/articles.json');
+                    const articles = await response.json();
+
+                    // ③ キーワードで絞り込み
+                    const filtered = articles.filter(art => {
+                        const title = art.originalTitle?.toLowerCase() || '';
+                        const tags = art.tags?.toLowerCase() || ''; // もしタグがあれば
+                        return title.includes(query) || tags.includes(query);
+                    });
+
+                    // ④ 画面に描画
+                    document.getElementById('search-count').textContent = filtered.length;
+                    const targetEl = document.getElementById('search-results-target');
+
+                    if (filtered.length === 0) {
+                        targetEl.innerHTML = '<p class="text-xs text-slate-400 col-span-full py-8 text-center">一致する作品が見つかりませんでした。</p>';
+                        return;
+                    }
+
+                    // ヒットした記事をカードHTMLにして結合（※暗号化リンクなどの処理をここで行う）
+                    targetEl.innerHTML = filtered.map(art => {
+                        return \`
+                        <div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex gap-3">
+                            <a href="posts/\${art.id}.html" class="text-xs font-bold">\${art.originalTitle}</a>
+                        </div>
+                        \`;
+                    }).join('\\n');
+
+                } catch (err) {
+                    console.error('データ取得エラー:', err);
+                }
+            });
+        </script>
+    </body>
+    </html>
+    `;
+}
+
 /**
  * 🏠 総合トップページの生成（読者絶賛ランキング＆ページネーション搭載版）
  * @param {Array} articles - そのページに表示する20件の記事
@@ -763,23 +838,20 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-4">
         
-	<div class="max-w-md mx-auto my-6 px-4 w-full box-border">
-        <div class="relative flex items-center">
-            <input 
-                type="text" 
-                id="site-search-input" 
-                placeholder="キーワードで作品を検索...（例：催眠、露出）" 
-                class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
-            />
-            <span class="absolute right-3 text-slate-400 pointer-events-none text-xs">
-                🔍
-            </span>
-        </div>
-        <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between w-full">
-            <span id="search-count">該当件数: 0件</span>
-            <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
-        </div>
+<form action="search.html" method="GET" class="max-w-md mx-auto my-6 px-4 w-full box-border">
+    <div class="relative flex items-center">
+        <input 
+            type="text" 
+            name="q"
+            id="site-search-input" 
+            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
+            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
+        />
+        <button type="submit" class="absolute right-3 text-slate-400 text-xs hover:text-rose-500 transition-colors">
+            🔍
+        </button>
     </div>
+</form>
         
                 <h2 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <span class="w-2 h-5 bg-rose-500 rounded-full"></span>🔥 【新着】本日の注目作品 (${currentPage}/${totalPages})
