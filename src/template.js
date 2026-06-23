@@ -410,7 +410,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                     const articles = await response.json();
 
                     // ③ キーワード絞り込み（【重要】あなたのdb.jsonの構造「originalTitle」「pageGenres」に100%最適化）
-                    const filtered = articles.filter(art => {
+                    const filtered = articles.filter(item => {
 // 1. タイトルから検索 (title)
   const matchTitle = item.title && item.title.toLowerCase().includes(searchQuery);
 
