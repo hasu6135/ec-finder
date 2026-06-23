@@ -3951,57 +3951,7 @@
         }
     });
     </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('site-search-input');
-    const searchMeta = document.getElementById('search-meta');
-    const searchCount = document.getElementById('search-count');
-    const clearBtn = document.getElementById('search-clear-btn');
-    const articleCards = document.querySelectorAll('.article-card');
-
-    if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
-        const keyword = e.target.value.toLowerCase().trim();
-        
-        if (keyword === '') {
-            // 空文字ならすべて表示
-            articleCards.forEach(card => card.style.display = '');
-            searchMeta.classList.add('hidden');
-            return;
-        }
-
-        let visibleCount = 0;
-        searchMeta.classList.remove('hidden');
-
-        articleCards.forEach(card => {
-            // カード内のタイトルとタグのテキストを取得
-            const titleText = card.querySelector('.search-title')?.textContent.toLowerCase() || '';
-            const tagsText = card.querySelector('.search-tags')?.textContent.toLowerCase() || '';
-
-            // キーワードが含まれているか判定
-            if (titleText.includes(keyword) || tagsText.includes(keyword)) {
-                card.style.display = ''; // 表示
-                visibleCount++;
-            } else {
-                card.style.display = 'none'; // 非表示
-            }
-        });
-
-        searchCount.textContent = '該当件数: ' + visibleCount + '件';
-    });
-
-    // クリアボタンの処理
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        articleCards.forEach(card => card.style.display = '');
-        searchMeta.classList.add('hidden');
-        searchInput.focus();
-    });
-});
-</script>
-
+    	
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">
             <p class="text-slate-500 mb-2">Powered by <a href="https://affiliate.dmm.com/api/">DMM.com Webサービス</a></p>

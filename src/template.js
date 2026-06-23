@@ -355,7 +355,10 @@ function generateSearchPageHTML(SITE_TITLE) {
     <!DOCTYPE html>
     <html lang="ja">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>検索結果 | ${SITE_TITLE}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
         
@@ -366,13 +369,13 @@ function generateSearchPageHTML(SITE_TITLE) {
             
             <p id="search-meta" class="text-xs text-slate-400 mb-4">該当件数: <span id="search-count" class="font-bold text-slate-700">0</span>件</p>
 
-            <div id="search-results-target" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div id="search-results-target" class="flex flex-col gap-3">
                 </div>
         </main>
 
         <script>
             document.addEventListener('DOMContentLoaded', async () => {
-                // ① URLから「?q=◯◯」のキーワードを抽出
+                // ① URLから「?q=キーワード」を取得
                 const params = new URLSearchParams(window.location.search);
                 const query = params.get('q')?.trim().toLowerCase() || '';
                 
@@ -383,17 +386,20 @@ function generateSearchPageHTML(SITE_TITLE) {
                 
                 document.getElementById('target-keyword').textContent = query;
 
-                // ② 全記事のデータを保持しているJSONファイル（例: articles.json）を非同期で読み込む
-                // ※ app.js側でビルド時に全記事リストのJSONを出力しておく必要があります
                 try {
-                    const response = await fetch('data/articles.json');
+                    // ② あなたのデータベース「db.json」を直接読み込む
+                    const response = await fetch('db.json');
                     const articles = await response.json();
 
-                    // ③ キーワードで絞り込み
+                    // ③ キーワード絞り込み（あなたのdb.jsonの構造に100%最適化）
                     const filtered = articles.filter(art => {
-                        const title = art.originalTitle?.toLowerCase() || '';
-                        const tags = art.tags?.toLowerCase() || ''; // もしタグがあれば
-                        return title.includes(query) || tags.includes(query);
+                        // タイトルで検索（art.title）
+                        const title = art.title ? art.title.toLowerCase() : '';
+                        
+                        // タグで検索（art.tags は配列なので、文字列に結合して検索）
+                        const tagsStr = art.tags && Array.isArray(art.tags) ? art.tags.join(' ').toLowerCase() : '';
+                        
+                        return title.includes(query) || tagsStr.includes(query);
                     });
 
                     // ④ 画面に描画
@@ -401,21 +407,45 @@ function generateSearchPageHTML(SITE_TITLE) {
                     const targetEl = document.getElementById('search-results-target');
 
                     if (filtered.length === 0) {
-                        targetEl.innerHTML = '<p class="text-xs text-slate-400 col-span-full py-8 text-center">一致する作品が見つかりませんでした。</p>';
+                        targetEl.innerHTML = '<p class="text-xs text-slate-400 py-12 text-center">一致する作品が見つかりませんでした。</p>';
                         return;
                     }
 
-                    // ヒットした記事をカードHTMLにして結合（※暗号化リンクなどの処理をここで行う）
+                    // ⑤ 先ほど大型化したランキングカードと同じ「最高にリッチなカードUI」で出力！
                     targetEl.innerHTML = filtered.map(art => {
+                        // 配列のタグをバッジHTMLに変換
+                        const tagBadges = (art.tags || []).map(t => 
+                            \`<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#\${t}</span>\`
+                        ).join(' ');
+
                         return \`
-                        <div class="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex gap-3">
-                            <a href="posts/\${art.id}.html" class="text-xs font-bold">\${art.originalTitle}</a>
+                        <div class="flex items-center gap-3.5 p-3 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+                            <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                                <img class="w-full h-full object-cover" src="\${art.imgUrl || ''}" alt="表紙">
+                            </div>
+                            
+                            <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
+                                <div>
+                                    <a href="posts/\${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">
+                                        \${art.title}
+                                    </a>
+                                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[34px]">
+                                        \${tagBadges}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center mt-auto w-full min-w-0">
+                                    <span class="text-[11px] text-slate-400">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
+                                    <a href="posts/\${art.id}.html" class="text-[11px] text-white bg-rose-500 px-4 py-1 rounded-full font-bold shadow-sm transition-transform active:scale-95">詳細を読む ➔</a>
+                                </div>
+                            </div>
                         </div>
                         \`;
                     }).join('\\n');
 
                 } catch (err) {
                     console.error('データ取得エラー:', err);
+                    targetEl.innerHTML = '<p class="text-xs text-rose-500 py-12 text-center">データの読み込みに失敗しました。</p>';
                 }
             });
         </script>
@@ -774,26 +804,6 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
             `;
         }
 		// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
-		
-	/* 検索ウィンドウ作成中
-		<div class="max-w-md mx-auto my-6 px-4">
-	    <div class="relative flex items-center">
-	        <input 
-	            type="text" 
-	            id="site-search-input" 
-	            placeholder="キーワードで作品を検索...（例：催眠、露出）" 
-	            class="w-full text-xs px-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent shadow-sm transition-all text-slate-800"
-	        />
-	        <span class="absolute right-3 text-slate-400 pointer-events-none">
-	            🔍
-	        </span>
-	    </div>
-	    <div id="search-meta" class="hidden text-[10px] text-slate-400 mt-1.5 px-1 flex justify-between">
-	        <span id="search-count">該当件数: 0件</span>
-	        <button id="search-clear-btn" class="text-rose-500 font-bold hover:underline">クリア</button>
-	    </div>
-	</div>
-	*/
 	
     return `
 <!DOCTYPE html>
@@ -931,57 +941,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         }
     });
     </script>
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('site-search-input');
-    const searchMeta = document.getElementById('search-meta');
-    const searchCount = document.getElementById('search-count');
-    const clearBtn = document.getElementById('search-clear-btn');
-    const articleCards = document.querySelectorAll('.article-card');
-
-    if (!searchInput) return;
-
-    searchInput.addEventListener('input', (e) => {
-        const keyword = e.target.value.toLowerCase().trim();
-        
-        if (keyword === '') {
-            // 空文字ならすべて表示
-            articleCards.forEach(card => card.style.display = '');
-            searchMeta.classList.add('hidden');
-            return;
-        }
-
-        let visibleCount = 0;
-        searchMeta.classList.remove('hidden');
-
-        articleCards.forEach(card => {
-            // カード内のタイトルとタグのテキストを取得
-            const titleText = card.querySelector('.search-title')?.textContent.toLowerCase() || '';
-            const tagsText = card.querySelector('.search-tags')?.textContent.toLowerCase() || '';
-
-            // キーワードが含まれているか判定
-            if (titleText.includes(keyword) || tagsText.includes(keyword)) {
-                card.style.display = ''; // 表示
-                visibleCount++;
-            } else {
-                card.style.display = 'none'; // 非表示
-            }
-        });
-
-        searchCount.textContent = '該当件数: ' + visibleCount + '件';
-    });
-
-    // クリアボタンの処理
-    clearBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        articleCards.forEach(card => card.style.display = '');
-        searchMeta.classList.add('hidden');
-        searchInput.focus();
-    });
-});
-</script>
-
+    	
 	<footer class="bg-slate-900 text-slate-400 py-8 text-center text-xs mt-12 w-full">
         <div class="max-w-4xl mx-auto px-4">
             <p class="text-slate-500 mb-2">Powered by <a href="https://affiliate.dmm.com/api/">DMM.com Webサービス</a></p>
