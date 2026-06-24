@@ -742,14 +742,11 @@ function generateSearchPageHTML(SITE_TITLE) {
                     <a href="posts/${article.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">${article.originalTitle}</a>
                 </div>
                 
-                <div class="flex flex-col gap-2 items-start sm:flex-row sm:justify-between sm:items-center mt-auto w-full min-w-0">
                     <div class="flex items-center gap-1.5 whitespace-nowrap">
                         <span class="text-xs text-amber-500 font-bold">⭐ ${article.reviewRating || '4.5'}</span>
                         <span class="text-[11px] text-slate-400 font-medium">(${article.reviewCount || 0}件)</span>
                     </div>
-                    
-                </div>
-                						<a class="text-[11px] text-white bg-rose-500 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-rose-600" 
+                <a class="text-[11px] text-white bg-rose-500 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-rose-600" 
                        href="${perfectAflink}" 
                        rel="nofollow noopener" 
                        target="_blank">詳細へ</a>
