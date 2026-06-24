@@ -327,7 +327,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
 
                 <div class="block w-full space-y-2.5 pt-2">
                     <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 color-[#fff] text-white py-3.5 px-6 rounded-full font-black text-sm text-center shadow-lg transition-all active:scale-95 w-full">
-                        FANZAで見る →1
+                        FANZAで見る →
                     </a>
                     <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="flex items-center justify-center bg-white text-rose-500 border-2 border-rose-400 hover:bg-rose-50/50 py-3 px-6 rounded-full font-bold text-sm text-center transition-all active:scale-95 w-full">
                         無料の試し読みはこちら

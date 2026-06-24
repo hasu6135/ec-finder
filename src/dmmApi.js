@@ -34,7 +34,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount, sortT
         url.searchParams.append('keyword', searchKeyword);
         url.searchParams.append('hits', hitsCount.toString());
         url.searchParams.append('sort', finalSort);
-        url.searchParams.append('offset', 1);　   //ずらして検索（1以上を指定）
+        url.searchParams.append('offset', 100);　   //ずらして検索（1以上を指定）
         url.searchParams.append('output', 'json');
 
         const response = await fetch(url.toString());
