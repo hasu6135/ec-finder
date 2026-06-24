@@ -748,11 +748,11 @@ function generateSearchPageHTML(SITE_TITLE) {
                         <span class="text-[11px] text-slate-400 font-medium">(${article.reviewCount || 0}件)</span>
                     </div>
                     
-					<a class="text-[11px] text-white bg-rose-500 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-rose-600" 
+                </div>
+                						<a class="text-[11px] text-white bg-rose-500 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-rose-600" 
                        href="${perfectAflink}" 
                        rel="nofollow noopener" 
                        target="_blank">詳細へ</a>
-                </div>
             </div>
         </div>
         `;
