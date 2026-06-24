@@ -593,7 +593,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                             
 <div class="min-w-0 flex-1 sm:h-80 flex flex-col justify-between py-2">
                 <div>
-                    <a href="posts/${art.id}.html" class="text-lg sm:text-xl font-black text-slate-800 hover:text-rose-600 line-clamp-3 block transition-colors leading-snug mb-3">
+                    <a href="posts/\${art.id}.html" class="text-lg sm:text-xl font-black text-slate-800 hover:text-rose-600 line-clamp-3 block transition-colors leading-snug mb-3">
 \${art.title || art.originalTitle}
                     </a>
                     <div class="flex flex-wrap gap-1.5 overflow-hidden max-h-[64px] mb-4">
