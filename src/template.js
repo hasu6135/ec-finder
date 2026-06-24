@@ -222,17 +222,21 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
 
     // 💖 関連記事（レコメンド）の組み立て
     let recommendHtml = '';
-    if (recommendArticles.length > 0) {
+	if (recommendArticles.length > 0) {
         const recCards = recommendArticles.map(rec => {
-            const encRecImg = encryptStr(rec.imgUrl);
+            // ✨ 変更：画像の暗号化処理（encryptStr）を完全に廃止し、生のURLをそのまま使用します
             return `
-            <a href="${rec.id}.html" class="group bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex gap-3 items-center hover:bg-rose-50/30 hover:border-rose-100 transition-all">
-                <div class="w-14 h-20 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
-                    <img class="er-safe-img w-100 h-100 object-contain p-0.5" data-enc-src="${encRecImg}" alt="関連表紙">
+            <a href="${rec.id}.html" class="group bg-slate-50 border border-slate-100 rounded-2xl p-3 flex gap-4 items-center hover:bg-rose-50/30 hover:border-rose-100 transition-all shadow-sm">
+                
+                <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                    <img class="w-full h-full object-cover" src="${rec.imgUrl}" alt="関連表紙" loading="lazy">
                 </div>
-                <div class="min-w-0 flex-1">
-                    <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">${rec.originalTitle}</h4>
-                    <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rec.reviewRating || '4.0'}(${rec.reviewCount || '0'}件)</div>
+                
+                <div class="min-w-0 flex-1 h-28 flex flex-col justify-center py-1">
+                    <h4 class="text-sm sm:text-base font-black text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug mb-1">
+                        ${rec.title || rec.originalTitle}
+                    </h4>
+                    <div class="text-xs text-amber-500 font-bold">⭐ ${rec.reviewRating || '4.0'}<span class="text-[11px] text-slate-400 font-normal ml-1">(${rec.reviewCount || '0'}件)</span></div>
                 </div>
             </a>
             `;
@@ -499,6 +503,7 @@ function generateSearchPageHTML(SITE_TITLE) {
         </main>
 
         <script>
+        	/*
             // 🔒 アドブロック回避用の暗号化・復元関数
             function encryptStr(str) {
                 if (!str) return '';
@@ -508,7 +513,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             function decode(b64) {
                 try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
             }
-
+*/
             document.addEventListener('DOMContentLoaded', async () => {
                 // 先に画面の描画先（ターゲット要素）を確実に取得
                 const targetEl = document.getElementById('search-results-target');
