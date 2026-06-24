@@ -193,7 +193,8 @@
     "maker": "快楽ナマきくらげ",
     "label": "コミックメガストア",
     "publisher": "コアマガジン（雑誌）",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 0
   },
   {
     "id": "女教師の趣味は露出【特別修正版】【タテヨミ】",
@@ -235,7 +236,8 @@
     "maker": "エロロギュウ",
     "label": "DLwolf18",
     "publisher": "Full Color Comics",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 0
   },
   {
     "id": "Webコミックトウテツ_Vol.125",
@@ -359,7 +361,8 @@
     "maker": "江戸しげズ逢坂ミナミ鉛棒なよなよ葛城ゆう一水社編集部",
     "label": "Webコミックトウテツ",
     "publisher": "一水社",
-    "category": "アダルトマンガ雑誌"
+    "category": "アダルトマンガ雑誌",
+    "apiReviewCount": 0
   },
   {
     "id": "お姉ちゃんとずぽずぽ。【デジタル特装版】",
@@ -969,7 +972,8 @@
     "maker": "山石18",
     "label": "WANIMAGAZINE COMICS SPECIAL",
     "publisher": "ワニマガジン社",
-    "category": "アダルトマンガ単行本"
+    "category": "アダルトマンガ単行本",
+    "apiReviewCount": 3
   },
   {
     "id": "利息はカラダで払ってね？【分冊版】（単話）",
@@ -2487,7 +2491,8 @@
     "maker": "愛罠",
     "label": "COMIC C-Trap",
     "publisher": "Realize出版",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 0
   },
   {
     "id": "催●アプリで人妻を調教したら娘も巻き込んで親子丼になった話〜キャリア妻・玲子編〜【モザイク版】",
@@ -2986,7 +2991,8 @@
     "maker": "松本痙",
     "label": "エンジェルコミックス",
     "publisher": "エンジェル出版",
-    "category": "アダルトマンガ単行本"
+    "category": "アダルトマンガ単行本",
+    "apiReviewCount": 1
   },
   {
     "id": "山神の花嫁〜寡黙な旦那様に溢れるほど注がれる寵愛〜【R版】（単話）",
@@ -3953,7 +3959,8 @@
     "maker": "甘蕉チチヅキ和泉はちminiru俵緋龍むむむ萌黄おじさん",
     "label": "GEEコミックス",
     "publisher": "ブレインハウス",
-    "category": "アダルトマンガ雑誌"
+    "category": "アダルトマンガ雑誌",
+    "apiReviewCount": 0
   },
   {
     "id": "愛の売買",
@@ -4052,7 +4059,8 @@
     "label": "エンジェルコミックス",
     "publisher": "エンジェル出版",
     "category": "アダルトマンガ単行本",
-    "lastCheckedAt": "2026-06-23T14:28:21.885Z"
+    "lastCheckedAt": "2026-06-23T14:28:21.885Z",
+    "apiReviewCount": 2
   },
   {
     "id": "好きだから、しよ？",
@@ -6127,7 +6135,8 @@
     "label": "WANIMAGAZINE COMICS SPECIAL",
     "publisher": "ワニマガジン社",
     "category": "アダルトマンガ単行本",
-    "lastCheckedAt": "2026-06-23T13:30:34.837Z"
+    "lastCheckedAt": "2026-06-23T13:30:34.837Z",
+    "apiReviewCount": 11
   },
   {
     "id": "こうふくのススメ（単話）",
@@ -7151,7 +7160,8 @@
     "label": "COMIC快楽天",
     "publisher": "ワニマガジン社",
     "category": "アダルトマンガ単話",
-    "lastCheckedAt": "2026-06-19T14:21:05.376Z"
+    "lastCheckedAt": "2026-06-19T14:21:05.376Z",
+    "apiReviewCount": 13
   },
   {
     "id": "みてみてミノタウロス（単話）",
@@ -13888,7 +13898,8 @@
     "label": "BAVEL COMICS",
     "publisher": "文苑堂",
     "category": "アダルトマンガ単行本",
-    "lastCheckedAt": "2026-06-23T14:28:48.568Z"
+    "lastCheckedAt": "2026-06-23T14:28:48.568Z",
+    "apiReviewCount": 73
   },
   {
     "id": "負けて孕んでボテ腹エンド",
@@ -14151,7 +14162,8 @@
     "author": "茨芽ヒサコミックバベル編集部",
     "label": "COMIC BAVEL",
     "publisher": "文苑堂",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 14
   },
   {
     "id": "オナホ教室",
@@ -15132,7 +15144,8 @@
     "author": "Croriin",
     "label": "WANIMAGAZINE COMICS SPECIAL",
     "publisher": "ワニマガジン社",
-    "category": "アダルトマンガ単行本"
+    "category": "アダルトマンガ単行本",
+    "apiReviewCount": 30
   },
   {
     "id": "守に完全特化した修道女の攻略譚【単話】（単話）",
@@ -15346,7 +15359,8 @@
     "author": "あるぷコミックバベル編集部",
     "label": "COMIC BAVEL",
     "publisher": "文苑堂",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 23
   },
   {
     "id": "巨乳母娘・美香と佑香（単話）",
@@ -18396,7 +18410,8 @@
     "author": "ふじざらしコミックバベル編集部",
     "label": "COMIC BAVEL",
     "publisher": "文苑堂",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 11
   },
   {
     "id": "メイド教育。ー没落貴族_瑠璃川椿ー（単行本）",

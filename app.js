@@ -187,17 +187,23 @@ async function main() {
             if (existingIndex !== -1) {
                 const existingArticle = dbArticles[existingIndex];
                 
-                // 💡 DMM API側から届いた最新のレビュー件数を取得 (APIの構造に合わせて適宜調整してください)
+                // 💡 DMM API側から届いた最新のレビュー件数を取得
                 const apiReviewCount = product.review && product.review.count !== undefined ? parseInt(product.review.count, 10) : 0;
-                // 💡 手元（DB）に保存されている現在のレビュー件数
-                const dbReviewCount = parseInt(existingArticle.reviewCount || 0, 10);
+                
+                // 💡 手元（DB）の比較対象を決定（最優先は保存された apiReviewCount。ない場合は従来の reviewCount を使用）
+                let dbCompareCount = 0;
+                if (existingArticle.apiReviewCount !== undefined) {
+                    dbCompareCount = parseInt(existingArticle.apiReviewCount || 0, 10);
+                } else {
+                    // 初回移行時など、DBに apiReviewCount がまだ保存されていない場合のフォールバック
+                    dbCompareCount = parseInt(existingArticle.reviewCount || 0, 10);
+                }
 
-                // 💡 APIの値が手元のデータより大きい（レビューが増えた）場合のみ更新フラグをONにする
-                // ※ もし減るケースや、評価（rate）の変化も検知したい場合は `apiReviewCount !== dbReviewCount` にしてもOKです
-                const isNeedUpdate = apiReviewCount > dbReviewCount;
+                // 💡 APIの最新値が、DB側の比較対象より大きい（レビューが増えた）場合のみ更新フラグをON
+                const isNeedUpdate = apiReviewCount > dbCompareCount;
 
                 if (isNeedUpdate) {
-                    console.log(`🔥 【レビュー増加検知】「${product.title}」のレビュー件数が ${dbReviewCount}件 ➔ ${apiReviewCount}件 に増加しました。スクレイピングで中身を再更新します...`);
+                    console.log(`🔥 【レビュー増加検知】「${product.title}」の公式API件数が ${dbCompareCount}件 ➔ ${apiReviewCount}件 に増加しました。スクレイピングで中身を再更新します...`);
                     
                     let detailData = {};
                     try {
@@ -215,6 +221,9 @@ async function main() {
                     dbArticles[existingIndex].reviewRating = finalRating.toString();
                     dbArticles[existingIndex].reviewCount = parseInt(finalCount, 10);
                     
+                    // ✨ 【重要】次回の正確な比較のため、今回のAPIレビュー件数をDBに新しく保存！
+                    dbArticles[existingIndex].apiReviewCount = apiReviewCount;
+                    
                     // 💡 念のため確認日時も今日の日付にセット
                     dbArticles[existingIndex].lastCheckedAt = new Date().toISOString();
                     
@@ -224,10 +233,16 @@ async function main() {
                     fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
 
                     isDatabaseChanged = true;
-                    console.log(`   ✅ レビューが増えたため、記事HTMLを最新の状態に更新しました！`);
+                    console.log(`   ✅ レビューが増えたため、記事HTMLを最新の状態に更新し、API件数(${apiReviewCount}件)をDBに保存しました！`);
                 } else {
                     // レビュー数に変化がなければ、1ミリも通信せずに爆速スキップ！
-                    console.log(`skip スキップ: 「${product.title}」はレビュー件数に変更がないためスキップします。（現在: ${dbReviewCount}件）`);
+                    console.log(`skip スキップ: 「${product.title}」はレビュー件数に変更がないためスキップします。（現在: ${dbCompareCount}件）`);
+                    
+                    // 💡 もしDBに apiReviewCount 自体がまだ記録されていなかった場合は、スキップのタイミングでも保存して次回に備える
+                    if (existingArticle.apiReviewCount === undefined) {
+                        dbArticles[existingIndex].apiReviewCount = apiReviewCount;
+                        isDatabaseChanged = true;
+                    }
                 }
                 continue; // 🛑 次の商品へ
             }
