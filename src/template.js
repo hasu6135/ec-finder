@@ -635,7 +635,8 @@ function generateSearchPageHTML(SITE_TITLE) {
  * @param {Number} totalPages - 全体のページ数
 				allArticles 全ページ
  */
-function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1, allArticles = []) {
+ 
+ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1, allArticles = []) {
     // 💡 もし古い呼び出し方で全データが送られてこなかった時のために、セーフティを貼る
     const baseArticlesForRanking = allArticles.length > 0 ? allArticles : articles;
     
@@ -677,6 +678,58 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
                     <img src="${article.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
                 </a>
             </div>
+            
+            <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
+                <div>
+                    <a href="posts/${article.id}.html" class="text-base font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
+                        ${article.title || article.originalTitle}
+                    </a>
+                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[24px]">
+                        ${tagBadges}
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center mt-auto w-full min-w-0">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-xs text-slate-400 whitespace-nowrap">⭐ ${article.reviewRating || '0.0'} (${article.reviewCount || 0}件)</span>
+                        <span class="text-[10px] text-slate-400 font-medium">${formattedDate}</span>
+                    </div>
+                    <a href="posts/${article.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を見る ➔</a>
+                </div>
+            </div>
+        </article>
+        `;
+    }).join('\n');
+ /*
+function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1, allArticles = []) {
+	// 💡 もし古い呼び出し方で全データが送られてこなかった時のために、セーフティを貼る
+    const baseArticlesForRanking = allArticles.length > 0 ? allArticles : articles;
+    
+    const cards = articles.map(article => {
+        let rawLurl = '';
+        try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
+        const encLurl = encryptStr(rawLurl);
+        const encImg = encryptStr(article.imgUrl);
+		const rawDateStr = article.createdAt || '不明';
+    	let formattedDate = '不明';
+    	if (rawDateStr !== '不明') {
+    	    // 🔍 正規表現で日本語や余計な時間を無視し、「数字4桁-2桁-2桁」だけを抜き出す
+    	    const match = String(rawDateStr).match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
+    	    if (match) {
+    	        // 「2024/11/11」の形に綺麗に整形！
+    	        formattedDate = `${match[1]}/${match[2]}/${match[3]}`;
+    	    } else {
+    	        // 万が一パースできなかった時の安全策
+    	        formattedDate = rawDateStr;
+    	    }
+    	}
+        return `
+        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
+			<div style="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
+			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
+        			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
+    			</a>
+			</div>
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
                 <div class="article-card space-y-1.5">
                     <h3 class="search-title text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
@@ -707,7 +760,7 @@ function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentP
         </article>
         `;
     }).join('\n');
-
+*/
 	// ✨ [新設] 点数×件数の総合スコアが高い順ランキング（上位5件）
     const rankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => {
