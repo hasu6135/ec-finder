@@ -667,15 +667,10 @@ function generateSearchPageHTML(SITE_TITLE) {
         // ✨ 修正後：後出し属性を完全排除し、最初からhref/srcを直書きした美しいレスポンシブカード
         return `
         <article class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-            <div class="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
+            <div class="w-40 h-56 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
                     <img src="${article.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
                 </a>
-            
-            
-
-            
-            
             </div>
             
             <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
