@@ -864,7 +864,7 @@ function generateSearchPageHTML(SITE_TITLE) {
     const megaCards = megaArticles.map((article, index) => {
         let rawLurl = ''; try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
         //const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
-        //const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+        const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         // 文字数のカウント（バッジ用）
         const textCount = article.summary ? article.summary.length : 0;
         const afId = "132815-990";
