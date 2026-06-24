@@ -819,12 +819,16 @@ function generateSearchPageHTML(SITE_TITLE) {
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const formattedDate = `${yyyy}/${mm}/${dd}`;
+        const afId = "132815-990";
+        const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
 		return `
         <div class="flex items-center gap-3.5 p-3 bg-slate-50/50 rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
             <span class="text-xl font-black w-6 text-center shrink-0">${rankMedals[index]}</span>
             
-            <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                <img class="er-safe-img w-full h-full object-cover" data-enc-src="${encImg}" alt="順位表紙">
+			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                </a>
             </div>
             
             <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
@@ -832,17 +836,13 @@ function generateSearchPageHTML(SITE_TITLE) {
                     <a href="posts/${article.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">${article.originalTitle}</a>
                 </div>
                 
-                <div class="flex flex-col gap-2 items-start sm:flex-row sm:justify-between sm:items-center mt-auto w-full min-w-0">
-                    <span class="text-[11px] text-slate-400 whitespace-nowrap">
-                        レビュー日: ${formattedDate}
-                    </span>
-                    
-                    <a class="er-safe-lnk text-[11px] text-white bg-slate-800 px-3 py-1.5 sm:py-1 rounded-full font-bold shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95" 
-                       data-enc-lurl="${encLurl}" 
-                       data-enc-af="132815-990" 
+                <span class="text-[11px] text-slate-400 whitespace-nowrap">
+                    レビュー日: ${formattedDate}
+                </span>
+                <a class="text-[11px] text-white bg-slate-800 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-slate-900" 
+                       href="${perfectAflink}" 
                        rel="nofollow noopener" 
                        target="_blank">詳細へ</a>
-                </div>
             </div>
         </div>
         `;
@@ -858,12 +858,16 @@ function generateSearchPageHTML(SITE_TITLE) {
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         // 文字数のカウント（バッジ用）
         const textCount = article.summary ? article.summary.length : 0;
+        const afId = "132815-990";
+        const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
 		return `
         <div class="flex items-center gap-3.5 p-3 bg-rose-50/20 rounded-2xl border border-rose-100 hover:bg-rose-50 transition-all shadow-sm">
             <span class="text-xl font-black w-6 text-center shrink-0">${rankMedals[index]}</span>
             
-            <div class="w-20 h-28 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                <img class="er-safe-img w-full h-full object-cover" data-enc-src="${encImg}" alt="順位表紙">
+			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                </a>
             </div>
             
             <div class="min-w-0 flex-1 h-28 flex flex-col justify-between py-1">
@@ -871,19 +875,13 @@ function generateSearchPageHTML(SITE_TITLE) {
                     <a href="posts/${article.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-tight mb-1.5">${article.originalTitle}</a>
                 </div>
                 
-                <div class="flex flex-col gap-2 items-start sm:flex-row sm:justify-between sm:items-center mt-auto w-full min-w-0">
-                    <div class="shrink-0">
-                        <span class="text-[11px] text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/70 animate-pulse inline-block whitespace-nowrap">
-                            熱量 🔥 ${textCount}文字
-                        </span>
-                    </div>
-                    
-                    <a class="er-safe-lnk text-[11px] text-white bg-rose-500 px-3 py-1.5 sm:py-1 rounded-full font-bold shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95" 
-                       data-enc-lurl="${encLurl}" 
-                       data-enc-af="132815-990" 
+                <span class="text-[11px] text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100/70 animate-pulse inline-block whitespace-nowrap">
+                    熱量 🔥 ${textCount}文字
+                </span>
+                <a class="text-[11px] text-white bg-rose-500 px-4 py-1.5 rounded-full font-black shadow-sm text-center w-full sm:w-auto shrink-0 transition-transform active:scale-95 hover:bg-rose-600" 
+                       href="${perfectAflink}" 
                        rel="nofollow noopener" 
                        target="_blank">詳細へ</a>
-                </div>
             </div>
         </div>
         `;
