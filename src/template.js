@@ -583,34 +583,35 @@ function generateSearchPageHTML(SITE_TITLE) {
                         const encImg = encryptStr(art.imgUrl);
 						const afId = "132815-990";
         				const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
-                        return \`
-                        <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-							<div class="w-full sm:w-56 h-80 bg-white border border-slate-200 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center shadow-md mx-auto">
-                				<a href="\${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
-                    				<img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
-                				</a>
-            				</div>
-                            
-<div class="min-w-0 flex-1 sm:h-80 flex flex-col justify-between py-2">
-                <div>
-                    <a href="posts/\${art.id}.html" class="text-lg sm:text-xl font-black text-slate-800 hover:text-rose-600 line-clamp-3 block transition-colors leading-snug mb-3">
-\${art.title || art.originalTitle}
-                    </a>
-                    <div class="flex flex-wrap gap-1.5 overflow-hidden max-h-[64px] mb-4">
-                \${tagBadges}
-                    </div>
-                </div>
-                
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mt-auto w-full min-w-0 border-t border-slate-50 pt-3">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-base text-rose-600 font-extrabold whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} <span class="text-xs text-slate-400 font-normal">(\${art.reviewCount || 0}件)</span></span>
-                    </div>
-                    <a href="posts/\${art.id}.html" class="text-sm text-white bg-rose-500 px-8 py-2.5 rounded-full font-black shadow-md hover:bg-rose-600 transition-transform active:scale-95 whitespace-nowrap text-center">詳細を読む ➔</a>
-                </div>
-            </div>
-                        </div>
-                        \`;
-                    }).join('\\n');
+						return \`
+							<div class="flex flex-row gap-3 sm:gap-5 p-3 sm:p-5 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+							    
+							    <div class="w-32 h-44 sm:w-56 sm:h-80 bg-white border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+							        <a href="\${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
+							            <img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
+							        </a>
+							    </div>
+							    
+							    <div class="min-w-0 flex-1 h-44 sm:h-80 flex flex-col justify-between py-0.5 sm:py-2">
+							        <div>
+							            <a href="posts/\${art.id}.html" class="text-sm sm:text-xl font-black text-slate-800 hover:text-rose-600 line-clamp-2 sm:line-clamp-3 block transition-colors leading-snug mb-1.5 sm:mb-3">
+							                \${art.title || art.originalTitle}
+							            </a>
+							            <div class="flex flex-wrap gap-1 sm:gap-1.5 overflow-hidden max-h-[24px] sm:max-h-[64px] mb-2">
+							                \${tagBadges}
+							            </div>
+							        </div>
+							        
+							        <div class="flex flex-col xs:flex-row xs:justify-between xs:items-end gap-1.5 sm:gap-3 mt-auto w-full min-w-0 border-t border-slate-50 pt-2 sm:pt-3">
+							            <div class="flex flex-col gap-0.5">
+							                <span class="text-xs sm:text-base text-rose-600 font-extrabold whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} <span class="text-[10px] sm:text-xs text-slate-400 font-normal">(\${art.reviewCount || 0}件)</span></span>
+							            </div>
+							            <a href="posts/\${art.id}.html" class="text-[11px] sm:text-sm text-white bg-rose-500 px-4 sm:px-8 py-1.5 sm:py-2.5 rounded-full font-black shadow-md hover:bg-rose-600 transition-transform active:scale-95 whitespace-nowrap text-center w-full xs:w-auto">詳細を読む ➔</a>
+							        </div>
+							    </div>
+							</div>
+						\`;
+                   	}).join('\\n');
 
 /*
                     // 🚀 その場でアドブロック回避スクリプトを即時実行して画像を復元
