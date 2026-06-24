@@ -705,6 +705,7 @@
     		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
         }
         
+        /*
         // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元
         document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
             var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
@@ -722,6 +723,7 @@
                 el.setAttribute("src", srcUrl);
             }
         });
+        */
     });
     </script>
     
