@@ -267,8 +267,8 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
         rawLurl = article.link;
     }
 
-    const encLurl = encryptStr(rawLurl);
-    const encImg = encryptStr(article.imgUrl);
+    //const encLurl = encryptStr(rawLurl);
+    //const encImg = encryptStr(article.imgUrl);
 	const rawDateStr = article.createdAt || '不明';
     let formattedDate = '不明';
     if (rawDateStr !== '不明') {
@@ -397,8 +397,8 @@ function generateTagPageHTML(tagName, articles) {
     const cards = articles.map(article => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        const encLurl = encryptStr(rawLurl);
-        const encImg = encryptStr(article.imgUrl);
+        //const encLurl = encryptStr(rawLurl);
+        //const encImg = encryptStr(article.imgUrl);
 		const rawDateStr = article.createdAt || '不明';
     	let formattedDate = '不明';
     	if (rawDateStr !== '不明') {
@@ -731,8 +731,8 @@ function generateSearchPageHTML(SITE_TITLE) {
     const rankingCards = rankingArticles.map((article, index) => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        const encLurl = encryptStr(rawLurl);
-        const encImg = encryptStr(article.imgUrl);
+        //const encLurl = encryptStr(rawLurl);
+        //const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         const afId = "132815-990";
         const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
@@ -770,8 +770,8 @@ function generateSearchPageHTML(SITE_TITLE) {
     const commentRankingCards = commentRankingArticles.map((article, index) => {
         let rawLurl = '';
         try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        const encLurl = encryptStr(rawLurl);
-        const encImg = encryptStr(article.imgUrl);
+        //const encLurl = encryptStr(rawLurl);
+        //const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         const afId = "132815-990";
         const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
@@ -815,8 +815,8 @@ function generateSearchPageHTML(SITE_TITLE) {
         } catch(e) { 
             rawLurl = article.link; 
         }
-        const encLurl = encryptStr(rawLurl); 
-        const encImg = encryptStr(article.imgUrl);
+        //const encLurl = encryptStr(rawLurl); 
+        //const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['⭐', '⭐', '⭐', '⭐', '⭐'];
         const rawDateStr = article.date || new Date().toISOString();
         const safeDateStr = typeof rawDateStr === 'string' ? rawDateStr.replace(/\s+/, 'T') : rawDateStr;
@@ -863,8 +863,8 @@ function generateSearchPageHTML(SITE_TITLE) {
         .slice(0, 5);
     const megaCards = megaArticles.map((article, index) => {
         let rawLurl = ''; try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
-        const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+        //const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
+        //const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         // 文字数のカウント（バッジ用）
         const textCount = article.summary ? article.summary.length : 0;
         const afId = "132815-990";
@@ -908,8 +908,8 @@ function generateSearchPageHTML(SITE_TITLE) {
         } catch(e) { 
             rawLurl = article.link; 
         }
-        const encLurl = encryptStr(rawLurl); 
-        const encImg = encryptStr(article.imgUrl);
+        //const encLurl = encryptStr(rawLurl); 
+        //const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['⭐', '⭐', '⭐', '⭐', '⭐'];
         // 💡 セーフティ：表示用データ（date か createdAt のあるほうを使う。最悪現在時刻）
         const displayDateStr = article.createdAt || article.date || new Date().toISOString();

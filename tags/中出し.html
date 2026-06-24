@@ -5428,36 +5428,5 @@
         </article>
         </div>
     </main>
-    
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Base64を復元するヘルパー
-        function decode(b64) {
-        	return b64; //難読化しなくてもアフィリ表示されたため平文とする
-    		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
-        }
-        
-        /*
-        // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元
-        document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
-            var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
-            var afId = el.getAttribute("data-enc-af") || "132815-990";
-            if (rawLurl) {
-                var perfectUrl = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
-                el.setAttribute("href", perfectUrl);
-            }
-        });
-
-        // 2. すべての隠蔽画像（クラス: er-safe-img）を復元
-        document.querySelectorAll(".er-safe-img").forEach(function(el) {
-            var srcUrl = decode(el.getAttribute("data-enc-src") || "");
-            if (srcUrl) {
-                el.setAttribute("src", srcUrl);
-            }
-        });
-        */
-    });
-    </script>
-    
 </body>
 </html>
