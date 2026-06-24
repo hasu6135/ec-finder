@@ -679,22 +679,31 @@ function generateSearchPageHTML(SITE_TITLE) {
                 </a>
             </div>
             
-            <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
-                <div>
-                    <a href="posts/${article.id}.html" class="text-base font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
-                        ${article.title || article.originalTitle}
-                    </a>
-                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[24px]">
-                        ${tagBadges}
+            <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
+                <div class="article-card space-y-1.5">
+                    <h3 class="search-title text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
+                    <div class="text-[11px] text-slate-500 flex items-center gap-1">
+                        <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
+                        <span class="inline">(${article.reviewCount || '0'}件)</span>
+                    </div>
+                    <div class="search-tags flex flex-wrap gap-0.5">
+                        <span class="sm:hidden flex flex-wrap gap-0.5">
+                            ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
+                        </span>
+                        <span class="hidden sm:flex flex-wrap gap-0.5">
+                            ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
+                        </span>
+                    </div>
+                    <div class="text-[11px] sm:text-xs text-slate-500 space-y-0.5 pt-0.5 leading-normal border-l-2 border-rose-100 pl-1.5">
+                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
+                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${formattedDate}</div>
                     </div>
                 </div>
-                
-                <div class="flex justify-between items-center mt-auto w-full min-w-0">
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-xs text-slate-400 whitespace-nowrap">⭐ ${article.reviewRating || '0.0'} (${article.reviewCount || 0}件)</span>
-                        <span class="text-[10px] text-slate-400 font-medium">${formattedDate}</span>
-                    </div>
-                    <a href="posts/${article.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を見る ➔</a>
+                <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full pt-2">
+                    <a href="posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
+                    <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 12px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;line-height:16px;cursor:pointer;" class="flex-1">FANZAで見る</a>
                 </div>
             </div>
         </article>
