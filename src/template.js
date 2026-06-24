@@ -311,7 +311,7 @@ function generateTagPageHTML(tagName, articles) {
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-2.5 flex gap-2.5 items-center">
 			<div class="w-36 h-48 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-cover" loading="lazy">
+                    <img src="${article.imgUrl}" alt="${article.originalTitle}の表紙" class="w-full h-full object-cover" loading="lazy">
                 </a>
             </div>
             <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
