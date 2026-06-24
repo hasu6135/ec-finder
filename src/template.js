@@ -664,12 +664,6 @@ function generateSearchPageHTML(SITE_TITLE) {
             }
         }
 
-        // 表示用タグバッジの作成（上位3個）
-        const currentTags = article.pageGenres || article.tags || [];
-        const tagBadges = currentTags.slice(0, 3).map(t => 
-            `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#${t}</span>`
-        ).join(' ');
-
         // ✨ 修正後：後出し属性を完全排除し、最初からhref/srcを直書きした美しいレスポンシブカード
         return `
         <article class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
