@@ -275,6 +275,10 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
             formattedDate = rawDateStr;
         }
     }
+    
+    const afId = "132815-990";
+    const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
+    
     return `
 <!DOCTYPE html>
 <html lang="ja">
@@ -303,12 +307,13 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
             <span class="text-xs font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">18+ ONLY</span>
         </div>
     </header>
-    <main class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+	<main class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
         <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
             
-            <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
-                <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;width:100%;text-align:center;padding:8px;text-decoration:none;cursor:pointer;">
-                    <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="display:inline-block;max-width:100%;height:auto;max-height:350px;object-fit:contain;vertical-align:middle;border:none;">
+            <div class="md:w-2/5 self-start space-y-4 shrink-0 w-full block">
+                
+                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full block bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden p-2 text-center shadow-md transition-transform active:scale-[0.99]">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-auto max-h-[500px] object-contain mx-auto rounded-xl" loading="lazy">
                 </a>
                 
                 <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
@@ -320,11 +325,11 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                     </div>
                 </div>
 
-                <div style="display:block;width:100%;margin-top:8px;">
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:12px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);cursor:pointer;">
+                <div class="block w-full space-y-2.5 pt-2">
+                    <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="flex items-center justify-center bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 color-[#fff] text-white py-3.5 px-6 rounded-full font-black text-sm text-center shadow-lg transition-all active:scale-95 w-full">
                         FANZAで見る →
                     </a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#fff;color:#e84393;padding:11px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;border:1px solid #fd79a8;">
+                    <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="flex items-center justify-center bg-white text-rose-500 border-2 border-rose-400 hover:bg-rose-50/50 py-3 px-6 rounded-full font-bold text-sm text-center transition-all active:scale-95 w-full">
                         無料の試し読みはこちら
                     </a>
                 </div>
