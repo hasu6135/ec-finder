@@ -470,8 +470,8 @@ function generateSearchPageHTML(SITE_TITLE) {
                         return \`
                         <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
                             <div class="w-28 h-40 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
-                                    <img src="${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
+                                <a href="\${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
+                                    <img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
                                 </a>
                             </div>
                             
