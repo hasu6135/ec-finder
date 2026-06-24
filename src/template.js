@@ -477,7 +477,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                             
                             <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
                                 <div>
-                                    <a href="posts/${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
+                                    <a href="posts/\${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
                                         ${art.title || art.originalTitle}
                                     </a>
                                     <div class="flex flex-wrap gap-1 overflow-hidden max-h-[48px]">
@@ -487,7 +487,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                                 
                                 <div class="flex justify-between items-center mt-auto w-full min-w-0">
                                     <span class="text-xs text-slate-400 whitespace-nowrap">⭐ ${art.reviewRating || '0.0'} (${art.reviewCount || 0}件)</span>
-                                    <a href="posts/${art.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
+                                    <a href="posts/\${art.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
                                 </div>
                             </div>
                         </div>
