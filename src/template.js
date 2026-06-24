@@ -483,7 +483,7 @@ function generateSearchPageHTML(SITE_TITLE) {
 							    
 							    <div class="w-32 h-44 sm:w-56 sm:h-80 bg-white border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
 							        <a href="\${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-							            <img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
+							            <img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="${art.originalTitle}の表紙" loading="lazy">
 							        </a>
 							    </div>
 							    
@@ -578,7 +578,7 @@ function generateSearchPageHTML(SITE_TITLE) {
         <article class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
             <div class="w-44 h-60 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img src="${article.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
+                    <img src="${article.imgUrl}" class="w-full h-full object-cover" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             
@@ -635,7 +635,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             
 			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             
@@ -674,7 +674,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             
 			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             	
@@ -729,7 +729,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             
 			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             
@@ -768,7 +768,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             
 			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             
@@ -819,7 +819,7 @@ function generateSearchPageHTML(SITE_TITLE) {
             
 			<div class="w-28 h-36 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
                 <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
-                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="順位表紙" loading="lazy">
+                    <img class="w-full h-full object-cover" src="${article.imgUrl}" alt="${article.originalTitle}の表紙" loading="lazy">
                 </a>
             </div>
             
