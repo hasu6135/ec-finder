@@ -22,16 +22,18 @@ function getAnalyticsTag() {
  * 🔒 【超強力アドブロック対策】
  * ブロッカーの文字列スキャンを回避するため、URLを一時的にBase64で暗号化（隠蔽）する関数
  */
+ /*
 function encryptStr(str) {
 	return str;　//難読化しなくてもアフィリ表示されたため平文とする
     //if (!str) return '';
     //return Buffer.from(str).toString('base64');
 }
-
+*/
 /**
  * 🚀 【全ページ共通】
  * 暗号化された画像とURLを、ブラウザ上でアドブロックをすり抜けて復元・注入するスクリプト
  */
+ /*
 function getBypassScript() {
     return `
     <script>
@@ -42,7 +44,6 @@ function getBypassScript() {
     		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
         }
         
-        /*
         // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元
         document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
             var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
@@ -60,12 +61,12 @@ function getBypassScript() {
                 el.setAttribute("src", srcUrl);
             }
         });
-        */
     });
     </script>
     `;
 }
-
+*/
+	
 function makeStarString(rating) {
     const score = parseFloat(rating) || 0;
     const fullStars = Math.floor(score);
@@ -256,7 +257,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
 
     const starIcons = makeStarString(article.reviewRating);
     const googleAnalyticsCode = getAnalyticsTag();
-    const bypassScript = getBypassScript();
+    //const bypassScript = getBypassScript();
 
     let rawLurl = '';
     try {
@@ -385,7 +386,6 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
             </div>
         </article>
     </main>
-    ${bypassScript}
 </body>
 </html>`;
 }
@@ -445,7 +445,7 @@ function generateTagPageHTML(tagName, articles) {
     }).join('\n');
 
     const googleAnalyticsCode = getAnalyticsTag();
-    const bypassScript = getBypassScript();
+    //const bypassScript = getBypassScript();
 
     return `
 <!DOCTYPE html>
@@ -466,7 +466,6 @@ function generateTagPageHTML(tagName, articles) {
         </h1>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">${cards}</div>
     </main>
-    ${bypassScript}
 </body>
 </html>`;
 }
@@ -957,7 +956,7 @@ function generateSearchPageHTML(SITE_TITLE) {
     `).join('\n');
 
     const googleAnalyticsCode = getAnalyticsTag();
-    const bypassScript = getBypassScript();
+    //const bypassScript = getBypassScript();
 
 		// ─────────────── 🛠️ ページネーションHTMLの組み立て ───────────────
         let paginationHtml = '';
@@ -1143,8 +1142,6 @@ function generateSearchPageHTML(SITE_TITLE) {
             <p>&copy; 2026 ${siteTitle}. All Rights Reserved.</p>
         </div>
     </footer>
-    	
-    ${bypassScript}
 </body>
 </html>`;
 }
