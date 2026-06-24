@@ -406,11 +406,13 @@ function generateTagPageHTML(tagName, articles) {
     	        formattedDate = rawDateStr;
     	    }
     	}
+    	const afId = "132815-990";
+        const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
         return `
         <article class="bg-white rounded-xl shadow-sm border border-rose-100 p-2.5 flex gap-2.5 items-center">
-            <div style="flex-shrink:0;width:50%;max-width:160px;aspect-ratio:3/4;">
-                <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
-                    <img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%;height:100%;object-fit:contain;padding:2px;border:none;">
+			<div class="w-36 h-48 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-sm">
+                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
+                    <img src="${article.imgUrl}" alt="表紙" class="w-full h-full object-cover" loading="lazy">
                 </a>
             </div>
             <div class="min-w-0 flex-1 flex flex-col justify-between self-stretch py-0.5">
@@ -427,9 +429,9 @@ function generateTagPageHTML(tagName, articles) {
                         <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${formattedDate}</div>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-1 w-full pt-2">
-                    <a href="../posts/${article.id}.html" class="py-1 bg-rose-50 text-rose-600 font-bold rounded text-[10px] border border-rose-100 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:4px 6px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;cursor:pointer;" class="flex-1">FANZA</a>
+				<div class="flex gap-2 w-full pt-1.5">
+                    <a href="../posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-full text-[11px] border border-rose-100 hover:bg-rose-100 text-center flex-1 transition-colors">🔎 レビュー</a>
+                    <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="py-1.5 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-black rounded-full text-[11px] text-center flex-1 shadow-sm transition-transform active:scale-95">FANZA</a>
                 </div>
             </div>
         </article>
@@ -708,67 +710,7 @@ function generateSearchPageHTML(SITE_TITLE) {
         </article>
         `;
     }).join('\n');
- /*
-function generateTopPageHTML(articles, displayDate, allTags, siteTitle, currentPage = 1, totalPages = 1, allArticles = []) {
-	// 💡 もし古い呼び出し方で全データが送られてこなかった時のために、セーフティを貼る
-    const baseArticlesForRanking = allArticles.length > 0 ? allArticles : articles;
-    
-    const cards = articles.map(article => {
-        let rawLurl = '';
-        try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
-        const encLurl = encryptStr(rawLurl);
-        const encImg = encryptStr(article.imgUrl);
-		const rawDateStr = article.createdAt || '不明';
-    	let formattedDate = '不明';
-    	if (rawDateStr !== '不明') {
-    	    // 🔍 正規表現で日本語や余計な時間を無視し、「数字4桁-2桁-2桁」だけを抜き出す
-    	    const match = String(rawDateStr).match(/(\d{4})[-/](\d{2})[-/](\d{2})/);
-    	    if (match) {
-    	        // 「2024/11/11」の形に綺麗に整形！
-    	        formattedDate = `${match[1]}/${match[2]}/${match[3]}`;
-    	    } else {
-    	        // 万が一パースできなかった時の安全策
-    	        formattedDate = rawDateStr;
-    	    }
-    	}
-        return `
-        <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-3 flex flex-row gap-3 items-center hover:shadow-md transition-all">
-			<div style="flex-shrink:0;width:55%;max-width:200px;aspect-ratio:3/4;">
-			    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;width:100%;height:100%;background:#f8fafc;border:1px solid #f1f5f9;border-radius:8px;overflow:hidden;text-align:center;text-decoration:none;cursor:pointer;">
-        			<img class="er-safe-img" data-enc-src="${encImg}" alt="表紙" style="width:100%; height:auto; display:inline-block; vertical-align:middle; padding:4px; border:none;">
-    			</a>
-			</div>
-            <div class="flex flex-col min-w-0 flex-1 justify-between self-stretch py-0.5">
-                <div class="article-card space-y-1.5">
-                    <h3 class="search-title text-[13px] sm:text-base font-bold text-slate-900 leading-snug overflow-hidden" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;">${article.originalTitle}</h3>
-                    <div class="text-[11px] text-slate-500 flex items-center gap-1">
-                        <span class="text-amber-500 font-bold">⭐ ${article.reviewRating || '4.2'}</span>
-                        <span class="inline">(${article.reviewCount || '0'}件)</span>
-                    </div>
-                    <div class="search-tags flex flex-wrap gap-0.5">
-                        <span class="sm:hidden flex flex-wrap gap-0.5">
-                            ${(article.tags || []).slice(0, 2).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1 py-0.2 rounded border border-slate-100 truncate max-w-[55px]">#${t}</span>`).join('')}
-                        </span>
-                        <span class="hidden sm:flex flex-wrap gap-0.5">
-                            ${(article.tags || []).slice(0, 4).map(t => `<span class="text-[9px] bg-slate-50 text-slate-500 px-1.5 py-0.5 rounded border border-slate-100">#${t}</span>`).join('')}
-                        </span>
-                    </div>
-                    <div class="text-[11px] sm:text-xs text-slate-500 space-y-0.5 pt-0.5 leading-normal border-l-2 border-rose-100 pl-1.5">
-                        <div class="truncate"><span class="font-bold text-slate-700">作家:</span> ${article.author || '不明'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">出版社:</span> ${article.publisher || '不明'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">カテゴリ:</span> ${article.category || 'アダルトマンガ'}</div>
-                        <div class="truncate"><span class="font-bold text-slate-700">配信日:</span> ${formattedDate}</div>
-                    </div>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-1.5 items-stretch w-full pt-2">
-                    <a href="posts/${article.id}.html" class="py-1.5 bg-rose-50 text-rose-600 font-bold rounded-lg text-[10px] sm:text-xs border border-rose-200 hover:bg-rose-100 text-center flex-1">🔎 レビュー</a>
-                    <a class="er-safe-lnk" data-enc-lurl="${encLurl}" data-enc-af="132815-990" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:6px 12px;border-radius:25px;font-size:10px;font-weight:bold;text-decoration:none;text-align:center;line-height:16px;cursor:pointer;" class="flex-1">FANZAで見る</a>
-                </div>
-            </div>
-        </article>
-        `;
-    }).join('\n');
-*/
+
 	// ✨ [新設] 点数×件数の総合スコアが高い順ランキング（上位5件）
     const rankingArticles = [...baseArticlesForRanking]
         .sort((a, b) => {
