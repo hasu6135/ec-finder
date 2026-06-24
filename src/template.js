@@ -76,6 +76,112 @@ function makeStarString(rating) {
 /**
  * 📖 個別レビュー詳細ページの生成（レコメンド ＆ OGP強化版）
  */
+ function generateSinglePostHTML(article, SITE_TITLE, recommendedArticles) {
+    // 1. 最初から直接代入用のアフィリエイトURLをビルド時に組み立てる
+    let rawLurl = '';
+    try {
+        const u = new URL(article.link);
+        rawLurl = u.searchParams.get('lurl') || article.link;
+    } catch(e) {
+        rawLurl = article.link;
+    }
+    const afId = "132815-990";
+    const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
+
+    // 2. 関連作品のHTMLを最初から直接リンク版で組み立て
+    const recommendedHtml = recommendedArticles.map(rel => {
+        let relRawLurl = '';
+        try {
+            const u = new URL(rel.link);
+            relRawLurl = u.searchParams.get('lurl') || rel.link;
+        } catch(e) {
+            relRawLurl = rel.link;
+        }
+        const relAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(relRawLurl) + "&af_id=" + afId + "&ch=api";
+
+        return `
+        <a href="${relAflink}" rel="nofollow noopener" target="_blank" class="group bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex gap-3 items-center hover:bg-rose-50/30 hover:border-rose-100 transition-all">
+            <div class="w-14 h-20 bg-white border border-slate-200 rounded overflow-hidden shrink-0">
+                <img src="${rel.imgUrl}" class="w-full h-full object-contain p-0.5" alt="関連表紙" loading="lazy">
+            </div>
+            <div class="min-w-0 flex-1">
+                <h4 class="text-xs sm:text-sm font-bold text-slate-800 line-clamp-2 group-hover:text-rose-600 transition-colors leading-snug">${rel.title || rel.originalTitle}</h4>
+                <div class="text-[11px] text-amber-500 font-bold mt-1">⭐ ${rel.reviewRating || '0.0'}</div>
+            </div>
+        </a>
+        `;
+    }).join('\n');
+
+    // 3. メインHTMLの出力（暗号化や後出し用data属性は一切排除）
+    return `
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${article.title} - レビュー | ${SITE_TITLE}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-[#fffbfb] text-slate-900 antialiased min-h-screen">
+        <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <a href="../index.html" class="text-sm font-bold text-rose-400 hover:text-rose-300">← ${SITE_TITLE} トップへ</a>
+                <span class="text-xs font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">18+ ONLY</span>
+            </div>
+        </header>
+        
+        <main class="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+            <article class="bg-white rounded-2xl shadow-sm border border-rose-100 p-5 sm:p-10 flex flex-col md:flex-row gap-6 sm:gap-8 items-start">
+                
+                <div class="md:w-1/3 self-start space-y-4 shrink-0 w-full block">
+                    <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;width:100%;text-align:center;padding:8px;text-decoration:none;">
+                        <img src="${article.imgUrl}" alt="表紙" style="display:inline-block;max-width:100%;height:auto;max-height:350px;object-fit:contain;vertical-align:middle;border:none;">
+                    </a>
+                    
+                    <div class="bg-rose-50/50 border border-rose-100 p-3 rounded-xl text-center w-full block">
+                        <div class="text-xs font-bold text-rose-900 mb-1">ユーザー評価</div>
+                        <div class="flex items-center justify-center gap-1">
+                            <span class="text-lg">⭐⭐⭐⭐🌟</span>
+                            <span class="text-base font-extrabold text-slate-800 ml-1">${article.reviewRating || '0.0'}</span>
+                            <span class="text-xs text-slate-400">(${article.reviewCount || 0}件)</span>
+                        </div>
+                    </div>
+
+                    <div style="display:block;width:100%;margin-top:8px;">
+                        <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#e84393,#fd79a8);color:#fff;padding:12px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+                            FANZAで見る →
+                        </a>
+                        <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" style="display:inline-block;background:#fff;color:#e84393;padding:11px 20px;border-radius:25px;font-size:14px;font-weight:bold;text-decoration:none;margin-top:8px;width:100%;text-align:center;border:1px solid #fd79a8;">
+                            無料の試し読みはこちら
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="md:w-2/3 flex flex-col min-w-0 w-full mt-2 md:mt-0">
+                    <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 mb-3 leading-snug">${article.title}</h1>
+                    
+                    <div class="text-slate-700 text-sm border-t border-rose-50 pt-4 mb-6">
+                        ${article.summary ? article.summary.replace(/<\/b([^>])/g, '</b>$1') : ''}
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-dashed border-slate-200">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">
+                            <span>🍑 こちらの羞恥作品も絶対にオススメ！</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            ${recommendedHtml}
+                        </div>
+                    </div>
+
+                </div>
+            </article>
+        </main>
+        
+        </body>
+    </html>
+    `;
+}
+ /*
 function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     const allTags = article.pageGenres || [];
     const mainVisibleBadges = allTags.slice(0, 5).map(t => 
@@ -271,6 +377,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
 </body>
 </html>`;
 }
+*/
 
 /**
  * 🏷️ タグ別一覧ページの生成
@@ -448,53 +555,6 @@ function generateSearchPageHTML(SITE_TITLE) {
                     }
 
                     // ⑤ ランキング等と同じ「大迫力の画像＆レスポンシブ対応カードUI」で出力
-                    // ⑤ 最初から href / src にアフィリエイトURLと画像URLを書き込んで出力
-                    /*
-                    targetEl.innerHTML = filtered.map(art => {
-                        // 表示用タグバッジの作成
-                        const currentTags = art.pageGenres || art.tags || [];
-						const tagBadges = currentTags.slice(0, 4).map(t => 
-                            \`<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#\${t}</span>\`
-                        ).join(' ');
-
-                        // 🔗 アフィリエイトURLの組み立て（最初から直接代入用）
-                        let rawLurl = '';
-                        try {
-                            const u = new URL(art.link);
-                            rawLurl = u.searchParams.get('lurl') || art.link;
-                        } catch(e) {
-                            rawLurl = art.link;
-                        }
-                        const afId = "132815-990";
-                        const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
-
-                        return \`
-                        <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-                            <div class="w-28 h-40 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                                <a href="\${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
-                                    <img src="\${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
-                                </a>
-                            </div>
-                            
-                            <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
-                                <div>
-                                    <a href="posts/\${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
-                        				\${art.title || art.originalTitle}
-                                    </a>
-                                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[48px]">
-                               			\${tagBadges}
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-between items-center mt-auto w-full min-w-0">
-                                    <span class="text-xs text-slate-400 whitespace-nowrap">⭐ \${art.reviewRating || '0.0'} (\${art.reviewCount || 0}件)</span>
-                                    <a href="posts/\${art.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
-                                </div>
-                            </div>
-                        </div>
-                        \`;
-                    }).join('\n');
-                    */
                     targetEl.innerHTML = filtered.map(art => {
                         // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];

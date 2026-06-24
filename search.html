@@ -93,54 +93,6 @@
                     }
 
                     // ⑤ ランキング等と同じ「大迫力の画像＆レスポンシブ対応カードUI」で出力
-                    // ⑤ 最初から href / src にアフィリエイトURLと画像URLを書き込んで出力
-                    /*
-                    targetEl.innerHTML = filtered.map(art => {
-                        // 表示用タグバッジの作成
-                        const currentTags = art.pageGenres || art.tags || [];
-						const tagBadges = currentTags.slice(0, 4).map(t => 
-                            `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#${t}</span>`
-                        ).join(' ');
-
-                        // 🔗 アフィリエイトURLの組み立て（最初から直接代入用）
-                        let rawLurl = '';
-                        try {
-                            const u = new URL(art.link);
-                            rawLurl = u.searchParams.get('lurl') || art.link;
-                        } catch(e) {
-                            rawLurl = art.link;
-                        }
-                        const afId = "132815-990";
-                        const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
-
-                        return `
-                        <div class="flex items-center gap-4 p-4 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
-                            <div class="w-28 h-40 bg-white border border-slate-200 rounded-xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
-                                <a href="${perfectAflink}" rel="nofollow noopener" target="_blank" class="w-full h-full block">
-                                    <img src="${art.imgUrl}" class="w-full h-full object-cover" alt="表紙" loading="lazy">
-                                </a>
-                            </div>
-                            
-                            <div class="min-w-0 flex-1 h-40 flex flex-col justify-between py-1">
-                                <div>
-                                    <a href="posts/${art.id}.html" class="text-sm font-bold text-slate-800 hover:text-rose-600 line-clamp-2 block transition-colors leading-snug mb-2">
-                        				${art.title || art.originalTitle}
-                                    </a>
-                                    <div class="flex flex-wrap gap-1 overflow-hidden max-h-[48px]">
-                               			${tagBadges}
-                                    </div>
-                                </div>
-                                
-                                <div class="flex justify-between items-center mt-auto w-full min-w-0">
-                                    <span class="text-xs text-slate-400 whitespace-nowrap">⭐ ${art.reviewRating || '0.0'} (${art.reviewCount || 0}件)</span>
-                                    <a href="posts/${art.id}.html" class="text-xs text-white bg-rose-500 px-5 py-1.5 rounded-full font-bold shadow-sm transition-transform active:scale-95 whitespace-nowrap">詳細を読む ➔</a>
-                                </div>
-                            </div>
-                        </div>
-                        `;
-                    }).join('
-');
-                    */
                     targetEl.innerHTML = filtered.map(art => {
                         // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];
