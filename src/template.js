@@ -23,9 +23,9 @@ function getAnalyticsTag() {
  * ブロッカーの文字列スキャンを回避するため、URLを一時的にBase64で暗号化（隠蔽）する関数
  */
 function encryptStr(str) {
-	return str;
-    if (!str) return '';
-    return Buffer.from(str).toString('base64');
+	return str;　//難読化しなくてもアフィリ表示されたため平文とする
+    //if (!str) return '';
+    //return Buffer.from(str).toString('base64');
 }
 
 /**
@@ -38,8 +38,8 @@ function getBypassScript() {
     document.addEventListener("DOMContentLoaded", function() {
         // Base64を復元するヘルパー
         function decode(b64) {
-        	return b64;
-            try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
+        	return b64; //難読化しなくてもアフィリ表示されたため平文とする
+    		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
         }
         
         // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元

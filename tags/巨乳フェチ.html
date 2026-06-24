@@ -981,8 +981,8 @@
     document.addEventListener("DOMContentLoaded", function() {
         // Base64を復元するヘルパー
         function decode(b64) {
-        	return b64;
-            try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
+        	return b64; //難読化しなくてもアフィリ表示されたため平文とする
+    		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
         }
         
         // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元
