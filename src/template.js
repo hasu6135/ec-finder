@@ -449,6 +449,7 @@ function generateSearchPageHTML(SITE_TITLE) {
 
                     // ⑤ ランキング等と同じ「大迫力の画像＆レスポンシブ対応カードUI」で出力
                     // ⑤ 最初から href / src にアフィリエイトURLと画像URLを書き込んで出力
+                    /*
                     targetEl.innerHTML = filtered.map(art => {
                         // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];
@@ -493,7 +494,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                         </div>
                         \`;
                     }).join('\n');
-                    /*
+                    */
                     targetEl.innerHTML = filtered.map(art => {
                         // 表示用タグバッジの作成
                         const currentTags = art.pageGenres || art.tags || [];
@@ -538,7 +539,7 @@ function generateSearchPageHTML(SITE_TITLE) {
                         </div>
                         \`;
                     }).join('\\n');
-*/
+
                     // 🚀 その場でアドブロック回避スクリプトを即時実行して画像を復元
                     document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
                         var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
