@@ -268,7 +268,7 @@ async function main() {
                 const articleData = {
                     id: articleId,
                     title: product.title,
-                    originalTitle: `${product.title} [Manga Raw]`, 
+                    originalTitle: `${product.title}`, 
                     link: product.url,
                     url: product.url,
                     rawUrl: product.rawUrl || product.url,

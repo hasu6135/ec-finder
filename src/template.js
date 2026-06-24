@@ -23,6 +23,7 @@ function getAnalyticsTag() {
  * ブロッカーの文字列スキャンを回避するため、URLを一時的にBase64で暗号化（隠蔽）する関数
  */
 function encryptStr(str) {
+	return str;
     if (!str) return '';
     return Buffer.from(str).toString('base64');
 }
@@ -37,6 +38,7 @@ function getBypassScript() {
     document.addEventListener("DOMContentLoaded", function() {
         // Base64を復元するヘルパー
         function decode(b64) {
+        	return b64;
             try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
         }
         
