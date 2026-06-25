@@ -24,6 +24,12 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount, sortT
         const finalSort = validSortTypes.includes(sortType) ? sortType : 'rank';
 		console.log(`📊 設定を検知しました。DMMから【${finalSort}順】でデータを ${hitsCount} 件取得します。`);
 
+		// 💡 ずらして検索（1以上を指定）のオフセット。
+		const min = 1;
+		const max = 500;
+		const randomOffset = Math.floor(Math.random() * (max - min + 1)) + min;
+   		console.log(`🤖 [DMM API 検索条件] オフセット：${randomOffset}`);
+   
         // URLとクエリパラメータの組み立て
         const url = new URL('https://api.dmm.com/affiliate/v3/ItemList');
         url.searchParams.append('api_id', apiId);
@@ -34,7 +40,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount, sortT
         url.searchParams.append('keyword', searchKeyword);
         url.searchParams.append('hits', hitsCount.toString());
         url.searchParams.append('sort', finalSort);
-        url.searchParams.append('offset', 1);　   //ずらして検索（1以上を指定）
+        url.searchParams.append('offset', randomOffset);　   //ずらして検索（1以上を指定）
         url.searchParams.append('output', 'json');
 
         const response = await fetch(url.toString());
