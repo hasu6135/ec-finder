@@ -17,55 +17,6 @@ function getAnalyticsTag() {
     </script>
     `;
 }
-
-/**
- * 🔒 【超強力アドブロック対策】
- * ブロッカーの文字列スキャンを回避するため、URLを一時的にBase64で暗号化（隠蔽）する関数
- */
- /*
-function encryptStr(str) {
-	return str;　//難読化しなくてもアフィリ表示されたため平文とする
-    //if (!str) return '';
-    //return Buffer.from(str).toString('base64');
-}
-*/
-/**
- * 🚀 【全ページ共通】
- * 暗号化された画像とURLを、ブラウザ上でアドブロックをすり抜けて復元・注入するスクリプト
- */
- /*
-function getBypassScript() {
-    return `
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Base64を復元するヘルパー
-        function decode(b64) {
-        	return b64; //難読化しなくてもアフィリ表示されたため平文とする
-    		//try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
-        }
-        
-        // 1. すべての隠蔽リンク（クラス: er-safe-lnk）を復元
-        document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
-            var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
-            var afId = el.getAttribute("data-enc-af") || "132815-990";
-            if (rawLurl) {
-                var perfectUrl = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
-                el.setAttribute("href", perfectUrl);
-            }
-        });
-
-        // 2. すべての隠蔽画像（クラス: er-safe-img）を復元
-        document.querySelectorAll(".er-safe-img").forEach(function(el) {
-            var srcUrl = decode(el.getAttribute("data-enc-src") || "");
-            if (srcUrl) {
-                el.setAttribute("src", srcUrl);
-            }
-        });
-    });
-    </script>
-    `;
-}
-*/
 	
 function makeStarString(rating) {
     const score = parseFloat(rating) || 0;
@@ -74,6 +25,21 @@ function makeStarString(rating) {
     let stars = '⭐'.repeat(fullStars);
     if (hasHalf && fullStars < 5) stars += '🌟';
     return stars || '⭐';
+}
+
+const cheerio = require('cheerio');
+/**
+ * 💡 壊れたHTMLタグを完全に修復して、正しいHTML文字列を返す関数
+ */
+function safeHtmlFixer(rawHtml) {
+    if (!rawHtml) return '';
+
+    // loadの第3引数に「false」を渡すことで、htmlやbodyタグが勝手に自動生成されるのを防ぎ、
+    // 純粋なパーツ（断片）としてパース・修復します。
+    const $ = cheerio.load(rawHtml, null, false);
+    
+    // 修復された綺麗なHTMLを出力
+    return $.html();
 }
 
 /**
@@ -253,7 +219,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
                 </div>
 
                 <div class="text-slate-700 text-sm border-t border-rose-50 pt-4 mb-6">
-                    ${article.summary ? article.summary.replace(/<\/b([^>])/g, '</b>$1') : ''}
+                	${safeHtmlFixer(article.summary)}
                 </div>
 
                 <div class="mb-6 border-t border-dashed border-slate-100 pt-4">
