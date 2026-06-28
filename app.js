@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML, genera
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 30;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 1;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -427,6 +427,24 @@ async function main() {
             generateSitemapWithPages(dbArticles, allAvailableTags, totalPages);
         } catch (sitemapErr) {
             console.error('⚠️ サイトマップの書き出しに失敗:', sitemapErr.message);
+        }
+
+		// ===================================================
+        // 🚀 【新規追加】Cloudflare Pages 301強制リダイレクト設定
+        // ===================================================
+        console.log('\n🔗 [リダイレクト設定] _redirects ファイルを生成中...');
+        try {
+            // 今回のプロジェクトは index.html などがルート直下に生成される構成のため、
+            // ファイルの保存先パスは 'sitemap.xml' と同じくプロジェクトのルート直下になります。
+            const redirectsPath = path.join(__dirname, '_redirects');
+            
+            // 旧ドメイン(pages.dev)から新ドメイン(設定されたSITE_DOMAIN)へ、階層を維持したまま転送
+            const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301!`;
+            
+            fs.writeFileSync(redirectsPath, redirectsContent, 'utf-8');
+            console.log(` ✅ 独自ドメイン [${SITE_DOMAIN}] への 301 強制転送設定を _redirects に書き出しました。`);
+        } catch (redirectsErr) {
+            console.error('⚠️ _redirects ファイルの書き出しに失敗:', redirectsErr.message);
         }
 
         console.log('\n✨ [すべての処理が正常終了] 指定件数分のループ処理が完了しました！');

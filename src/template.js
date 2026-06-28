@@ -152,7 +152,8 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
-    
+    <link rel="canonical" href="https://ec-finder.com/posts/${article.id}.html">
+    	
     <meta property="og:site_name" content="${siteTitle}">
     <meta property="og:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} の狂おしい魅力を徹底レビュー！">
     <meta property="og:description" content="言葉責め・公開羞恥の興奮ポイントをエロ同人ソムリエが熱量MAXで解説。購入者のリアルな口コミも掲載中！">
@@ -313,6 +314,7 @@ function generateTagPageHTML(tagName, articles) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>タグ: ${tagName} のおすすめコミック一覧</title>
+   	<link rel="canonical" href="https://ec-finder.com/tags/${tagName}.html">
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
@@ -865,6 +867,7 @@ function generateSearchPageHTML(SITE_TITLE) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${siteTitle} - 羞恥専門成人向けレビューまとめ</title>
+    <link rel="canonical" href="https://ec-finder-comic.com/">
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
