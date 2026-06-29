@@ -39,6 +39,7 @@ async function generateAiReview(product, detailData) {
             ],
             // 💡 温度を 0.7 ➔ 0.2 に下げることで、AIが勝手な装飾や挨拶を喋るのを防ぎ、ルールを厳格に守らせます
             temperature: 0.2,
+            max_tokens: 2000,
         });
 
         const rawText = response.choices[0].message.content || '';
