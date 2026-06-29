@@ -25,14 +25,20 @@ async function generateAiReview(product, detailData) {
 3. 各セクションは、2〜3行ごとに空行（改行）を挟み、スマホでもサクサク読める快適な文章量に調整してください。
 4. 表（テーブル）の出力は絶対に禁止します。
 5. 重要な単語や興奮するポイントには、適宜 <b>太字</b> やピンクハイライト（<mark class="bg-rose-100 text-rose-900 px-1 rounded">文章</mark>）を使って見やすく色付けしてください。
-6. Markdownの記号（# や ** や --- など）は一切禁止です。すべてHTMLタグ（<b>, <mark>, <h3 class="...">, <p>など）だけで出力してください。`
+6. Markdownの記号（# や ** や --- など）は一切禁止です。すべてHTMLタグ（<b>, <mark>, <h3 class="...">, <p>など）だけで出力してください。
+
+【厳格な出力制限】
+・「はい、どうぞ」や「以下がレビューです」などの前置き・解説の挨拶は一切出力しないでください。
+・出力を \`\`\`html や \`\`\` などのコードブロック（バックティック）で囲むことは絶対に禁止します。
+・生成されたHTMLテキストそのものだけを1文字目から直接出力してください。`
                 },
                 { 
                     role: 'user', 
                     content: `【作品タイトル】\n${product.title}\n\n【公式ジャンル】\n${detailData.pageGenres ? detailData.pageGenres.join(', ') : ''}\n\n【公式あらすじ】\n${detailData.productDescription || ''}\n\n【購入者の口コミ】\n${detailData.userReviews || ''}` 
                 }
             ],
-            temperature: 0.7,
+            // 💡 温度を 0.7 ➔ 0.2 に下げることで、AIが勝手な装飾や挨拶を喋るのを防ぎ、ルールを厳格に守らせます
+            temperature: 0.2,
         });
 
         const rawText = response.choices[0].message.content || '';
@@ -40,7 +46,7 @@ async function generateAiReview(product, detailData) {
     } catch (error) {
         console.error('⚠️ AIレビューの生成に失敗しました。フォールバックテキストを使用します:', error.message);
         return `<h1 class="text-base font-extrabold text-slate-900 mb-4">「${product.title}」をガチ評価！</h1>
-        <p class="text-sm text-slate-600">AIによるレビュー自動生成がスキップされました。公式あらすじや口コミを参考にしてください。</p>`;
+        <p class="text-sm text-slate-600">公式あらすじや口コミを参考にしてください。</p>`;
     }
 }
 
