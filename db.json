@@ -6762,7 +6762,8 @@
     "maker": "羽原ヒロコミックバベル編集部",
     "label": "COMIC BAVEL",
     "publisher": "文苑堂",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 1
   },
   {
     "id": "背徳クライシス（単話）",
@@ -21569,7 +21570,8 @@
     "maker": "たかしな浅妃",
     "label": "GOT COMICS",
     "publisher": "ジーオーティー",
-    "category": "アダルトマンガ単行本"
+    "category": "アダルトマンガ単行本",
+    "apiReviewCount": 9
   },
   {
     "id": "異種恋愛_【FANZA限定】【デジタル特装版】",
