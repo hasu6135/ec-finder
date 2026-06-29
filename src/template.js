@@ -868,6 +868,11 @@ function generateSearchPageHTML(SITE_TITLE) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${siteTitle} - 羞恥専門成人向けレビューまとめ</title>
     <link rel="canonical" href="https://ec-finder-comic.com/">
+	<script>
+      if (window.location.hostname === 'ec-finder.pages.dev') {
+        window.location.replace('https://ec-finder-comic.com' + window.location.pathname + window.location.search);
+      }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
