@@ -1,0 +1,167 @@
+
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>検索結果 | 羞恥系コミック専門メディア</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-slate-50 text-slate-900 overflow-x-hidden">
+        
+        <header class="bg-slate-950 text-white py-6 px-4 border-b border-rose-950">
+            <div class="max-w-4xl mx-auto flex justify-between items-center">
+                <a href="index.html" class="text-sm font-bold text-rose-400 hover:text-rose-300">← 羞恥系コミック専門メディア トップへ</a>
+                <span class="text-xs font-bold text-rose-500 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">18+ ONLY</span>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto px-4 py-8">
+            <h1 class="text-base font-black border-l-4 border-rose-500 pl-2 mb-6 text-slate-800">
+                「<span id="target-keyword" class="text-rose-600">...</span>」の検索結果
+            </h1>
+            
+            <p id="search-meta" class="text-xs text-slate-400 mb-4">該当件数: <span id="search-count" class="font-bold text-slate-700">0</span>件</p>
+
+            <div id="search-results-target" class="flex flex-col gap-3">
+            </div>
+        </main>
+
+        <script>
+        	/*
+            // 🔒 アドブロック回避用の暗号化・復元関数
+            function encryptStr(str) {
+                if (!str) return '';
+                return btoa(unescape(encodeURIComponent(str)));
+            }
+
+            function decode(b64) {
+                try { return decodeURIComponent(escape(atob(b64))); } catch(e) { return ""; }
+            }
+*/
+            document.addEventListener('DOMContentLoaded', async () => {
+                // 先に画面の描画先（ターゲット要素）を確実に取得
+                const targetEl = document.getElementById('search-results-target');
+
+                // ① URLから「?q=キーワード」を取得
+                const params = new URLSearchParams(window.location.search);
+                const query = params.get('q')?.trim().toLowerCase() || '';
+                
+                if (!query) {
+                    document.getElementById('target-keyword').textContent = '未入力';
+                    if (targetEl) targetEl.innerHTML = '<p class="text-xs text-slate-400 py-12 text-center">検索キーワードを入力してください。</p>';
+                    return;
+                }
+                
+                document.getElementById('target-keyword').textContent = query;
+
+                try {
+                    // ② データベース「db.json」を読み込む
+                    const response = await fetch('db.json');
+                    if (!response.ok) throw new Error('db.json の読み込みに失敗しました');
+                    const articles = await response.json();
+
+                    // ③ キーワード絞り込み（あなたのdb.jsonのプロパティ構造に100%適合）
+                    const filtered = articles.filter(art => {
+                        // タイトルで探す
+                        const title = art.title ? art.title.toLowerCase() : '';
+                        const originalTitle = art.originalTitle ? art.originalTitle.toLowerCase() : '';
+                        
+                        // タグ配列（tags, pageGenres）を結合して探す
+                        const tagsStr = art.tags && Array.isArray(art.tags) ? art.tags.join(' ').toLowerCase() : '';
+                        const genresStr = art.pageGenres && Array.isArray(art.pageGenres) ? art.pageGenres.join(' ').toLowerCase() : '';
+                        
+                        // 口コミ本文（reviews）や作家名（author）からも探せるように補強
+                        const reviewsStr = art.reviews ? art.reviews.toLowerCase() : '';
+                        const author = art.author ? art.author.toLowerCase() : '';
+
+                        return title.includes(query) || 
+                               originalTitle.includes(query) || 
+                               tagsStr.includes(query) || 
+                               genresStr.includes(query) || 
+                               reviewsStr.includes(query) ||
+                               author.includes(query);
+                    });
+
+                    // ④ 画面に件数を描画
+                    document.getElementById('search-count').textContent = filtered.length;
+
+                    if (!targetEl) return;
+
+                    if (filtered.length === 0) {
+                        targetEl.innerHTML = '<p class="text-xs text-slate-400 py-12 text-center">一致する作品が見つかりませんでした。</p>';
+                        return;
+                    }
+
+                    // ⑤ ランキング等と同じ「大迫力の画像＆レスポンシブ対応カードUI」で出力
+                    targetEl.innerHTML = filtered.map(art => {
+                        // 表示用タグバッジの作成
+                        const currentTags = art.pageGenres || art.tags || [];
+                        const tagBadges = currentTags.slice(0, 4).map(t => 
+                            `<span class="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-medium">#${t}</span>`
+                        ).join(' ');
+
+                        // アフィリエイトリンクの安全な暗号化
+                        let rawLurl = '';
+                        try {
+                            const u = new URL(art.link);
+                            rawLurl = u.searchParams.get('lurl') || art.link;
+                        } catch(e) {
+                            rawLurl = art.link;
+                        }
+						const afId = "132815-990";
+        				const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
+						return `
+							<div class="flex flex-row gap-3 sm:gap-5 p-3 sm:p-5 bg-white rounded-2xl border border-slate-100 hover:bg-rose-50/20 transition-all shadow-sm">
+							    
+							    <div class="w-32 h-44 sm:w-56 sm:h-80 bg-white border border-slate-200 rounded-xl sm:rounded-2xl overflow-hidden shrink-0 flex items-center justify-center shadow-md">
+							        <a href="${perfectAflink}" rel="sponsored nofollow noopener" target="_blank" class="w-full h-full block">
+							            <img src="${art.imgUrl}" class="w-full h-full object-cover" alt="${art.originalTitle}の表紙" loading="lazy">
+							        </a>
+							    </div>
+							    
+							    <div class="min-w-0 flex-1 h-44 sm:h-80 flex flex-col justify-between py-0.5 sm:py-2">
+							        <div>
+							            <a href="posts/${art.id}.html" class="text-sm sm:text-xl font-black text-slate-800 hover:text-rose-600 line-clamp-2 sm:line-clamp-3 block transition-colors leading-snug mb-1.5 sm:mb-3">
+							                ${art.title || art.originalTitle}
+							            </a>
+							            <div class="flex flex-wrap gap-1 sm:gap-1.5 overflow-hidden max-h-[24px] sm:max-h-[64px] mb-2">
+							                ${tagBadges}
+							            </div>
+							        </div>
+							        
+							        <div class="flex flex-col xs:flex-row xs:justify-between xs:items-end gap-1.5 sm:gap-3 mt-auto w-full min-w-0 border-t border-slate-50 pt-2 sm:pt-3">
+							            <div class="flex flex-col gap-0.5">
+							                <span class="text-xs sm:text-base text-rose-600 font-extrabold whitespace-nowrap">⭐ ${art.reviewRating || '0.0'} <span class="text-[10px] sm:text-xs text-slate-400 font-normal">(${art.reviewCount || 0}件)</span></span>
+							            </div>
+							            <a href="posts/${art.id}.html" class="text-[11px] sm:text-sm text-white bg-rose-500 px-4 sm:px-8 py-1.5 sm:py-2.5 rounded-full font-black shadow-md hover:bg-rose-600 transition-transform active:scale-95 whitespace-nowrap text-center w-full xs:w-auto">詳細を読む ➔</a>
+							        </div>
+							    </div>
+							</div>
+						`;
+                   	}).join('\n');
+
+/*
+                    // 🚀 その場でアドブロック回避スクリプトを即時実行して画像を復元
+                    document.querySelectorAll(".er-safe-lnk").forEach(function(el) {
+                        var rawLurl = decode(el.getAttribute("data-enc-lurl") || "");
+                        var afId = el.getAttribute("data-enc-af") || "132815-990";
+                        if (rawLurl) {
+                            var perfectUrl = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
+                            el.setAttribute("href", perfectUrl);
+                        }
+                    });
+                    document.querySelectorAll(".er-safe-img").forEach(function(el) {
+                        var srcUrl = decode(el.getAttribute("data-enc-src") || "");
+                        if (srcUrl) { el.setAttribute("src", srcUrl); }
+                    });
+*/
+                } catch (err) {
+                    console.error('データ取得エラー:', err);
+                    if (targetEl) targetEl.innerHTML = '<p class="text-xs text-rose-500 py-12 text-center">データの読み込みに失敗しました。</p>';
+                }
+            });
+        </script>
+    </body>
+    </html>
+    

@@ -113,7 +113,7 @@ function generateSitemapWithPages(articles, tags, totalPages) {
 async function main() {
     try {
     	// 1. main関数冒頭のディレクトリ作成部分を修正
-		if (!fs.existsSync('public')) fs.mkdirSync('dist'); // 🚀 publicフォルダを作成（公開用）
+		if (!fs.existsSync('public')) fs.mkdirSync('public'); // 🚀 publicフォルダを作成（公開用）
 		if (!fs.existsSync(path.join('public', ARCHIVE_DIR))) fs.mkdirSync(path.join('public', ARCHIVE_DIR));
 		if (!fs.existsSync(path.join('public', 'posts'))) fs.mkdirSync(path.join('public', 'posts'));
 		if (!fs.existsSync(path.join('public', TAGS_DIR))) fs.mkdirSync(path.join('public', TAGS_DIR));
