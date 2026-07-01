@@ -448,7 +448,9 @@ async function main() {
             // 旧ドメイン(pages.dev)から新ドメイン(設定されたSITE_DOMAIN)へ、階層を維持したまま転送
             //const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301!`;
             // 🚀 【完全修正】左側をドメインなしの「/*」にすることで、Cloudflareのエラーを回避します！
-			const redirectsContent = `/* https://${SITE_DOMAIN}/:splat 301`;
+			//const redirectsContent = `/* https://${SITE_DOMAIN}/:splat 301`;
+			// 🚀 【最終確定版】pages.devのドメインだけを指定して、新ドメイン側が巻き込まれるのを防ぎます
+			const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301`;
 
             fs.writeFileSync(path.join('public', '_redirects'), redirectsContent, 'utf-8');
             console.log(` ✅ 独自ドメイン [${SITE_DOMAIN}] への 301 強制転送設定を _redirects に書き出しました。`);

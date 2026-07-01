@@ -166,6 +166,11 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://ec-finder-comic.com/posts/アナンガ・ランガ_vol.1.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://ec-finder-comic.com/posts/魔法少女が堕ちるまで.html</loc>
     <lastmod>2026-07-01</lastmod>
     <priority>0.8</priority>
@@ -3401,6 +3406,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://ec-finder-comic.com/tags/%E3%81%8A%E5%A7%89%E3%81%95%E3%82%93.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ec-finder-comic.com/tags/%E3%83%9E%E3%83%B3%E3%82%AC%E8%AA%8C.html</loc>
+    <lastmod>2026-07-01</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://ec-finder-comic.com/tags/%E3%82%AA%E3%83%8A%E3%83%8B%E3%83%BC.html</loc>
     <lastmod>2026-07-01</lastmod>
     <priority>0.6</priority>
@@ -3681,11 +3696,6 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://ec-finder-comic.com/tags/%E3%81%8A%E5%A7%89%E3%81%95%E3%82%93.html</loc>
-    <lastmod>2026-07-01</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://ec-finder-comic.com/tags/%E3%83%90%E3%82%A4%E3%83%96.html</loc>
     <lastmod>2026-07-01</lastmod>
     <priority>0.6</priority>
@@ -3867,11 +3877,6 @@
   </url>
   <url>
     <loc>https://ec-finder-comic.com/tags/%E3%82%A2%E3%82%A4%E3%83%89%E3%83%AB%E3%83%BB%E8%8A%B8%E8%83%BD%E4%BA%BA.html</loc>
-    <lastmod>2026-07-01</lastmod>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://ec-finder-comic.com/tags/%E3%83%9E%E3%83%B3%E3%82%AC%E8%AA%8C.html</loc>
     <lastmod>2026-07-01</lastmod>
     <priority>0.6</priority>
   </url>
