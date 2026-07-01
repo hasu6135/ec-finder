@@ -43,11 +43,33 @@ async function generateAiReview(product, detailData) {
         });
 
         const rawText = response.choices[0].message.content || '';
-        return formatAiResponseToHtml(rawText);
+        const formattedHtml = formatAiResponseToHtml(rawText);
+        
+		// ==========================================
+        // 🚀 修正：HTML全体の文字数チェック処理
+        // ==========================================
+        
+        // HTMLタグを除外した「純粋な文字数」で判定したい場合は下の2行を有効にしてください。
+        // タグ（<p>や<b>など）も含んだ総文字数でよければ、単純に formattedHtml.length でOKです。
+        const pureText = formattedHtml.replace(/<[^>]*>/g, '').trim();
+        const textCount = pureText.length;
+
+        // 💡 【設定】最低文字数をここで指定（例：400文字以下は失敗にする場合）
+        const MIN_REQUIRED_CHARACTERS = 400; 
+
+        if (textCount < MIN_REQUIRED_CHARACTERS) {
+            // 意図的にエラーを発生させて catch ブロック（フォールバック）に飛ばす
+            throw new Error(`AIレビューの総文字数が少なすぎます (${textCount}文字 / 最低${MIN_REQUIRED_CHARACTERS}文字必要)`);
+        } else {
+        	console.log("成功！文字数は${textCount}文字でした。");
+        }
+
+        // すべてのチェックをクリアしたら正常なHTMLを返す
+        return formattedHtml;
     } catch (error) {
-        console.error('⚠️ AIレビューの生成に失敗しました。フォールバックテキストを使用します:', error.message);
-        return `<h1 class="text-base font-extrabold text-slate-900 mb-4">「${product.title}」をガチ評価！</h1>
-        <p class="text-sm text-slate-600">公式あらすじや口コミを参考にしてください。</p>`;
+		// 🚀 変更：エラー時はログだけ残して、null を返して呼び出し元に伝える
+        console.error(`⚠️ 「${product.title}」のAIレビュー生成に失敗したため、この作品の追加をスキップします:`, error.message);
+        return null;
     }
 }
 

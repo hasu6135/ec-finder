@@ -13,7 +13,7 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML, genera
  * ===================================================
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
-const FETCH_COUNT = 30;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
+const FETCH_COUNT = 1;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
 const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
@@ -277,6 +277,11 @@ async function main() {
 
                 // AIへオブジェクトごと丸々バトンパス！これでundefined警告が完全に消え去ります
                 const aiReviewMarkdown = await generateAiReview(product, detailData);
+				// 🚀 【修正】レビュー生成に失敗（null）した場合は、ここで安全にエラーを投げて
+                // 下の catch ブロックに飛ばすことで、DB追加やHTML生成を確実にスキップさせます
+                if (aiReviewMarkdown === null) {
+                    throw new Error('AIレビューの文字数が足りないか、生成に失敗したためスキップします。');
+                }
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
 
                 // 💡【完全マッピング】template.jsとdb.jsonの全ての要求プロパティを100%満たす
@@ -331,11 +336,13 @@ async function main() {
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
                 fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
+				// 🚀 すべてのファイル書き出しが「成功」した後に初めて、DBの配列に組み込む
                 dbArticles.unshift(articleData);
                 isDatabaseChanged = true;
                 console.log(`   ✅ 記事生成が完了しました！ (取得タグ: [${officialTags.join(', ')}])`);
 
             } catch (itemError) {
+            	// 🚀 generateAiReview から null が来て投げられたエラーも、ここで綺麗にキャッチされます
                 console.error(`   ❌ この商品の処理中にエラーが発生しました:`, itemError.message);
             }
 
