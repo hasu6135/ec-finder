@@ -446,8 +446,10 @@ async function main() {
             // 今回のプロジェクトは index.html などがルート直下に生成される構成のため、
             // ファイルの保存先パスは 'sitemap.xml' と同じくプロジェクトのルート直下になります。
             // 旧ドメイン(pages.dev)から新ドメイン(設定されたSITE_DOMAIN)へ、階層を維持したまま転送
-            const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301!`;
-            
+            //const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301!`;
+            // 🚀 【完全修正】左側をドメインなしの「/*」にすることで、Cloudflareのエラーを回避します！
+			const redirectsContent = `/* https://${SITE_DOMAIN}/:splat 301`;
+
             fs.writeFileSync(path.join('public', '_redirects'), redirectsContent, 'utf-8');
             console.log(` ✅ 独自ドメイン [${SITE_DOMAIN}] への 301 強制転送設定を _redirects に書き出しました。`);
         } catch (redirectsErr) {

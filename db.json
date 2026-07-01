@@ -3989,7 +3989,8 @@
     "maker": "すずきとと",
     "label": "WANIMAGAZINE COMICS SPECIAL",
     "publisher": "ワニマガジン社",
-    "category": "アダルトマンガ単行本"
+    "category": "アダルトマンガ単行本",
+    "apiReviewCount": 7
   },
   {
     "id": "COMIC_BAVEL_2019年8月号",
@@ -23816,7 +23817,8 @@
     "maker": "永瀬るりを",
     "label": "ペンギンクラブ",
     "publisher": "辰巳出版",
-    "category": "アダルトマンガ単話"
+    "category": "アダルトマンガ単話",
+    "apiReviewCount": 0
   },
   {
     "id": "小悪魔の条件（単話）",
