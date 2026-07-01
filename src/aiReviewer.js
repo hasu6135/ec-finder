@@ -55,7 +55,7 @@ async function generateAiReview(product, detailData) {
         const textCount = pureText.length;
 
         // 💡 【設定】最低文字数をここで指定（例：400文字以下は失敗にする場合）
-        const MIN_REQUIRED_CHARACTERS = 4000; 
+        const MIN_REQUIRED_CHARACTERS = 400; 
 
         if (textCount < MIN_REQUIRED_CHARACTERS) {
             // 意図的にエラーを発生させて catch ブロック（フォールバック）に飛ばす

@@ -71,7 +71,7 @@ function generateSitemap(articles, tags) {
     });
 
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
-    fs.writeFileSync('sitemap.xml', sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+    fs.writeFileSync(path.join('public', 'sitemap.xml'), sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
     console.log(`🤖 [SEO対策] 最新の sitemap.xml をルートに自動書き出ししました（合計: ${xmlUrls.length} 件のURL）`);
 }
 
@@ -101,7 +101,7 @@ function generateSitemapWithPages(articles, tags, totalPages) {
     });
 
     const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${xmlUrls.join('\n')}\n</urlset>`;
-    fs.writeFileSync('sitemap.xml', sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+    fs.writeFileSync(path.join('public', 'sitemap.xml'), sitemapXml.replace(/\r?\n/g, '\r\n'), 'utf-8');
     console.log(`🤖 [SEO対策] 最新の sitemap.xml をルートに自動書き出ししました（合計: ${xmlUrls.length} 件のURL）`);
 }
 
@@ -112,9 +112,11 @@ function generateSitemapWithPages(articles, tags, totalPages) {
  */
 async function main() {
     try {
-        if (!fs.existsSync(ARCHIVE_DIR)) fs.mkdirSync(ARCHIVE_DIR);
-        if (!fs.existsSync('posts')) fs.mkdirSync('posts');
-        if (!fs.existsSync(TAGS_DIR)) fs.mkdirSync(TAGS_DIR);
+    	// 1. main関数冒頭のディレクトリ作成部分を修正
+		if (!fs.existsSync('public')) fs.mkdirSync('dist'); // 🚀 publicフォルダを作成（公開用）
+		if (!fs.existsSync(path.join('public', ARCHIVE_DIR))) fs.mkdirSync(path.join('public', ARCHIVE_DIR));
+		if (!fs.existsSync(path.join('public', 'posts'))) fs.mkdirSync(path.join('public', 'posts'));
+		if (!fs.existsSync(path.join('public', TAGS_DIR))) fs.mkdirSync(path.join('public', TAGS_DIR));
 
 		// --------------------------------------------------
         // 🖥️ 【追加】LM Studio の起動確認（ヘルスチェック）
@@ -230,7 +232,7 @@ async function main() {
                     // 記事のHTMLを最新の評価・レビュー件数（熱量文字数など）で再生成
                     const recommendedArticles = dbArticles.filter(art => art.id !== articleId).slice(0, 5);
                     const postHtml = generateSinglePostHTML(dbArticles[existingIndex], SITE_TITLE, recommendedArticles);
-                    fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
+                    fs.writeFileSync(path.join('public','posts', `${articleId}.html`), postHtml.replace(/\r?\n/g, '\r\n'), 'utf-8');
 
                     isDatabaseChanged = true;
                     console.log(`   ✅ レビューが増えたため、記事HTMLを最新の状態に更新し、API件数(${apiReviewCount}件)をDBに保存しました！`);
@@ -334,7 +336,7 @@ async function main() {
                     .slice(0, 5);
                 const postHtml = generateSinglePostHTML(articleData, SITE_TITLE, recommendedArticles);
                 const postHtmlCrlf = postHtml.replace(/\r?\n/g, '\r\n');
-                fs.writeFileSync(path.join('posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
+                fs.writeFileSync(path.join('public','posts', `${articleId}.html`), postHtmlCrlf, 'utf-8');
 
 				// 🚀 すべてのファイル書き出しが「成功」した後に初めて、DBの配列に組み込む
                 dbArticles.unshift(articleData);
@@ -384,7 +386,7 @@ async function main() {
         for (const [tagName, articles] of tagMap.entries()) {
             const tagHtml = generateTagPageHTML(tagName, articles);
             const tagHtmlCrlf = tagHtml.replace(/\r?\n/g, '\r\n');
-            fs.writeFileSync(path.join(TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
+            fs.writeFileSync(path.join('public',TAGS_DIR, `${tagName}.html`), tagHtmlCrlf, 'utf-8');
         }
 
 		// ② 【20件ずつ】の総合トップページ量産ロジック
@@ -412,7 +414,7 @@ async function main() {
 
             // ファイル名の割り当て（1ページ目は index.html、2ページ目以降は index2.html, index3.html...）
             const fileName = page === 1 ? 'index.html' : `index${page}.html`;
-            fs.writeFileSync(fileName, indexHtmlCrlf, 'utf-8');
+            fs.writeFileSync(path.join('public', fileName), indexHtmlCrlf, 'utf-8');
             console.log(` 🏠 トップページ生成完了: ${fileName} (${page}/${totalPages} ページ)`);
         }
 
@@ -423,7 +425,7 @@ async function main() {
         const searchHtml = generateSearchPageHTML(SITE_TITLE);
         const searchHtmlCrlf = searchHtml.replace(/\r?\n/g, '\r\n');
         // ルート直下（index.html と同じ階層）に書き出します
-        fs.writeFileSync('search.html', searchHtmlCrlf, 'utf-8');
+        fs.writeFileSync(path.join('public', 'search.html'), searchHtmlCrlf, 'utf-8');
         console.log(' ✅ 検索専用ページ（search.html）の生成が完了しました！');
         // ===================================================
 
@@ -448,7 +450,7 @@ async function main() {
             // 旧ドメイン(pages.dev)から新ドメイン(設定されたSITE_DOMAIN)へ、階層を維持したまま転送
             const redirectsContent = `https://ec-finder.pages.dev/* https://${SITE_DOMAIN}/:splat 301!`;
             
-            fs.writeFileSync(redirectsPath, redirectsContent, 'utf-8');
+            fs.writeFileSync(path.join('public', redirectsPath), redirectsContent, 'utf-8');
             console.log(` ✅ 独自ドメイン [${SITE_DOMAIN}] への 301 強制転送設定を _redirects に書き出しました。`);
         } catch (redirectsErr) {
             console.error('⚠️ _redirects ファイルの書き出しに失敗:', redirectsErr.message);
