@@ -61,7 +61,7 @@ async function generateAiReview(product, detailData) {
             // 意図的にエラーを発生させて catch ブロック（フォールバック）に飛ばす
             throw new Error(`AIレビューの総文字数が少なすぎます (${textCount}文字 / 最低${MIN_REQUIRED_CHARACTERS}文字必要)`);
         } else {
-        	console.log("成功！文字数は${textCount}文字でした。");
+        	console.log(`成功！文字数は${textCount}文字でした。`);
         }
 
         // すべてのチェックをクリアしたら正常なHTMLを返す
