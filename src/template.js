@@ -720,15 +720,14 @@ function generateSearchPageHTML(SITE_TITLE) {
 
 	// 🔥 【新設】今週の超大作ランキング（紹介文の文字数＝熱量順・上位5件）
     const megaArticles = [...baseArticlesForRanking]
-        .sort((a, b) => parseInt(b.summary ? b.summary.length : 0) - parseInt(a.summary ? a.summary.length : 0))
+        .sort((a, b) => parseInt(b.summary ? b.summary.replace(/<[^>]*>/g, '').trim().length : 0) - parseInt(a.summary ? a.summary.replace(/<[^>]*>/g, '').trim().length : 0))
         .slice(0, 5);
     const megaCards = megaArticles.map((article, index) => {
         let rawLurl = ''; try { const u = new URL(article.link); rawLurl = u.searchParams.get('lurl') || article.link; } catch(e) { rawLurl = article.link; }
         //const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         // 文字数のカウント（バッジ用）
-        // HTMLタグを除外した「純粋な文字数」で判定したい場合は下の2行を有効にしてください。
-        // タグ（<p>や<b>など）も含んだ総文字数でよければ、単純に formattedHtml.length でOKです。
+        // HTMLタグを除外した「純粋な文字数」で判定
         const pureText = article.summary ? article.summary.replace(/<[^>]*>/g, '').trim() : 0;
         const textCount = pureText.length;
         const afId = "132815-990";
