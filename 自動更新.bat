@@ -3,16 +3,22 @@ rem コードページをUTF-8に設定
 chcp 65001 > nul
 
 rem ===================================================
-rem 📁 ログフォルダの自動作成と日付の取得
+rem 📁 ログフォルダの自動作成と詳細な日時の取得
 rem ===================================================
 if not exist Log mkdir Log
 
-rem 日付を YYYY-MM-DD の形式で取得
+rem 1. 日付を YYYY-MM-DD の形式で取得
 for /f "tokens=1-3 delims=/ " %%a in ("%date%") do (
     set CURRENT_DATE=%%a-%%b-%%c
 )
 set CURRENT_DATE=%CURRENT_DATE:/=-%
-set LOG_FILE=Log\%CURRENT_DATE%.log
+
+rem 2. 時間を HHMMSS の形式で取得 (AMの時にスペースが入る対策込み)
+set TIME_STR=%time: =0%
+set CURRENT_TIME=%TIME_STR:~0,2%%TIME_STR:~3,2%%TIME_STR:~6,2%
+
+rem 3. ログファイル名を「YYYY-MM-DD_HHMMSS.log」に指定
+set LOG_FILE=Log\%CURRENT_DATE%_%CURRENT_TIME%.log
 
 echo ===================================================
 echo 🔞 同人レビュー自動更新システム 起動 (画面＆ログ同時出力)

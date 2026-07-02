@@ -727,7 +727,10 @@ function generateSearchPageHTML(SITE_TITLE) {
         //const encLurl = encryptStr(rawLurl); const encImg = encryptStr(article.imgUrl);
         const rankMedals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
         // 文字数のカウント（バッジ用）
-        const textCount = article.summary ? article.summary.length : 0;
+        // HTMLタグを除外した「純粋な文字数」で判定したい場合は下の2行を有効にしてください。
+        // タグ（<p>や<b>など）も含んだ総文字数でよければ、単純に formattedHtml.length でOKです。
+        const pureText = article.summary ? article.summary.replace(/<[^>]*>/g, '').trim() : 0;
+        const textCount = pureText.length;
         const afId = "132815-990";
         const perfectAflink = "https://al.fanza.co.jp/?lurl=" + encodeURIComponent(rawLurl) + "&af_id=" + afId + "&ch=api";
 		return `
