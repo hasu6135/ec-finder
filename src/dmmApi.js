@@ -26,7 +26,7 @@ async function fetchDmmProducts(apiId, affiliateId, siteTitle, fetchCount, sortT
 
 		// 💡 ずらして検索（1以上を指定）のオフセット。
 		const min = 1;
-		const max = 500;
+		const max = 1;
 		const randomOffset = Math.floor(Math.random() * (max - min + 1)) + min;
    		console.log(`🤖 [DMM API 検索条件] オフセット：${randomOffset}`);
    
