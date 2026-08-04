@@ -285,12 +285,12 @@ async function main() {
                     throw new Error('AIレビューの文字数が足りないか、生成に失敗したためスキップします。');
                 }
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
-
+				const customTitle = `${product.title} のネタバレ感想・見どころレビュー`;
                 // 💡【完全マッピング】template.jsとdb.jsonの全ての要求プロパティを100%満たす
                 const articleData = {
                     id: articleId,
-                    title: product.title,
-                    originalTitle: `${product.title}`, 
+                    title: customTitle,
+                    originalTitle: product.title, 
                     link: product.url,
                     url: product.url,
                     rawUrl: product.rawUrl || product.url,
