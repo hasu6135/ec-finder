@@ -285,12 +285,23 @@ async function main() {
                     throw new Error('AIレビューの文字数が足りないか、生成に失敗したためスキップします。');
                 }
                 const aiReviewHtml = parseMarkdownTableToHtml(aiReviewMarkdown);
-				const customTitle = `${product.title} のネタバレ感想・見どころレビュー`;
+                
+				// 複数のタイトルテンプレートを用意
+				const titleTemplates = [
+				    `${product.title} のネタバレ感想・見どころレビュー`,
+				    `${product.title} の評価とあらすじ・見どころまとめ`,
+				    `${product.title} は面白い？見どころ＆感想レビュー`,
+				    `${product.title} の魅力を徹底解説！あらすじと感想`
+				];
+				// ランダムでパターンを選択
+				const randomIndex = Math.floor(Math.random() * titleTemplates.length);
+				const customTitle = titleTemplates[randomIndex];
+				
                 // 💡【完全マッピング】template.jsとdb.jsonの全ての要求プロパティを100%満たす
                 const articleData = {
                     id: articleId,
-                    title: customTitle,
-                    originalTitle: product.title, 
+                    title: product.title,
+                    originalTitle: customTitle, 
                     link: product.url,
                     url: product.url,
                     rawUrl: product.rawUrl || product.url,
@@ -441,6 +452,7 @@ async function main() {
 		// ===================================================
         // 🚀 【新規追加】Cloudflare Pages 301強制リダイレクト設定
         // ===================================================
+        /*
         console.log('\n🔗 [リダイレクト設定] _redirects ファイルを生成中...');
         try {
             // 今回のプロジェクトは index.html などがルート直下に生成される構成のため、
@@ -457,7 +469,7 @@ async function main() {
         } catch (redirectsErr) {
             console.error('⚠️ _redirects ファイルの書き出しに失敗:', redirectsErr.message);
         }
-
+		*/
         console.log('\n✨ [すべての処理が正常終了] 指定件数分のループ処理が完了しました！');
     } catch (error) {
         console.error('❌ 致命的なエラー:', error);
