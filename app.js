@@ -14,7 +14,6 @@ const { generateSinglePostHTML, generateTagPageHTML, generateTopPageHTML, genera
  */
 const SITE_TITLE = '羞恥系コミック専門メディア';
 const FETCH_COUNT = 50;       // 💡 ここで指定した件数分、新着を一気にループ処理します！（100以下）
-const ARCHIVE_DIR = 'archive';
 const TAGS_DIR = 'tags';
 const DB_FILE = 'db.json';   // 過去データを保存する簡易データベースファイル
 
@@ -114,7 +113,6 @@ async function main() {
     try {
     	// 1. main関数冒頭のディレクトリ作成部分を修正
 		if (!fs.existsSync('public')) fs.mkdirSync('public'); // 🚀 publicフォルダを作成（公開用）
-		if (!fs.existsSync(path.join('public', ARCHIVE_DIR))) fs.mkdirSync(path.join('public', ARCHIVE_DIR));
 		if (!fs.existsSync(path.join('public', 'posts'))) fs.mkdirSync(path.join('public', 'posts'));
 		if (!fs.existsSync(path.join('public', TAGS_DIR))) fs.mkdirSync(path.join('public', TAGS_DIR));
 
