@@ -152,7 +152,7 @@ function generateSinglePostHTML(article, siteTitle, recommendArticles = []) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${article.originalTitle} - レビュー | ${siteTitle}</title>
-    <link rel="canonical" href="https://ec-finder.com/posts/${article.id}.html">
+    <link rel="canonical" href="https://ec-finder-comic.com/posts/${article.id}.html">
     	
     <meta property="og:site_name" content="${siteTitle}">
     <meta property="og:title" content="【⭐${article.reviewRating || '4.0'}絶賛】${article.originalTitle} の狂おしい魅力を徹底レビュー！">
@@ -314,7 +314,7 @@ function generateTagPageHTML(tagName, articles) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>タグ: ${tagName} のおすすめコミック一覧</title>
-   	<link rel="canonical" href="https://ec-finder.com/tags/${tagName}.html">
+   	<link rel="canonical" href="https://ec-finder-comic.com/tags/${tagName}.html">
     <script src="https://cdn.tailwindcss.com"></script>
     ${googleAnalyticsCode}
 </head>
